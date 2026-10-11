@@ -1,0 +1,258 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import {
+  heroCurves, heroOptima, bandInfo, liveSentence, sliderTau, snapIndex, startIndex, heroResults,
+  BAND_LABEL, COINCIDE_LABEL, REVERSE_LABEL, TOO_SHORT, HERO_DECODER, HERO_PLATFORMS,
+} from '../src/ui/hero.js';
+import { findMinimum } from '../src/core/optimum.js';
+import { stage4v2 as stage4 } from '../src/ui/bridge_data.js';
+// A v1-format superconducting Stage 3 file (no decoder field, no tauPhysEmpirical). The real
+// data/results/stage3_sc.json is a v2 file since Person A's A48 rerun (handoff N6).
+import stage3v1 from '../data/fixtures/stage3_sc.json' with { type: 'json' };
+
+// Synthetic v2 results: tau*_log (learned) = 2 [1.5, 2.5], tau*_phys (empirical) = 5, so
+// the logical optimum sits below the physical one and the band is [2, 5].
+const GRID = [0.5, 1, 2, 3, 5, 10];
+const results = {
+  x: { name: 'tau_us', values: GRID },
+  series: [
+    { d: 3, r: 3, mode: 'hard', decoder: 'naive', pL: [0.5, 0.2, 0.1, 0.12, 0.2, 0.3] },
+    { d: 3, r: 3, mode: 'hard', decoder: 'learned', pL: [0.4, 0.1, 0.05, 0.06, 0.1, 0.2] },
+    { d: 5, r: 3, mode: 'hard', decoder: 'learned', pL: [0.3, 0.1, 0.01, 0.02, 0.05, 0.1] },
+  ],
+  assignment: { empirical: [0.3, 0.2, 0.1, 0.05, 0.01, 0.02], lo: [0, 0, 0, 0, 0, 0], hi: [1, 1, 1, 1, 1, 1] },
+  optima: {
+    tauPhysEmpirical: { xMin: 5, atEdge: false },
+    tauLog: [
+      { d: 3, mode: 'hard', decoder: 'naive', xMin: 3, lo: 2, hi: 4, atEdge: false },
+      { d: 3, mode: 'hard', decoder: 'learned', xMin: 2, lo: 1.5, hi: 2.5, atEdge: false },
+    ],
+  },
+};
+const optima = heroOptima(results, 'learned');
+const band = bandInfo(optima);
+
+// Catches: fails if the regions share a template, or if the boundaries are misplaced.
+// tau*_log = 2 with interval [1.5, 2.5], tau*_phys = 5. tau = 1 (below the interval) is "too
+// short"; tau = 2 (inside the interval) is the code's best range; tau = 3 (past the interval,
+// inside the band) and tau = 5 (exactly on tau*_phys) are "between"; tau = 10 (one grid step
+// above) is "too long". A53 review item 4 moved the "too short" boundary from min(optima) to
+// the interval's lower end and reworded it (it used to blame the readout's reliability), and
+// gave the interval itself its own sentence; the "between" and "too long" sentences are as before.
+test('live sentence below, inside and above the tau*_log interval, and in the band', () => {
+  const below = liveSentence(1, band);
+  const inside = liveSentence(2, band);
+  const between = liveSentence(3, band);
+  const above = liveSentence(10, band);
+  assert.equal(below, 'Too short: listening longer still lowers the logical error.');
+  assert.equal(below, TOO_SHORT);
+  assert.equal(inside, 'At 2 µs you are at or near the code\'s best readout time (τ*_log = 2 µs, 95% interval 1.5 µs to 2.5 µs).');
+  assert.equal(between, 'At 3 µs you read better, but your data qubits lose more than you gain.');
+  assert.equal(above, 'Too long: the waiting costs more than the clearer signal is worth.');
+  assert.equal(new Set([below, inside, between, above]).size, 4);
+  assert.equal(liveSentence(5, band), 'At 5 µs you read better, but your data qubits lose more than you gain.');
+  // Exactly on the interval's lower end is inside; a grid step below is too short.
+  assert.equal(liveSentence(1.5, band), 'At 1.5 µs you are at or near the code\'s best readout time (τ*_log = 2 µs, 95% interval 1.5 µs to 2.5 µs).');
+});
+
+// A53 review item 4. Catches: fails if the phase-flip hero calls a readout time inside
+// tau*_log's interval "too short" (the trapped-ion X case: tau*_log = 31.6 µs, interval 15.9
+// to 52.0 µs, tau*_phys = 23 µs, so 20 µs lies inside it), or if the slider does not start at
+// the case's own tau*_log on the real results. Non-vacuous: 10 µs, one grid step below 15.9 µs
+// on the ion grid, is "too short".
+test('phase-flip hero on the real results: start at its own tau*_log, no "too short" inside the interval', () => {
+  for (const p of HERO_PLATFORMS) {
+    for (const basis of ['Z', 'X']) {
+      const res = heroResults(p, basis);
+      const c = heroCurves(res, HERO_DECODER);
+      const o = heroOptima(res, c.decoder);
+      const i = startIndex(c, o);
+      assert.equal(i, snapIndex(c.tau, o.tauLog.xMin), `${p.id} ${basis}`);
+      assert.notEqual(liveSentence(c.tau[i], bandInfo(o, { grid: c.tau })), TOO_SHORT, `${p.id} ${basis} at its own tau*_log`);
+    }
+  }
+  const res = heroResults(HERO_PLATFORMS[0], 'X');
+  const b = bandInfo(heroOptima(res, heroCurves(res, HERO_DECODER).decoder), { grid: res.x.values });
+  assert.equal(b.kind, 'coincide');
+  assert.ok(b.logLo < 20 && b.logHi > 20, `interval ${b.logLo} to ${b.logHi}`);
+  assert.equal(liveSentence(20, b), `At 20 µs: ${COINCIDE_LABEL}.`);
+  assert.ok(res.x.values.includes(10) && b.logLo > 10);
+  assert.equal(liveSentence(10, b), TOO_SHORT);
+});
+
+// Catches: fails if the grid point nearest tau*_log is called "too short" because tau*_log's
+// interval is narrower than the grid step (superconducting X, naive: tau*_log 0.526 µs,
+// interval 0.519 to 0.533 µs; 0.5 µs is the lowest measured point). Non-vacuous: without the
+// grid 0.5 µs is "too short"; with it 0.5 µs is inside and 0.4 µs, one grid step lower, is not.
+test('grid point nearest tau*_log counts as inside a narrow interval', () => {
+  const o = { tauLog: { xMin: 0.526, lo: 0.519, hi: 0.533, atEdge: false }, tauPhys: { xMin: 0.906, atEdge: false } };
+  const grid = [0.3, 0.4, 0.5, 0.7, 1];
+  assert.equal(liveSentence(0.5, bandInfo(o)), TOO_SHORT);
+  const b = bandInfo(o, { grid });
+  assert.deepEqual([b.logLo, b.logHi], [0.5, 0.533]);
+  assert.match(liveSentence(0.5, b), /^At 0\.5 µs you are at or near the code's best readout time \(τ\*_log = 0\.526 µs/);
+  assert.equal(liveSentence(0.4, b), TOO_SHORT);
+});
+
+// Catches: fails if the band is drawn between the wrong optima (the naive tau_log 3, or
+// the d = 5 entry) or with its ends swapped, or without the U7.2 label.
+test('shaded interval runs from tau*_log to tau*_phys (empirical), learned decoder', () => {
+  assert.equal(band.kind, 'band');
+  assert.equal(band.shaded, true);
+  assert.equal(band.x0, 2);
+  assert.equal(band.x1, 5);
+  assert.equal(band.label, BAND_LABEL);
+});
+
+// Catches: fails if tau*_phys inside tau*_log's interval still draws a band (U7.2: no band,
+// the coincide label), and if a tau*_phys just past the interval's end does not.
+test('optima coinciding within the interval: no band, the coincide label', () => {
+  const inside = bandInfo({ tauLog: { xMin: 2, lo: 1.5, hi: 2.5, atEdge: false }, tauPhys: { xMin: 2.5, atEdge: false } });
+  assert.equal(inside.kind, 'coincide');
+  assert.equal(inside.shaded, false);
+  assert.equal(inside.label, COINCIDE_LABEL);
+  assert.equal(liveSentence(2, inside), `At 2 µs: ${COINCIDE_LABEL}.`);
+  const past = bandInfo({ tauLog: { xMin: 2, lo: 1.5, hi: 2.5, atEdge: false }, tauPhys: { xMin: 3, atEdge: false } });
+  assert.equal(past.kind, 'band');
+  assert.deepEqual([past.x0, past.x1], [2, 3]);
+});
+
+// Catches: fails if a tau*_log above tau*_phys is labelled "listening longer costs more than
+// it gains", which would state the opposite of the data.
+test('tau*_log above tau*_phys: reversed band, its own label', () => {
+  const rev = bandInfo({ tauLog: { xMin: 8, lo: 7, hi: 9, atEdge: false }, tauPhys: { xMin: 3, atEdge: false } });
+  assert.equal(rev.kind, 'reverse');
+  assert.deepEqual([rev.x0, rev.x1], [3, 8]);
+  assert.equal(rev.label, REVERSE_LABEL);
+  assert.notEqual(liveSentence(5, rev), liveSentence(5, band));
+});
+
+// Catches: fails if the slider can land between grid points: every slider value, including
+// fractional and out-of-range ones, maps to a grid point (rounded to the nearer index, 1.4 ->
+// index 1 and 1.6 -> index 2).
+test('slider snaps to grid points', () => {
+  for (const v of [-3, 0, 0.49, 0.51, 1.4, 1.6, 2.5, 4.2, 5, 99, 'x']) {
+    const { index, tau } = sliderTau(GRID, v);
+    assert.ok(GRID.includes(tau), `slider value ${v} gave ${tau}`);
+    assert.equal(tau, GRID[index]);
+  }
+  assert.equal(sliderTau(GRID, 1.4).tau, 1);
+  assert.equal(sliderTau(GRID, 1.6).tau, 2);
+  assert.equal(sliderTau(GRID, -3).tau, 0.5);
+  assert.equal(sliderTau(GRID, 99).tau, 10);
+});
+
+// Catches: fails if the starting position is chosen on a linear instead of a log axis: the
+// log midpoint of 1 and 10 is sqrt(10) = 3.162, so 3.1 snaps to 1 and 3.2 to 10 (a linear
+// rule would send both to 1).
+test('starting position: nearest grid point on a log axis', () => {
+  assert.equal(snapIndex([1, 10, 100], 3.1), 0);
+  assert.equal(snapIndex([1, 10, 100], 3.2), 1);
+  assert.equal(snapIndex(GRID, 2), 2);
+});
+
+// Catches: fails if the hero picks the naive curve when a learned one exists, or the d = 5
+// curve, or the model's (belief) assignment error instead of the simulated one.
+test('curves: learned d = 3 hard series and the simulated assignment error', () => {
+  const c = heroCurves(results);
+  assert.equal(c.decoder, 'learned');
+  assert.deepEqual(c.logical.y, results.series[1].pL);
+  assert.deepEqual(c.readout.y, results.assignment.empirical);
+  assert.equal(optima.tauLog.decoder, 'learned');
+  assert.equal(optima.tauPhys.from, 'tauPhysEmpirical');
+});
+
+// Catches: fails if the fallbacks for the v1 superconducting file (no decoder field, no
+// tauPhysEmpirical) break: the hero must use its naive d = 3 hard series and tau_log, and
+// locate tau*_phys on assignment.empirical with findMinimum, not the belief optimum
+// optima.tauPhys. Non-vacuous on the fixture: findMinimum gives 0.829 µs, the stored
+// optima.tauPhys is 0.7 µs, and the check below requires the two to differ.
+test('v1 stage-3 file: naive series, its tau_log, tau*_phys from findMinimum', () => {
+  assert.equal(stage3v1.fixture, true);
+  assert.equal(stage3v1.optima.tauPhysEmpirical, undefined);
+  assert.ok(stage3v1.series.every((u) => u.decoder === undefined), 'fixture must be v1 format');
+  const c = heroCurves(stage3v1);
+  assert.equal(c.decoder, 'naive');
+  const s = stage3v1.series.find((u) => u.d === 3 && u.mode === 'hard');
+  assert.deepEqual(c.logical.y, s.pL);
+  const o = heroOptima(stage3v1, c.decoder);
+  assert.equal(o.tauPhys.from, 'findMinimum');
+  const expectedPhys = findMinimum(stage3v1.x.values, stage3v1.assignment.empirical, { logX: true }).xMin;
+  assert.ok(Math.abs(expectedPhys - stage3v1.optima.tauPhys.xMin) > 1e-3, 'fixture cannot tell empirical from belief');
+  assert.ok(Math.abs(o.tauPhys.xMin - expectedPhys) < 1e-9, `tau_phys ${o.tauPhys.xMin}`);
+  const t = stage3v1.optima.tauLog.find((u) => u.d === 3 && u.mode === 'hard');
+  assert.equal(o.tauLog.xMin, t.xMin);
+  // In the fixture tau*_phys (0.829) lies inside tau*_log's interval [0.5, 1]: coincide.
+  assert.ok(expectedPhys >= t.lo && expectedPhys <= t.hi);
+  assert.equal(bandInfo(o).kind, 'coincide');
+});
+
+// Catches: fails if a missing learned series falls back to a v2 naive series by mistake
+// when it is labelled explicitly ("naive") rather than absent.
+test('v2 file without a learned series: explicit naive series', () => {
+  const naiveOnly = { ...results, series: results.series.filter((s) => s.decoder === 'naive') };
+  const c = heroCurves(naiveOnly);
+  assert.equal(c.decoder, 'naive');
+  assert.equal(heroOptima(naiveOnly, c.decoder).tauLog.xMin, 3);
+});
+
+// Replaces the test "SP5 cut: HERO_DECODER is naive …", because the decision changed: DECISIONS
+// (Person A) records "SP5 cut lifted (V18 passed)", so U3 row 31 sets HERO_DECODER to null
+// (CC-B21 item 4). Catches: fails if the hero still defaults to the naive decoder after the
+// lift, if the default does not pick the learned series and the learned tau_log when the results
+// contain them, if an explicit "naive" request no longer returns the naive series and tau_log,
+// or if an unknown decoder name is accepted silently. Non-vacuous: the synthetic results hold
+// both decoders with different curves and optima (learned 2 µs, naive 3 µs).
+test('SP5 cut lifted: HERO_DECODER is null (learned); an explicit "naive" request still returns naive', () => {
+  assert.equal(HERO_DECODER, null);
+  const c = heroCurves(results, HERO_DECODER);
+  assert.equal(c.decoder, 'learned');
+  assert.deepEqual(c.logical.y, results.series[1].pL);
+  assert.equal(heroOptima(results, c.decoder).tauLog.xMin, 2);
+  const n = heroCurves(results, 'naive');
+  assert.equal(n.decoder, 'naive');
+  assert.deepEqual(n.logical.y, results.series[0].pL);
+  assert.equal(heroOptima(results, n.decoder).tauLog.xMin, 3);
+  assert.throws(() => heroCurves(results, 'other'), /unknown decoder/);
+});
+
+// Replaces the test "SP5 cut: both hero arms use the same decoder …", because the decision
+// changed (see above; CC-B21 item 4). Catches: fails if the two arms of the real hero data end
+// up on different decoders (the K2 gate: the same decoder on both arms), if either arm is not on
+// the learned decoder, or if the hero's tau*_log differs from Stage 4's (ion 23.0 µs,
+// superconducting 0.710 µs, d = 3, hard) or its superconducting tau*_phys from 0.910 µs (the
+// dense grid's simulated optimum; the standard-grid 0.906 µs would fail). Values compared to
+// three significant figures, as the page shows them.
+test('SP5 cut lifted: both hero arms use the learned decoder and Stage 4\'s optima', () => {
+  const s3 = (v) => Number(v.toPrecision(3));
+  const got = HERO_PLATFORMS.map((p) => {
+    const c = heroCurves(p.results, HERO_DECODER);
+    return { id: p.id, decoder: c.decoder, o: heroOptima(p.results, c.decoder) };
+  });
+  assert.deepEqual(got.map((g) => g.decoder), ['learned', 'learned']);
+  for (const g of got) {
+    const s4 = stage4.platforms[g.id].tauLog.hard.find((t) => t.d === 3);
+    assert.equal(s3(g.o.tauLog.xMin), s3(s4.xMin), `${g.id} tau*_log`);
+  }
+  assert.equal(s3(got[0].o.tauLog.xMin), 23.0);
+  assert.equal(s3(got[1].o.tauLog.xMin), 0.71);
+  assert.equal(s3(got[1].o.tauPhys.xMin), 0.91);
+  assert.equal(s3(got[1].o.tauPhys.xMin), s3(stage4.platforms.superconducting.tauPhys.empirical.xMin));
+});
+
+// CC-B21 item 2. Catches: fails if the hero's logical-error bars are the Wilson ones when the
+// series carries cluster intervals, or if a series without them loses its Wilson bars.
+test('curves: cluster interval when the series has one, Wilson otherwise', () => {
+  const withCluster = {
+    ...results,
+    series: results.series.map((s) => (s.decoder === 'learned' && s.d === 3
+      ? { ...s, lo: [0, 0, 0, 0, 0, 0], hi: [1, 1, 1, 1, 1, 1], loCluster: [0.1, 0.1, 0.1, 0.1, 0.1, 0.1], hiCluster: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9] }
+      : { ...s, lo: [0, 0, 0, 0, 0, 0], hi: [1, 1, 1, 1, 1, 1] })),
+  };
+  const c = heroCurves(withCluster);
+  assert.equal(c.logical.interval, 'cluster');
+  assert.deepEqual([c.logical.lo[0], c.logical.hi[0]], [0.1, 0.9]);
+  const n = heroCurves(withCluster, 'naive');
+  assert.equal(n.logical.interval, 'wilson');
+  assert.deepEqual([n.logical.lo[0], n.logical.hi[0]], [0, 1]);
+});
