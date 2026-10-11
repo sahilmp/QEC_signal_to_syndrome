@@ -131,8 +131,8 @@ test('step 2: the naive choice is a three-way tie, one of which flips data 1', (
 });
 
 // Catches: fails if step 3 does not lead with the held-out test (V18,
-// holdout.json setting1) or misquotes it: at d = 5 the learned decoder made 37 logical errors of
-// 40 000 against the naive 70, beyond the intervals; at d = 3, 65 against 79 of 8 000, not
+// holdout.json setting1) or misquotes it: at d = 5 the learned decoder made 36 logical errors of
+// 40 000 against the naive 66 (in-window rerun), beyond the intervals; at d = 3, 65 against 79 of 8 000, not
 // beyond them. Also fails if the in-sample label is lost.
 test('step 3: the held-out text quotes the pooled V18 rows', () => {
   assert.equal(holdout.setting1.V18.verdict, 'pass');
@@ -140,7 +140,7 @@ test('step 3: the held-out text quotes the pooled V18 rows', () => {
   assert.match(t, /^Held-out test: the rates were learned from the original stored shots/);
   assert.match(t, /flat readout ε = 0\.02, hard decoding/);
   assert.match(t, /d = 3: naive 79 of 8 000, learned 65 of 8 000;/);
-  assert.match(t, /d = 5: naive 70 of 40 000, learned 37 of 40 000 \(learned lower beyond the 95% intervals\)\.$/);
+  assert.match(t, /d = 5: naive 66 of 40 000, learned 36 of 40 000 \(learned lower beyond the 95% intervals\)\.$/);
   assert.equal(heldOutText({}), null);
   assert.equal(IN_SAMPLE, 'In sample (rates learned from the same stored shots): ');
 });
@@ -192,8 +192,8 @@ test('heatmap banks exist in dem_forte1.json with a square pij of the detector c
 test('comparisonFor: exact row, and the r = 3 row when r has no comparison', () => {
   const a = comparisonFor(dem, { arm: 'superconducting', x: 0.7, d: 7, r: 3 });
   assert.equal(a.rUsed, 3);
-  assert.equal(a.row.naive.pL, 0.000875);
-  assert.equal(a.row.learned.pL, 0.000125);
+  assert.equal(a.row.naive.pL, 0.0005625);
+  assert.equal(a.row.learned.pL, 0);
   const b = comparisonFor(dem, { arm: 'superconducting', x: 0.7, d: 5, r: 5 });
   assert.equal(b.rUsed, 3);
   assert.equal(b.row.d, 5);
@@ -245,7 +245,7 @@ test('step 3: the reversal comes from holdout setting2, else from stage2v2 label
 test('step 3: the reversal text, both numbers on the naive power of ten', () => {
   const t = reversalText(reversalNumbers(holdout, stage2v2));
   assert.equal(t.naive, 'Naive decoder: +5.28×10⁻³ [3.73, 7.11]×10⁻³');
-  assert.equal(t.learned, 'Learned decoder: +0.0938×10⁻³ [−0.281, 0.5]×10⁻³');
+  assert.equal(t.learned, 'Learned decoder: +0.0625×10⁻³ [−0.0625, 0.235]×10⁻³');
   assert.match(t.sentence, /^With the naive decoder soft decoding loses the bit more often than hard decoding, beyond the 95% interval; with the learned decoder soft and hard decoding cannot be told apart/);
   assert.match(reversalClause({ diff: -1e-4, lo: -2e-4, hi: 0 }), /cannot be told apart/);
   assert.match(reversalClause({ diff: -1e-4, lo: -2e-4, hi: -1e-12 }), /less often than hard decoding, beyond/);

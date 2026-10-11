@@ -135,13 +135,13 @@ test('batch banks: the X bank is the phase-flip d = 3, r = 3 bank', () => {
 
 // Catches: fails if an ion optimum with fewer than 10 logical errors at its lowest point is
 // still presented as an optimum with a marker, or if d = 3 loses its marker.
-// Changed by the author's decision: Level 3 now shows the learned decoder, whose ion d = 5 curve has 7
-// and d = 7 curve 0 errors of 32 000 at their lowest points (the naive d = 7 had 3), so only
+// Changed by the author's decision: Level 3 now shows the learned decoder, whose ion d = 5 curve has 8
+// (7 before the in-window rerun) and d = 7 curve 0 errors of 32 000 at their lowest points (the naive d = 7 had 3), so only
 // d = 3 is drawn; the rule itself is unchanged and the test is at least as strict.
 test('optimaInfo: ion optima under 10 errors not resolved and not drawn (learned: d = 5, 7); d = 3 drawn', () => {
   const info = optimaInfo(ION.results, 'hard', [3, 5, 7]);
   assert.deepEqual(info.vlines.map((v) => v.label), ['τ_phys', 'τ_log d3']);
-  assert.match(info.lines[2], /d = 5 \(hard\): not resolved\. The lowest point has only 7 logical errors/);
+  assert.match(info.lines[2], /d = 5 \(hard\): not resolved\. The lowest point has only 8 logical errors/);
   assert.match(info.lines[3], /d = 7 \(hard\): not resolved\. The lowest point has only 0 logical errors/);
 });
 

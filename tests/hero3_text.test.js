@@ -63,17 +63,20 @@ test('every contract name is exported with the right type, and nothing else', ()
   assert.equal(WHY_RIVAL_RATIO, 0.5);
 });
 
-// Catches: fails if the superconducting bit-flip case stops being 'coincide' on the dense file,
-// or if the overlap sentence drops or misformats tau*_log, tau*_phys or an interval end
+// Replaces "superconducting Z: coincide, …" because the in-window rerun moved the case: on the
+// dense file the learned d = 3 hard interval now lies wholly below tau*_phys (0.729 [0.697,
+// 0.844] µs against 0.910 µs). Catches: fails if the superconducting bit-flip case stops being
+// 'band', or if the overlap sentence drops or misformats tau*_log, tau*_phys or an interval end
 // (expected values read from stage3_sc_dense.json optima, learned d = 3 hard).
-test('superconducting Z: coincide, and the overlap sentence quotes both optima and the interval', () => {
+test('superconducting Z: band, and the overlap sentence quotes both optima and the interval', () => {
   const { band } = heroCase('superconducting', 'Z');
-  assert.equal(band.kind, 'coincide');
+  assert.equal(band.kind, 'band');
   const row = stage3dense.optima.tauLog.find((t) => t.d === 3 && t.mode === 'hard' && t.decoder === 'learned');
   const phys = stage3dense.optima.tauPhysEmpirical.xMin;
+  assert.ok(row.hi < phys);
   const s = overlapSentence(band);
   for (const v of [row.xMin, phys, row.lo, row.hi]) assert.ok(s.includes(formatTau(v)), `${formatTau(v)} in ${s}`);
-  assert.ok(s.includes('overlap within our uncertainty'));
+  assert.ok(s.includes('is earlier than the readout’s best'));
 });
 
 // Catches: fails if overlapSentence mixes up its kinds, keeps an empty bracket when the band has
@@ -106,12 +109,17 @@ test('whySentence, trapped ion Z and X: the "smaller" branch with the file ratio
   }
 });
 
-// Catches: fails if the superconducting cases (idle/readout 1.19 in Z, 0.73 in X; tau*_log below
-// tau*_phys) leave the "nudges earlier" branch, or if minPL and maxPL are not the min and max
-// of the learned d = 3 hard series at the grid points inside tau*_log's interval (read here
-// from the dense results files).
-test('whySentence, superconducting Z and X: "nudges earlier" with the valley min and max', () => {
-  for (const basis of ['Z', 'X']) {
+// Replaces the Z and X loop because the in-window rerun made the superconducting Z case a 'band'
+// (its interval wholly below tau*_phys), where whySentence gives no sentence and the overlap
+// sentence states the shift. Catches: fails if the superconducting X case (idle/readout 0.73;
+// tau*_log below tau*_phys) leaves the "nudges earlier" branch, if minPL and maxPL are not the min
+// and max of the learned d = 3 hard series at the grid points inside tau*_log's interval (read
+// here from the dense results file), or if the Z band case gets a "Why?" sentence.
+test('whySentence, superconducting X: "nudges earlier" with the valley min and max; Z band: none', () => {
+  const z = heroCase('superconducting', 'Z');
+  assert.equal(z.band.kind, 'band');
+  assert.equal(whySentence({ platformId: 'superconducting', basis: 'Z', curves: z.curves, band: z.band }), null);
+  for (const basis of ['X']) {
     const b = STAGE4[basis].platforms.superconducting.budgetAtOptimum;
     const { res, curves, band } = heroCase('superconducting', basis);
     const row = res.optima.tauLog.find((t) => t.d === 3 && t.mode === 'hard' && t.decoder === 'learned');
@@ -128,14 +136,18 @@ test('whySentence, superconducting Z and X: "nudges earlier" with the valley min
 
 // Catches: fails if omitting the optional budget does not fall back to budgetFor(platformId,
 // basis), i.e. if the default and the explicit file budget give different sentences on any of
-// the four real cases.
+// the four real cases. Each 'coincide' case has a sentence; the superconducting Z case is a
+// 'band' since the in-window rerun and has none.
 test('whySentence: omitting budget equals passing budgetFor, on all four real cases', () => {
   for (const basis of ['Z', 'X']) {
     for (const platformId of PLATFORM_IDS) {
       const { curves, band } = heroCase(platformId, basis);
       const implicit = whySentence({ platformId, basis, curves, band });
       const explicit = whySentence({ platformId, basis, curves, band, budget: budgetFor(platformId, basis) });
-      assert.equal(typeof implicit, 'string', `${platformId} ${basis}`);
+      const isBand = platformId === 'superconducting' && basis === 'Z';
+      assert.equal(band.kind, isBand ? 'band' : 'coincide', `${platformId} ${basis}`);
+      if (isBand) assert.equal(implicit, null, `${platformId} ${basis}`);
+      else assert.equal(typeof implicit, 'string', `${platformId} ${basis}`);
       assert.equal(implicit, explicit, `${platformId} ${basis}`);
     }
   }
@@ -287,9 +299,11 @@ test('every exported string and every real sentence: at most 40 words, no forbid
 });
 
 // Read-aloud fixes. Catches: fails if the intro is not the reviewed copy; if the trapped-ion Z
-// overlap sentence (both optima print as 23 µs) quotes the same value twice instead of the "are
-// the same here" form, or the superconducting Z one (0.71 against 0.91 µs) takes that form; if
-// a caption puts the hard number before the soft one; or if any of these runs past 40 words.
+// overlap sentence (since the in-window rerun the optima print differently, 23.5 against 23 µs,
+// within the interval) does not quote both optima and the interval in the "overlap within our
+// uncertainty" form, or the superconducting Z one (0.729 against 0.91 µs) takes the "are the
+// same here" form; if a caption puts the hard number before the soft one; or if any of these runs
+// past 40 words. The "are the same here" form itself is checked on synthetic input above.
 test('read-aloud fixes: intro, equal-optima overlap, caption order, 40 words', () => {
   // Replaces 'The stopwatch barely mattered. What did: how well the decoder knows the noise.'
   // because the wording changed after the read-aloud review (both authors).
@@ -297,8 +311,10 @@ test('read-aloud fixes: intro, equal-optima overlap, caption order, 40 words', (
   const ion = heroCase('trapped-ion', 'Z').band;
   const sc = heroCase('superconducting', 'Z').band;
   const row = stage4z.platforms['trapped-ion'].budgetAtOptimum;
-  assert.equal(formatTau(ion.tauLog), formatTau(ion.x0 === ion.tauLog ? ion.x1 : ion.x0));
-  assert.equal(overlapSentence(ion), `The code’s best and the readout’s best are the same here (${formatTau(row.tau_us)}; uncertainty ${formatTau(ion.ciLo)} to ${formatTau(ion.ciHi)}).`);
+  const ionPhys = ion.x0 === ion.tauLog ? ion.x1 : ion.x0;
+  assert.notEqual(formatTau(ion.tauLog), formatTau(ionPhys));
+  assert.equal(ion.kind, 'coincide');
+  assert.equal(overlapSentence(ion), `The code’s best (${formatTau(row.tau_us)}) and the readout’s best (${formatTau(ionPhys)}) overlap within our uncertainty (${formatTau(ion.ciLo)} to ${formatTau(ion.ciHi)}). Treat them as the same.`);
   assert.ok(!overlapSentence(sc).includes('are the same here'), overlapSentence(sc));
   const d = twistData();
   const texts = [T.TWIST_INTRO, overlapSentence(ion), overlapSentence(sc)];
@@ -310,7 +326,8 @@ test('read-aloud fixes: intro, equal-optima overlap, caption order, 40 words', (
     assert.ok(soft >= 0 && hard > soft && c.indexOf('without it') > hard, c);
     texts.push(c);
   }
-  for (const basis of ['Z', 'X']) for (const id of PLATFORM_IDS) texts.push(whySentence({ platformId: id, basis, ...heroCase(id, basis) }));
+  // The superconducting Z case is a 'band' since the in-window rerun and has no "Why?" sentence.
+  for (const basis of ['Z', 'X']) for (const id of PLATFORM_IDS) if (!(id === 'superconducting' && basis === 'Z')) texts.push(whySentence({ platformId: id, basis, ...heroCase(id, basis) }));
   for (const t of texts) assert.ok(typeof t === 'string' && words(t) <= 40, `${t}`);
 });
 

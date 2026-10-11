@@ -26,9 +26,9 @@ test('curate.mjs output is reproducible and matches the committed file', () => {
 });
 
 // Catches: fails if the scan settings drift from U7.11 (tau, seed, shot count, R) or if the
-// per-bank counts change: with these settings the stored-0 bank has 0 soft saves and 72 soft
-// fails in its first 4000 shots, and the stored-1 bank 575 soft saves and 0 soft fails (B50).
-test('per-bank counts: L0 0 saves / 72 fails, L1 575 saves / 0 fails', () => {
+// per-bank counts change: with these settings (in-window banks) the stored-0 bank has 2 soft saves
+// and 69 soft fails in its first 4000 shots, and the stored-1 bank 579 soft saves and 0 soft fails (B50).
+test('per-bank counts: L0 2 saves / 69 fails, L1 579 saves / 0 fails', () => {
   assert.equal(file.settings.tau_us, 3);
   assert.equal(file.settings.seed, 20261011);
   assert.equal(file.settings.maxShots, 4000);
@@ -39,9 +39,9 @@ test('per-bank counts: L0 0 saves / 72 fails, L1 575 saves / 0 fails', () => {
   assert.equal(file.banks[L1].shotsScanned, 4000);
   assert.equal(file.banks[L0].logical, 0);
   assert.equal(file.banks[L1].logical, 1);
-  assert.equal(file.banks[L0].counts.softSaves, 0);
-  assert.equal(file.banks[L0].counts.softFails, 72);
-  assert.equal(file.banks[L1].counts.softSaves, 575);
+  assert.equal(file.banks[L0].counts.softSaves, 2);
+  assert.equal(file.banks[L0].counts.softFails, 69);
+  assert.equal(file.banks[L1].counts.softSaves, 579);
   assert.equal(file.banks[L1].counts.softFails, 0);
   assert.equal(file.banks[L0].counts.nonExact + file.banks[L1].counts.nonExact, 0);
 });
@@ -80,13 +80,13 @@ test('every curated shot replays to its kind from the file alone', () => {
 });
 
 // Catches: fails if the page sentence drops either bank's counts or the averages over both stored
-// values (stage 2, learned, d = 3: soft 0.0256, hard 0.0885 at tau = 3 us), so one curated shot
+// values (stage 2, learned, d = 3: soft 0.0282, hard 0.0900 at tau = 3 us), so one curated shot
 // could be read as the average.
-test('the curated sentence gives both counts and the 2.6% against 8.9% averages', () => {
+test('the curated sentence gives both counts and the 2.8% against 9.0% averages', () => {
   const t = curatedSentence(file, stage2v2);
-  assert.match(t, /stored value was 1, soft decoding saved the bit 575 times and lost it 0 times/);
-  assert.match(t, /stored value was 0, soft decoding saved the bit 0 times and lost it 72 times/);
+  assert.match(t, /stored value was 1, soft decoding saved the bit 579 times and lost it 0 times/);
+  assert.match(t, /stored value was 0, soft decoding saved the bit 2 times and lost it 69 times/);
   assert.match(t, /4,000 stored shots/);
-  assert.match(t, /2\.6% of the time against 8\.9%/);
+  assert.match(t, /2\.8% of the time against 9\.0%/);
   assert.equal(CURATED_KINDS.map((k) => k.kind).join(), 'softSaves,softFails');
 });
