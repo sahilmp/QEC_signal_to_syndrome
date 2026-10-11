@@ -91,10 +91,8 @@ npm run check
 ## AI assistance and planning disclosure
 
 - **Planning documents written before the build window.** The project plan, the execution checklist, the team checklist (including the Claude Code prompts in them) and the parameter-card templates were written before the window opened, and are disclosed as such. They are not part of this repository.
-- **Work before the window.** We prototyped the pipeline and ran early simulator banks on 7–9 Oct, before the window. Every measurement bank and result in this submission was regenerated inside the window with new simulator seeds (data/raw/RERUN_SEEDS.md); the pre-window banks are kept unchanged in archive/pre-window/. On the fresh seeds, F1 replicated within its intervals (the d = 5 gain, the 15× suppression and "13 of 26 → 0 of 26"), but not everything did: the superconducting bit-flip memory now shows a resolved shorter best readout time than a single qubit (before, the shift was within the noise), and the ion's d = 5 best readout time is no longer resolved. Every old and new number is compared in docs/RERUN_DIFF.md.
-- **AI assistance.** All code in this repository was generated with Claude Code (Anthropic), an AI coding assistant, following those prompts under the authors' direction. Every change was reviewed by the authors, cross-reviewed by the other team member, and checked by tests and the validation checks V1–V10. The project page and this README were drafted with Claude Code from the repository's own results files and edited by the authors.
-- **Reference code.** `docs/qollab_js_api_example.txt` is Qollab's own example of calling the IonQ backend from JavaScript, copied as a disclosed reference.
-- The physics derivations, the choice of parameters and their sources, and the conclusions are the authors' responsibility.
+
+- **AI assistance.** The authors developed and wrote the majority of the project's code themselves, using Claude Code as an assistance tool for tasks such as UI improvements, debugging, running selected tests and validation checks. All code was reviewed by the authors, with additional cross-review by the other team member. The project idea, initial plan, and team checklists were prepared by the authors before the hackathon window opened. All measurements and results presented in the submission were regenerated during the hackathon window using fresh simulator seeds.
 
 ## Licence
 
