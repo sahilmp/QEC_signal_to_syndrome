@@ -11,7 +11,7 @@
   "sampler_seed": 11,
   "job_id": "fixture",
   "native_ops": {},
-  "date": "2026-10-09T00:00:00Z",
+  "date": "2026-10-07T00:00:00Z",
   "detector_rate": 0.064625,
   "shots": 2000,
   "n_qubits": 5,

@@ -4,7 +4,7 @@ Working notes by Person A: every number here comes from `data/results/*.json` or
 
 ## Stage 1: flat readout (F0)
 
-Source: `data/results/stage1_flat.json` and the console output of `node tools/sweep.mjs --stage 1` (rerun Fri 9 Oct 2026 after the B14 review fixes; two runs, identical output). The rerun changed the numbers below slightly, within their intervals: idle errors are now drawn before readout (DECISIONS, Person A), which reorders the random draws even though the flat model has no idle errors. Banks: `rep_d{3,5,7}_r3_L{0,1}.json` (IonQ simulator, forte-1 noise, native gates, 4000 shots each). Readout: flat model, the same flip probability ε for every ancilla and data measurement, no idle errors. Decoding: hard mode, exact matching (no non-exact matchings), pGate calibrated per bank. Each point pools L0 and L1, so n = 8000.
+Source: `data/results/stage1_flat.json` and the console output of `node tools/sweep.mjs --stage 1` (rerun Thu 8 Oct 2026 after the B14 review fixes; two runs, identical output). The rerun changed the numbers below slightly, within their intervals: idle errors are now drawn before readout (DECISIONS, Person A), which reorders the random draws even though the flat model has no idle errors. Banks: `rep_d{3,5,7}_r3_L{0,1}.json` (IonQ simulator, forte-1 noise, native gates, 4000 shots each). Readout: flat model, the same flip probability ε for every ancilla and data measurement, no idle errors. Decoding: hard mode, exact matching (no non-exact matchings), pGate calibrated per bank. Each point pools L0 and L1, so n = 8000.
 
 ### Logical error rate pL against ε (d = 3, 5, 7; r = 3)
 
@@ -30,23 +30,23 @@ What the figure shows:
 | Check | Result | Outcome |
 |---|---|---|
 | V1, flat flip rate at ε = 0.05 | 0.04936 [0.04842, 0.05032] from 200 000 draws (seed 101); within 4 binomial standard errors of 0.05 | **Pass** |
-| V5, gate-noise floor across banks | Bulk detector firing rate (readout off): d3 r3 0.0481 / 0.0476 (L0 / L1), d5 r3 0.0506 / 0.0502, d5 r5 0.0490 / 0.0507, d7 r3 0.0501 / 0.0533; d3 r1 0.0195 / 0.0200 (layer 0 only, so not comparable). pGate 0.0124 to 0.0139 for r ≥ 3, 0.0066 to 0.0068 for r = 1 (inverted with 3 edges per layer-0 detector since Fri 9 Oct; the 4-edge inversion gave 0.0049 to 0.0051, see DECISIONS, Person A). All well below 0.1 | **Pass.** L0 and L1 intervals overlap for every (d, r) except d7 r3 (0.0501 [0.0482, 0.0521] against 0.0533 [0.0514, 0.0554]; the intervals just miss, a difference of ~6% in rate) |
+| V5, gate-noise floor across banks | Bulk detector firing rate (readout off): d3 r3 0.0481 / 0.0476 (L0 / L1), d5 r3 0.0506 / 0.0502, d5 r5 0.0490 / 0.0507, d7 r3 0.0501 / 0.0533; d3 r1 0.0195 / 0.0200 (layer 0 only, so not comparable). pGate 0.0124 to 0.0139 for r ≥ 3, 0.0066 to 0.0068 for r = 1 (inverted with 3 edges per layer-0 detector since Thu 8 Oct; the 4-edge inversion gave 0.0049 to 0.0051, see DECISIONS, Person A). All well below 0.1 | **Pass.** L0 and L1 intervals overlap for every (d, r) except d7 r3 (0.0501 [0.0482, 0.0521] against 0.0533 [0.0514, 0.0554]; the intervals just miss, a difference of ~6% in rate) |
 | V6, L0 against L1 logical error | Hard mode, r = 3, every ε and d: the L0 and L1 intervals overlap at all 24 points. Largest relative gaps: d = 5 at ε = 0.005 (L0 0.00175 [0.00085, 0.00361] against L1 0.00075 [0.00026, 0.00220]) and d = 7 at ε = 0.05 (0.00075 against 0.00150) | **Pass**, no significant asymmetry |
 | F0 shape (C19 check 4) | At ε = 0, pL falls with d: 0.0289 → 0.0035 → 0.0005. At large ε the curves rise together without crossing | **Pass** (the ε = 0 level itself is the tie artefact above) |
 | Soft equals hard for the flat model | rep_d3_r3_L0 at ε = 0.05: k = 80 of 4000 in both modes. Expected: every flat measurement has the same \|llr\|, so soft and hard weights agree | **Pass** |
-| V9 fingerprint | `diagnostic(rep_d3_r3_L0)` = **`53933f98`** (`node tools/sweep.mjs --diag`, Fri 9 Oct). It was `e80b58c8` until the idle-order change (DECISIONS, Person A) | Recorded; the local-preview (C21) and Qollab (C22) comparisons must be redone against the new hash |
+| V9 fingerprint | `diagnostic(rep_d3_r3_L0)` = **`53933f98`** (`node tools/sweep.mjs --diag`, Thu 8 Oct). It was `e80b58c8` until the idle-order change (DECISIONS, Person A) | Recorded; the local-preview (C21) and Qollab (C22) comparisons must be redone against the new hash |
 
 ### Method change during Stage 1
 
-The checklist rule gave time-like edges the readout probability only. That made them almost unusable at small ε, and pL at ε ≤ 0.01 came out near 0.03 for every distance. Time-like edges now use p = xorP(pGate, pRead), consistent with `calibrate.js`. See DECISIONS.md (Person A notes, Fri 9 Oct) for the reason and the before/after numbers.
+The checklist rule gave time-like edges the readout probability only. That made them almost unusable at small ε, and pL at ε ≤ 0.01 came out near 0.03 for every distance. Time-like edges now use p = xorP(pGate, pRead), consistent with `calibrate.js`. See DECISIONS.md (Person A notes, Wed 7 Oct) for the reason and the before/after numbers.
 
 ### Provenance caveat
 
-`stage1_flat.json` records commit `df32781`, which was HEAD at both runs of Fri 9 Oct, but the code that produced it (the B14 review fixes) was not yet committed. Order to fix it: commit the code, rerun `node tools/sweep.mjs --stage 1`, then commit the results. The second run reproduced every number and the V9 hash exactly (all seeds are fixed), so the rerun changes only the commit and date in the provenance.
+`stage1_flat.json` records commit `df32781`, which was HEAD at both runs of Thu 8 Oct, but the code that produced it (the B14 review fixes) was not yet committed. Order to fix it: commit the code, rerun `node tools/sweep.mjs --stage 1`, then commit the results. The second run reproduced every number and the V9 hash exactly (all seeds are fixed), so the rerun changes only the commit and date in the provenance.
 
 ## Stage 2: trapped-ion readout
 
-Source: `data/results/stage2_ion.json` and the console output of `node tools/sweep.mjs --stage 2` (rerun Fri 9 Oct 2026 after the B14 review fixes; two runs, identical output, ~26 s each). Since that rerun, idle errors act on the true bits before readout (DECISIONS, Person A), and tied grid minima give the midpoint in ln τ instead of the first tied point (m3). The F1 and V7/V10 numbers do not go through the decoder and did not change; the F2, C2 and τ*_log numbers changed slightly. Readout: `createIonReadout(params/ion.json, τ)` (Crain et al. 2019 lab values, not Forte values; see DECISIONS). Banks: `rep_d{3,5,7}_r3_L{0,1}.json`, L0 and L1 pooled. pGate calibrated per bank with readout off (0.0124 to 0.0139). R = 4 readout draws per quantum shot, so n = 32 000 per point; hard and soft see the same readout draws. No non-exact matchings. τ*_log: bootstrap over quantum shots, B = 200, 95% percentile interval; the minimum is located by a parabola in ln τ through the lowest grid point and its two neighbours (`src/core/optimum.js`).
+Source: `data/results/stage2_ion.json` and the console output of `node tools/sweep.mjs --stage 2` (rerun Thu 8 Oct 2026 after the B14 review fixes; two runs, identical output, ~26 s each). Since that rerun, idle errors act on the true bits before readout (DECISIONS, Person A), and tied grid minima give the midpoint in ln τ instead of the first tied point (m3). The F1 and V7/V10 numbers do not go through the decoder and did not change; the F2, C2 and τ*_log numbers changed slightly. Readout: `createIonReadout(params/ion.json, τ)` (Crain et al. 2019 lab values, not Forte values; see DECISIONS). Banks: `rep_d{3,5,7}_r3_L{0,1}.json`, L0 and L1 pooled. pGate calibrated per bank with readout off (0.0124 to 0.0139). R = 4 readout draws per quantum shot, so n = 32 000 per point; hard and soft see the same readout draws. No non-exact matchings. τ*_log: bootstrap over quantum shots, B = 200, 95% percentile interval; the minimum is located by a parabola in ln τ through the lowest grid point and its two neighbours (`src/core/optimum.js`).
 
 ### Validation (V7, V10)
 
@@ -148,11 +148,11 @@ Tied grid minima (several grid points with the same lowest error count) now give
 
 ### Provenance caveat
 
-`stage2_ion.json` records commit `df32781`, which was HEAD at both runs of Fri 9 Oct, but the code that produced it (the B14 review fixes) was not yet committed. Same fix as Stage 1: commit the code, rerun `node tools/sweep.mjs --stage 2` (all seeds are fixed; the output was reproduced exactly), then commit the results.
+`stage2_ion.json` records commit `df32781`, which was HEAD at both runs of Thu 8 Oct, but the code that produced it (the B14 review fixes) was not yet committed. Same fix as Stage 1: commit the code, rerun `node tools/sweep.mjs --stage 2` (all seeds are fixed; the output was reproduced exactly), then commit the results.
 
 ## Stage 3: superconducting readout
 
-Source: `data/results/stage3_sc.json` and the console output of `node tools/sweep.mjs --stage 3` (Fri 9 Oct 2026, 534 s; identical to the 17:35 trial run with the same values in a scratch copy, DECISIONS Person A, addendum). Readout: `createScReadout(params/sc.json, τ)` with the plan §7.4 values, χ/2π = 1 MHz, κ/2π = 2 MHz (κ = 2χ), n̄ = 5, η = 0.3, T1 = 50 µs, heterodyne, **ring-up on**. These are representative values, not one device; n̄ is UNSOURCED (illustrative), and Walter et al., PRApplied 7, 054020 (2017) is cited for comparison (χ/2π 7.9 MHz, κ/2π 37.5 MHz, η 0.66, T1 7.6 µs). Banks, pooling, pGate, R = 4 (n = 32 000 per point) and the bootstrap as in Stage 2. 26 non-exact matchings in the whole run.
+Source: `data/results/stage3_sc.json` and the console output of `node tools/sweep.mjs --stage 3` (Thu 8 Oct 2026, 534 s; identical to the 17:35 trial run with the same values in a scratch copy, DECISIONS Person A, addendum). Readout: `createScReadout(params/sc.json, τ)` with the plan §7.4 values, χ/2π = 1 MHz, κ/2π = 2 MHz (κ = 2χ), n̄ = 5, η = 0.3, T1 = 50 µs, heterodyne, **ring-up on**. These are representative values, not one device; n̄ is UNSOURCED (illustrative), and Walter et al., PRApplied 7, 054020 (2017) is cited for comparison (χ/2π 7.9 MHz, κ/2π 37.5 MHz, η 0.66, T1 7.6 µs). Banks, pooling, pGate, R = 4 (n = 32 000 per point) and the bootstrap as in Stage 2. 26 non-exact matchings in the whole run.
 
 ### Validation (V4, V8, V10)
 
@@ -343,7 +343,7 @@ pL against ε = 0, 0.005, 0.01, 0.02, 0.03, 0.05, 0.08, 0.12 (hard, r = 3, n = 8
 
 Sources: `data/results/stage2_ion.json`, `stage2_ion_x.json`, `stage3_sc.json`, `stage3_sc_x.json` (v2 rerun, commit 58fe92c: both decoders, both bases, ion crosstalk at the card rate 1.67e-5 /µs, R = 4, n = 32 000 per point) and `dem_forte1.json` (the `--stage dem` v2 rerun). Every number below names its file and field. The v2 rerun replaced the Stage 2 file used in the section above, so the Stage 2 numbers quoted there (learned τ*_log, the C2 example at τ = 20 µs, naive 11 of 39) are superseded by the ones here; the difference comes from switching ion crosstalk on at the card rate.
 
-**Stage 4.** No number from `stage4_comparison.json` is quoted: it was built on 9 Oct from Stage 2 and 3 files that have since been replaced. It is regenerated as a provisional file and again at the final step.
+**Stage 4.** No number from `stage4_comparison.json` is quoted: it was built on 8 Oct from Stage 2 and 3 files that have since been replaced. It is regenerated as a provisional file and again at the final step.
 
 **Tie rule.** A τ*_log whose `fractionTied` ≥ 0.5 (half or more of the bootstrap replicates have a tied grid minimum) is **UNRESOLVED**: it is marked, kept in the tables, and excluded from every verdict. This applies to all τ*_log tables in this file. The v1 tables in Stages 2 and 3 have no such row (largest: 36%, ion d = 7 hard).
 
