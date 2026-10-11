@@ -5,7 +5,7 @@
 // stage4_comparison.json decoderComparison (trapped ion, bit-flip, d = 5, hard, held out) and
 // findings F1 numbers.outOfSample; F2 from stage3_sc_dense.json optima.tauLog (learned, d = 3,
 // hard) and stage4_comparison.json platforms[*].tauPhys.empirical and trapped-ion tauLog (hard,
-// d = 3); F3 from stage4_comparison.json platforms["trapped-ion"].budgetAtOptimum. A card whose
+// d = 3), its title chosen by whether the superconducting interval lies below tauPhys; F3 from stage4_comparison.json platforms["trapped-ion"].budgetAtOptimum. A card whose
 // values are missing shows its title only.
 
 import { stage3v2, stage4v2 } from './bridge_data.js';
@@ -59,6 +59,11 @@ export function findingCards(sources = DEFAULT_SOURCES) {
   const ionLog = (s4?.platforms?.['trapped-ion']?.tauLog?.hard || []).find((t) => t?.d === 3);
   const ionPhys = s4?.platforms?.['trapped-ion']?.tauPhys?.empirical?.xMin;
   const ionSame = fin(ionLog?.xMin, ionPhys) && formatTau(ionLog.xMin) === formatTau(ionPhys);
+  const ionText = !fin(ionLog?.xMin, ionPhys) ? null
+    : ionSame ? `ion: both ${formatTau(ionPhys)}` : `ion: ${formatTau(ionLog.xMin).replace(/ µs$/, '')} against ${formatTau(ionPhys)}`;
+  // The superconducting code's best is resolved shorter when its whole interval lies below the
+  // single qubit's best (the bit-flip memory in the in-window rerun); the title then says so.
+  const scShorter = fin(opt?.hi, scPhys) && opt.hi < scPhys;
   const b = s4?.platforms?.['trapped-ion']?.budgetAtOptimum;
   return [
     {
@@ -69,9 +74,10 @@ export function findingCards(sources = DEFAULT_SOURCES) {
       note: (line1 || detail1) && isPostHoc(f1) ? POST_HOC_NOTE : null, target: 'learnnoise-3', headline: true,
     },
     {
-      id: 'F2', title: 'Both platforms: tune readout on one qubit',
-      line: fin(opt?.lo, opt?.hi, scPhys) && ionSame
-        ? `Superconducting: code’s best ${formatTau(opt.lo).replace(/ µs$/, '')}–${formatTau(opt.hi)}, one qubit’s ${formatTau(scPhys)}; ion: both ${formatTau(ionPhys)}`
+      id: 'F2',
+      title: scShorter ? 'Superconducting code wants shorter readout; ion does not' : 'Both platforms: tune readout on one qubit',
+      line: fin(opt?.lo, opt?.hi, scPhys) && ionText
+        ? `Superconducting: code’s best ${formatTau(opt.lo).replace(/ µs$/, '')}–${formatTau(opt.hi)}, one qubit’s ${formatTau(scPhys)}; ${ionText}`
         : null,
       detail: null, note: null, target: 'level3:superconducting', headline: false,
     },

@@ -11,10 +11,10 @@
     "tau_us": 3,
     "decoder": "learned",
     "rates": {
-      "space": 0.00816547,
-      "spaceBoundary": 0.00656471,
-      "time": 0.0100458,
-      "diag": 0.00993978
+      "space": 0.00768693,
+      "spaceBoundary": 0.00662021,
+      "time": 0.0102439,
+      "diag": 0.0109949
     },
     "seed": 20261011,
     "maxShots": 4000,
@@ -49,14 +49,14 @@
           8
         ]
       },
-      "samplerSeed": 1938670837,
+      "samplerSeed": 160643811,
       "shots": 4000,
       "shotsScanned": 4000,
       "counts": {
-        "softSaves": 0,
-        "softFails": 72,
-        "hardErrors": 6,
-        "softErrors": 78,
+        "softSaves": 2,
+        "softFails": 69,
+        "hardErrors": 9,
+        "softErrors": 76,
         "nonExact": 0
       }
     },
@@ -87,14 +87,14 @@
           8
         ]
       },
-      "samplerSeed": 706416029,
+      "samplerSeed": 176271806,
       "shots": 4000,
       "shotsScanned": 4000,
       "counts": {
-        "softSaves": 575,
+        "softSaves": 579,
         "softFails": 0,
-        "hardErrors": 682,
-        "softErrors": 107,
+        "hardErrors": 703,
+        "softErrors": 124,
         "nonExact": 0
       }
     }
@@ -102,23 +102,51 @@
   "softSaves": [
     {
       "bank": "rep_d3_r3_L1",
+      "index": 0,
+      "key": "48",
+      "seed": 744081943,
+      "nDefects": 3
+    },
+    {
+      "bank": "rep_d3_r3_L1",
+      "index": 2,
+      "key": "57",
+      "seed": 1230273510,
+      "nDefects": 3
+    },
+    {
+      "bank": "rep_d3_r3_L1",
       "index": 3,
-      "key": "5a",
+      "key": "58",
       "seed": 611092454,
       "nDefects": 3
     },
     {
       "bank": "rep_d3_r3_L1",
-      "index": 4,
-      "key": "70",
-      "seed": 104149552,
+      "index": 5,
+      "key": "5c",
+      "seed": 1913158899,
       "nDefects": 3
     },
     {
       "bank": "rep_d3_r3_L1",
-      "index": 5,
-      "key": "80",
-      "seed": 1913158899,
+      "index": 6,
+      "key": "5e",
+      "seed": 1108777372,
+      "nDefects": 3
+    },
+    {
+      "bank": "rep_d3_r3_L1",
+      "index": 7,
+      "key": "5f",
+      "seed": 1479454931,
+      "nDefects": 5
+    },
+    {
+      "bank": "rep_d3_r3_L1",
+      "index": 8,
+      "key": "c0",
+      "seed": 1574840993,
       "nDefects": 2
     },
     {
@@ -141,34 +169,6 @@
       "key": "c0",
       "seed": 1509018271,
       "nDefects": 2
-    },
-    {
-      "bank": "rep_d3_r3_L1",
-      "index": 23,
-      "key": "e0",
-      "seed": 1793547239,
-      "nDefects": 3
-    },
-    {
-      "bank": "rep_d3_r3_L1",
-      "index": 26,
-      "key": "e0",
-      "seed": 1946341111,
-      "nDefects": 1
-    },
-    {
-      "bank": "rep_d3_r3_L1",
-      "index": 29,
-      "key": "e0",
-      "seed": 740004129,
-      "nDefects": 1
-    },
-    {
-      "bank": "rep_d3_r3_L1",
-      "index": 32,
-      "key": "e0",
-      "seed": 106500890,
-      "nDefects": 1
     }
   ],
   "softFails": [
@@ -181,65 +181,65 @@
     },
     {
       "bank": "rep_d3_r3_L0",
-      "index": 3559,
+      "index": 3543,
       "key": "40",
-      "seed": 488155321,
+      "seed": 915452504,
       "nDefects": 1
     },
     {
       "bank": "rep_d3_r3_L0",
-      "index": 3560,
+      "index": 3544,
       "key": "40",
-      "seed": 1753705244,
+      "seed": 1346257548,
       "nDefects": 1
     },
     {
       "bank": "rep_d3_r3_L0",
-      "index": 3561,
+      "index": 3545,
       "key": "40",
-      "seed": 385706933,
+      "seed": 739146398,
       "nDefects": 1
     },
     {
       "bank": "rep_d3_r3_L0",
-      "index": 3562,
+      "index": 3546,
       "key": "40",
-      "seed": 2047704245,
+      "seed": 1706342744,
       "nDefects": 1
     },
     {
       "bank": "rep_d3_r3_L0",
-      "index": 3563,
+      "index": 3547,
       "key": "40",
-      "seed": 1164832094,
+      "seed": 1442391153,
       "nDefects": 1
     },
     {
       "bank": "rep_d3_r3_L0",
-      "index": 3564,
+      "index": 3548,
       "key": "40",
-      "seed": 1843133829,
+      "seed": 1689108342,
       "nDefects": 1
     },
     {
       "bank": "rep_d3_r3_L0",
-      "index": 3565,
+      "index": 3549,
       "key": "40",
-      "seed": 354989927,
+      "seed": 1733392228,
       "nDefects": 1
     },
     {
       "bank": "rep_d3_r3_L0",
-      "index": 3566,
+      "index": 3550,
       "key": "40",
-      "seed": 987576203,
+      "seed": 822167805,
       "nDefects": 1
     },
     {
       "bank": "rep_d3_r3_L0",
-      "index": 3567,
+      "index": 3551,
       "key": "40",
-      "seed": 1517225374,
+      "seed": 2067256597,
       "nDefects": 1
     }
   ],

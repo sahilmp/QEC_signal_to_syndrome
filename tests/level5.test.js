@@ -444,21 +444,21 @@ test('pairedCell: resolved only when the interval excludes 0 strictly', () => {
 });
 
 // Catches: fails if the tornado's values table misses the paired change against
-// the baseline, or resolves a row whose interval includes 0. On the final file exactly three rows
-// are resolved, all superconducting: η × 0.5 (+), η × 2 (−) and T1 × 2 (−); ion γ × 0.5 (interval
-// ending at 0) and γ × 2 are not.
-test('tornado values table: paired change against the baseline, three rows resolved', () => {
+// the baseline, or resolves a row whose interval includes 0. On the final file (in-window rerun)
+// exactly two rows are resolved, both superconducting: η × 0.5 (+) and η × 2 (−); T1 × 2
+// (interval −4.4×10⁻⁴ [−1.9×10⁻³, +9.7×10⁻⁴], resolved before the rerun), ion γ × 0.5 and γ × 2 are not.
+test('tornado values table: paired change against the baseline, two rows resolved', () => {
   const t = tornadoOptions().table;
   const col = t.columns.length - 1;
   assert.match(t.columns[col], /^Paired change/);
   const cell = (label, scale) => t.rows.find((r) => r[0] === label && r[2] === `× ${scale}`)[col];
-  assert.equal(cell('Superconducting: measurement efficiency η', 0.5), '+5.69×10⁻³ [4.19, 7.19]×10⁻³ at τ = 0.7 µs, d = 3, hard');
-  assert.equal(cell('Superconducting: measurement efficiency η', 2), '−6.25×10⁻⁴ [−10.6, −3.13]×10⁻⁴ at τ = 0.7 µs, d = 3, hard');
-  assert.equal(cell('Superconducting: T1', 2), '−2.44×10⁻³ [−3.81, −1.06]×10⁻³ at τ = 0.7 µs, d = 3, hard');
+  assert.equal(cell('Superconducting: measurement efficiency η', 0.5), '+6.5×10⁻³ [4.88, 8.06]×10⁻³ at τ = 0.7 µs, d = 3, hard');
+  assert.equal(cell('Superconducting: measurement efficiency η', 2), '−7.5×10⁻⁴ [−12.5, −3.13]×10⁻⁴ at τ = 0.7 µs, d = 3, hard');
+  assert.equal(cell('Superconducting: T1', 2), NOT_RESOLVED_CHANGE);
   assert.equal(cell('Trapped ion: dark-to-bright leak rate', 0.5), NOT_RESOLVED_CHANGE);
   assert.equal(cell('Trapped ion: dark-to-bright leak rate', 2), NOT_RESOLVED_CHANGE);
   const resolved = t.rows.filter((r) => / at τ = /.test(r[col]));
-  assert.deepEqual(resolved.map((r) => r[1]), ['Superconducting', 'Superconducting', 'Superconducting']);
+  assert.deepEqual(resolved.map((r) => r[1]), ['Superconducting', 'Superconducting']);
   assert.ok(/resampling quantum shots/.test(t.caption));
 });
 
@@ -604,8 +604,10 @@ test('Level 5 v2 charts: cluster intervals and the learned label', () => {
   assert.deepEqual([tp.lo, tp.hi], [v.loCluster, v.hiCluster]);
   assert.equal(t.intervals, 'Lower and upper bounds: 95% interval, resampling quantum shots.');
   assert.ok(t.title.includes(LEARNED_LABEL));
-  // The v1 level (flag off): its curves (v1 files) carry no cluster bounds, its Stage 4 points
-  // do, and the caption names each.
+  // The v1 level (flag off): since the in-window rerun its v1 curve files (stage2_ion.json,
+  // stage3_sc.json, regenerated with the current sweep) carry cluster bounds too, so the caption
+  // names the one interval used for curves and points.
+  assert.ok('loCluster' in PLATFORMS[0].results.series[0]);
   assert.equal(chartOptions(PLATFORMS[0], 'hard', 'perRound').intervals,
-    'Curves: 95% Wilson interval. Stage 4 points: 95% interval, resampling quantum shots.');
+    'Lower and upper bounds: 95% interval, resampling quantum shots.');
 });

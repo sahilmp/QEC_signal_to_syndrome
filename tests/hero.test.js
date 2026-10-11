@@ -219,8 +219,8 @@ test('SP5 cut lifted: HERO_DECODER is null (learned); an explicit "naive" reques
 // Replaces the test "SP5 cut: both hero arms use the same decoder …", because the decision
 // changed (see above). Catches: fails if the two arms of the real hero data end
 // up on different decoders (the K2 gate: the same decoder on both arms), if either arm is not on
-// the learned decoder, or if the hero's tau*_log differs from Stage 4's (ion 23.0 µs,
-// superconducting 0.710 µs, d = 3, hard) or its superconducting tau*_phys from 0.910 µs (the
+// the learned decoder, or if the hero's tau*_log differs from Stage 4's (in-window rerun: ion 23.5 µs,
+// superconducting 0.729 µs, d = 3, hard) or its superconducting tau*_phys from 0.910 µs (the
 // dense grid's simulated optimum; the standard-grid 0.906 µs would fail). Values compared to
 // three significant figures, as the page shows them.
 test('SP5 cut lifted: both hero arms use the learned decoder and Stage 4\'s optima', () => {
@@ -234,8 +234,8 @@ test('SP5 cut lifted: both hero arms use the learned decoder and Stage 4\'s opti
     const s4 = stage4.platforms[g.id].tauLog.hard.find((t) => t.d === 3);
     assert.equal(s3(g.o.tauLog.xMin), s3(s4.xMin), `${g.id} tau*_log`);
   }
-  assert.equal(s3(got[0].o.tauLog.xMin), 23.0);
-  assert.equal(s3(got[1].o.tauLog.xMin), 0.71);
+  assert.equal(s3(got[0].o.tauLog.xMin), 23.5);
+  assert.equal(s3(got[1].o.tauLog.xMin), 0.729);
   assert.equal(s3(got[1].o.tauPhys.xMin), 0.91);
   assert.equal(s3(got[1].o.tauPhys.xMin), s3(stage4.platforms.superconducting.tauPhys.empirical.xMin));
 });

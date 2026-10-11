@@ -36,7 +36,12 @@ test('findingCards on the real data: F1, F2, F3, each number from the results fi
   const opt = stage3.optima.tauLog.find((t) => t.d === 3 && t.mode === 'hard' && t.decoder === 'learned');
   const scPhys = stage4.platforms.superconducting.tauPhys.empirical.xMin;
   const ionPhys = stage4.platforms['trapped-ion'].tauPhys.empirical.xMin;
-  assert.deepEqual(numbersIn(cards[1].line), [p3(opt.lo), p3(opt.hi), p3(scPhys), p3(ionPhys)]);
+  const ionLog = stage4.platforms['trapped-ion'].tauLog.hard.find((t) => t.d === 3).xMin;
+  const ionNums = p3(ionLog) === p3(ionPhys) ? [p3(ionPhys)] : [p3(ionLog), p3(ionPhys)];
+  assert.deepEqual(numbersIn(cards[1].line), [p3(opt.lo), p3(opt.hi), p3(scPhys), ...ionNums]);
+  // The title says the superconducting code wants a shorter readout exactly when the file's
+  // interval lies wholly below the single-qubit optimum.
+  assert.equal(/wants shorter readout/.test(cards[1].title), opt.hi < scPhys);
   const b = stage4.platforms['trapped-ion'].budgetAtOptimum;
   // Replaces p2 (toPrecision(2): 520) with p3 (formatNumber: 523) because the final audit allows
   // only formatNumber rounding when a sentence states no precision.

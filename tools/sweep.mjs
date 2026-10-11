@@ -1373,7 +1373,7 @@ export const PLAIN = {
   framing: 'Same IonQ-simulated circuits and gate noise, two ways of reading qubits out: a controlled comparison, not a hardware benchmark.',
   C1: {
     held: 'The code’s best readout time is shorter than the best time for reading one qubit.',
-    refuted: 'In neither qubit type does the code reliably want a shorter readout than a single qubit does.',
+    refuted: 'Refuted as registered: only the superconducting bit-flip memory wants a shorter readout than one qubit; phase-flip and ion do not.',
     undetermined: 'The data cannot yet say whether the code prefers a shorter readout than one qubit does.',
   },
   C2: {
@@ -1402,7 +1402,7 @@ export const PLAIN = {
     refuted: 'Even with faster dephasing, the phase-flip memory does not prefer a shorter readout.',
     undetermined: 'The data cannot yet say whether faster dephasing shortens the best readout time.',
   },
-  O4: { undetermined: 'Measured, not tested: IonQ’s simulated gate noise looks the same to the decoder for bit flips and phase flips.' },
+  O4: { undetermined: 'Measured, not tested: IonQ’s simulated gate noise looks nearly the same to the decoder for bit flips and phase flips.' },
   F1: 'Readout confidence seemed to hurt the ion only because the first decoder ignored a common error; fresh data confirm it.',
 };
 const plainOf = (id, verdict) => PLAIN[id]?.[verdict] ?? '';

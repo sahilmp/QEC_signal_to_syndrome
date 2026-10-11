@@ -9871,10 +9871,10 @@
     ]
   },
   "provenance": {
-    "tool": "tools/sweep.mjs --stage 3 --decoder both --basis X --dense --set T2_us=25 --out data\\results\\stage3_sc_x_T2_25.json",
-    "commit": "42d68a34ee2ccc169bc500dd81e9cc880c99d1c3",
-    "date": "2026-10-10T19:50:48.495Z",
-    "node": "v24.19.0",
+    "tool": "tools/sweep.mjs --stage 3 --decoder both --basis X --dense --set T2_us=25 --out data/results/stage3_sc_x_T2_25.json",
+    "commit": "16b9a97a4164f96bf93aff0bfbf275027be39b77",
+    "date": "2026-10-11T17:06:09.883Z",
+    "node": "v24.18.1",
     "params": "params/sc.json",
     "banks": [
       "repx_d3_r3_L0.json",
@@ -10894,6 +10894,6 @@
       "T2_us": 25
     },
     "nonExact": 40,
-    "runtime_s": 1546.254
+    "runtime_s": 2860.008
   }
 }

@@ -2,6 +2,8 @@
 
 Working notes by Person A: every number here comes from `data/results/*.json` or from the console output of `tools/sweep.mjs`, and states its source. The project page (`docs/project_page.md`) quotes only from this file, `DECISIONS.md` and `data/results/*.json`. Intervals are Wilson 95% unless stated otherwise.
 
+> **Pre-window banks (note added Sun 11 Oct, after the in-window rerun).** Sections dated before 10 Oct use pre-window banks. So do the v2 sections dated Sat 10 and Sun 11 Oct below: they decode the same pre-window `rep_*` banks (run on 7 Oct), together with the phase-flip, V13 and held-out banks, which were run inside the window. All these dated sections are kept unchanged as history. Every pre-window bank was re-run inside the window with a new seed (`data/raw/RERUN_SEEDS.md`; originals in `archive/pre-window/`), and every result was regenerated from the new banks. The current results are in `data/results/` and `docs/project_page.md`, summarised in "Current results: in-window rerun" at the end of this file; `docs/RERUN_DIFF.md` compares old and new.
+
 ## Stage 1: flat readout (F0)
 
 Source: `data/results/stage1_flat.json` and the console output of `node tools/sweep.mjs --stage 1` (rerun Thu 8 Oct 2026 after the B14 review fixes; two runs, identical output). The rerun changed the numbers below slightly, within their intervals: idle errors are now drawn before readout (DECISIONS, Person A), which reorders the random draws even though the flat model has no idle errors. Banks: `rep_d{3,5,7}_r3_L{0,1}.json` (IonQ simulator, forte-1 noise, native gates, 4000 shots each). Readout: flat model, the same flip probability ε for every ancilla and data measurement, no idle errors. Decoding: hard mode, exact matching (no non-exact matchings), pGate calibrated per bank. Each point pools L0 and L1, so n = 8000.
@@ -713,3 +715,49 @@ Final Stage 4 (`stage4_comparison.json`, 0fdb7c4; learned decoder). The plain te
 | F1 | Finding (post hoc), out of sample | Readout confidence seemed to hurt the ion only because the first decoder ignored a common error; fresh data confirm it. |
 
 C3's note now gives the cycle-time ratio from the files, about 3800× at d = 3 (3787×), instead of "about 2000×".
+
+## Current results: in-window rerun (Sun 11 Oct, evening)
+
+Every pre-window bank (`rep_*`, `v4_*`) was re-run inside the window with a new seed (`data/raw/RERUN_SEEDS.md`; originals in `archive/pre-window/`), and every results file was regenerated from the banks now in `data/banks/` (`tools/make_fixtures.mjs`, `node tools/sweep.mjs --stage dem | holdout | 1 | 2 | 3 | 4` in both bases with the `--out`, `--dense` and `--set T2_us=25` variants, `tools/ablation.mjs`, `tools/curate.mjs`). The phase-flip (`repx_*`), V13, held-out and spam-check banks were already in-window and are unchanged, so every X-basis number below equals the earlier one. The sections above are history; this section and `data/results/` are current. `docs/RERUN_DIFF.md` lists every headline number old → new.
+
+### What changed, in plain words
+
+- **C1 to C6 and O4 keep their verdict labels** (C1 refuted, C2 held, C3 held by construction, C4 undetermined, C5 held, C6 not applicable with an undetermined variant, O4 a measurement). Two of the claims built on them changed:
+- **Superconducting C1, bit-flip memory: the shift is now resolved.** Learned τ*_log at d = 3 hard is 0.729 µs [0.697, 0.844], wholly below τ*_phys = 0.910 µs, and `shiftDelta` pL(0.9) − pL(0.75) is +1.25e-3 [+3.0e-4, +2.2e-3] (resolved); at d = 5 hard the interval reaches 1.00 µs but `shiftDelta` +5.6e-4 [+1.6e-4, +9.4e-4] is resolved too (`stage4_comparison.json` → `conclusionDetail.C1.superconducting.cases`). The phase-flip memory is unchanged (only X d = 3 soft below, by 0.004 µs). 4 of 8 intervals at d = 3 and 5 lie below τ*_phys (before: 1 of 8). C1 stays refuted because the pre-registered statement needed both memories. The former reading "single-qubit tuning is enough on both platforms" holds for the ion and the superconducting phase-flip memory only.
+- **The ion's d = 5 τ*_log is now unresolved** (hard and soft: 27.4 µs [27.4, 38.7], 100% tied; `platforms.trapped-ion.tauLog`). The held-out F1 rows at d = 5 are read at that grid point; their C5 rows become "undetermined" and drop out of C5, which now rests on 12 resolved rows (0 learned above naive, 11 below; out of sample: ion Z d = 3 hard and soft).
+
+### F1 out of sample (`stage4_comparison.json` → `decoderComparison`, ion, Z, `inSample: false`; cluster 95%)
+
+| d, mode | τ (µs) | Naive | Learned | Gain |
+|---|---|---|---|---|
+| 3, hard | 23.5 | 0.00483 [0.00338, 0.00634] | 0.00322 [0.00211, 0.00449] | 1.5× (cluster intervals overlap) |
+| 3, soft | 17.3 | 0.0103 [0.00813, 0.0126] | 0.00323 [0.00213, 0.00453] | 3.2× |
+| 5, hard | 27.4 (τ*_log unresolved) | 0.000901 [0.000633, 0.00123] | 0.000213 [0.0000932, 0.000351] | 4.2× |
+| 5, soft | 27.4 (τ*_log unresolved) | 0.00101 [0.000745, 0.00131] | 0.000202 [0.0000884, 0.000353] | 5.0× |
+
+Suppression d = 3 → 5 (hard): naive 5.4×, learned 15.1×. Soft worse than hard out of sample (`holdout.json` → `setting2.softWorseCount`): naive 13 of 26, learned 0 of 26 (unchanged). d = 3 at 20 µs, paired soft − hard: naive +5.3e-3 [+3.7e-3, +7.1e-3], learned +6e-5 [−6e-5, +2.4e-4].
+
+In sample (`stage2_ion_v2b.json` → `validation.C2`, `paired`): naive soft worse than hard at 9 of 39 points (Wilson) and 9 of 39 (paired), learned 0 and 0; X basis unchanged (naive 9 and 10, learned 0 and 0). Z d = 3 at 20 µs: naive soft 0.00953 [0.00852, 0.0107] against hard 0.00566 [0.00489, 0.00654]; learned soft 0.00331 against hard 0.00344.
+
+Learned rates (`dem_forte1.json` → `banks`, Z, space / spaceBoundary / time / diag (antiDiag)): d3 r3 0.0077 / 0.0066 / 0.0102 / 0.0110 (0.0005); d5 r3 0.0072 / 0.0065 / 0.0093 / 0.0105 (0.0002); d5 r5 0.0076 / 0.0080 / 0.0094 / 0.0094 (0.0003); d7 r3 0.0070 / 0.0079 / 0.0093 / 0.0100 (0.0002); d3 r1 0.0033 / 0.0040 / 0.0074 / 0.0081 (0.0001). The diagonal class is again about as large as the time class.
+
+### Ablation (`ablation.json`, Wilson 95%, R = 4)
+
+Naive, diagonal-only and rates-only at d = 3 are identical to before; the learned rows moved. d = 3: learned hard 0.00316 [0.00260, 0.00383] and soft 0.00309 [0.00254, 0.00376] now lie below the diagonal-only intervals ([0.00339, 0.00479], [0.00334, 0.00472]). d = 5: rates-only hard 0.000856, minus naive −1.19e-4 [−2.31e-4, −1.3e-5] (now resolved, small); learned hard 0.000250 and soft 0.000263, inside the diagonal-only intervals. Model checks: trained d = 5 space / time / diag 0.0072 / 0.0093 / 0.0105 against held-out 0.0071 / 0.0094 / 0.0094; 16-bank ranges 0.0066–0.0088 (space), 0.0088–0.0102 (time), 0.0081–0.0112 (diag); held-out anti-diagonal 6.1e-5, 153× below the held-out diagonal (unchanged).
+
+### Optima, budget and trade-off (`stage4_comparison.json`, learned, d = 3, hard)
+
+- Ion τ*_log 23.5 µs [17.3, 25.1] (τ*_phys 23.0 µs, unchanged); budget at the optimum: idle 1.20e-6, readout 6.20e-4, gate 8.89e-3, crosstalk 2.00e-4 per round; readout/idle 517, gate/idle 7403, gate/readout 14.3.
+- Superconducting τ*_log 0.729 µs [0.697, 0.844] (τ*_phys 0.910 µs, unchanged).
+- Per round: ion 0.00117 [0.000972, 0.00141] at 253 rounds/s; superconducting 0.00205 [0.00178, 0.00235] at 940 612 rounds/s. Per µs: 2.96e-7 against 1.92e-3. Cycle ratio 3719.
+- C4: ion break-even 0.229 [0.201, 0.261] at 1.63 µs (hard); superconducting no crossing.
+- C6 variant (T2 = 25 µs, X, against the dense Z file): X shorter in 3 of 4 point estimates (d = 5 hard: X 0.798 against Z 0.742), every interval overlaps: undetermined.
+- O4: 1.167 [0.997, 1.366] (d3 r1), 1.027 [0.959, 1.100], 0.984 [0.939, 1.032], 1.048 [1.013, 1.084] (d5 r5, excludes 1), 1.013 [0.976, 1.053]; 4 of 5 intervals contain 1.
+- C1 ion: point flag, crosstalk off flags Z d = 3 and d = 5 soft (before: Z d = 3 hard and soft); resolved flag and `shiftDelta` unchanged in outcome (card rate refuted; resolved only at 1e-3 /µs).
+- Sensitivity (paired against baseline, d = 3 hard): η × 0.5 +0.0065 [+0.0049, +0.0081]; η × 2 −7.5e-4 [−1.25e-3, −3.1e-4]; T1 × 2 −4.4e-4 [−1.9e-3, +9.7e-4] (no longer resolved); pumping rate × 0.5 and × 2 not resolved.
+
+### Checks
+
+- V18 (`holdout.json` → `setting1.V18`): pass. d = 5 pooled naive 0.00165 [0.00130, 0.00210] against learned 0.00090 [0.00065, 0.00125] (66 → 36 errors), paired −7.5e-4 [−1.11e-3, −4.0e-4]; d = 3 unchanged (79 → 65).
+- V6: no L0/L1 difference in 48 comparisons per basis. V11: pass at d = 3, 5, 7 in both bases.
+- V9 and V9L: `53933f98`, unchanged. `diagnostic()` decodes the first 1000 shots of `rep_d3_r3_L0` in key order, which are the all-zero outcome in both the old bank (3358 such shots) and the new one (3339), so the fingerprint does not distinguish the two banks.
