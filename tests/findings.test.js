@@ -38,7 +38,7 @@ test('findingCards on the real data: F1, F2, F3, each number from the results fi
   const ionPhys = stage4.platforms['trapped-ion'].tauPhys.empirical.xMin;
   assert.deepEqual(numbersIn(cards[1].line), [p3(opt.lo), p3(opt.hi), p3(scPhys), p3(ionPhys)]);
   const b = stage4.platforms['trapped-ion'].budgetAtOptimum;
-  // Replaces p2 (toPrecision(2): 520) with p3 (formatNumber: 523) because the E17 audit allows
+  // Replaces p2 (toPrecision(2): 520) with p3 (formatNumber: 523) because the final audit allows
   // only formatNumber rounding when a sentence states no precision.
   assert.deepEqual(numbersIn(cards[2].line), [p3(b.readout / b.idle)]);
   // The bridge serves the same files: the page's default sources give the same cards.
@@ -61,7 +61,7 @@ test('findingCards: short titles and lines, F1 wording and note', () => {
   assert.equal(f1.note, POST_HOC_NOTE);
 });
 
-// Catches (E17 audit): fails if the F1 card stops naming the trapped ion (F1 is shown for the ion
+// Catches (final audit): fails if the F1 card stops naming the trapped ion (F1 is shown for the ion
 // only) or the held-out circuits (F1 is labelled out of sample), or if the F3 card's ratio and the
 // hero's trapped-ion Z "Why?" ratio print differently (the two were 520× and 523× at the audit).
 test('findingCards: F1 names the ion and the held-out circuits; F3 ratio as the hero prints it', () => {

@@ -212,7 +212,7 @@ test('invalid parameters throw an error naming the field', () => {
 // cannot hide a change in ion.js.
 const xor = (a, b) => a + b - 2 * a * b;
 const half = (x) => 0.5 * (1 - Math.exp(-x));
-// The card as before CC-A13: no T2_idle_us, no crosstalk fields.
+// The card as before the idle-error fields were added: no T2_idle_us, no crosstalk fields.
 const cardV1 = { ...card };
 delete cardV1.T2_idle_us;
 delete cardV1.crosstalk_rate_per_us;

@@ -97,7 +97,7 @@ test('step 2: naive graph needs two edges, learned graph one diagonal edge', () 
   assert.equal(learned.flip, 0);
 });
 
-// A53 review item 5. Catches: fails if step 2 presents the naive decoder's choice as what always
+// Catches: fails if step 2 presents the naive decoder's choice as what always
 // happens: for the diagonal pair of a fault on data 2 in every round there are exactly three
 // cheapest explanations, each of two errors costing 2 ln[(1 − p)/p] (8.75 at p = 0.0124), and
 // only one of them (data 3 and data 1 flips, through both boundaries) flips data 1. Also fails
@@ -130,7 +130,7 @@ test('step 2: the naive choice is a three-way tie, one of which flips data 1', (
   assert.equal(tieSentences(single, single.sets[0].flip).tie, false);
 });
 
-// A53 review item 6. Catches: fails if step 3 does not lead with the held-out test (V18,
+// Catches: fails if step 3 does not lead with the held-out test (V18,
 // holdout.json setting1) or misquotes it: at d = 5 the learned decoder made 37 logical errors of
 // 40 000 against the naive 70, beyond the intervals; at d = 3, 65 against 79 of 8 000, not
 // beyond them. Also fails if the in-sample label is lost.
@@ -210,7 +210,7 @@ test('comparisonSentence: factor, worse case and zero errors', () => {
   assert.match(comparisonSentence(row(5, 0)), /no logical error in 1000 shots/);
 });
 
-// ---- CC-B21 item 3: the soft-against-hard reversal leads the numbers of step 3 ----
+// ---- The soft-against-hard reversal leads the numbers of step 3 ----
 import { reversalNumbers, reversalText, reversalClause, REVERSAL } from '../src/ui/learnnoise.js';
 import stage2v2 from '../data/results/stage2_ion_v2b.json' with { type: 'json' };
 

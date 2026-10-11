@@ -1,5 +1,5 @@
 // Hero, three steps (UX1): the fixed copy and the sentences, with no DOM. Person A owns this
-// file and its test by agreement (DECISIONS E16, UX1 split); the panel that shows them is
+// file and its test by agreement (DECISIONS, UX1 split); the panel that shows them is
 // Person B's. Contract: the P1 prompts (P1-S and P1-H), unchanged.
 //
 // Step 1: the reader guesses a readout time; step 2: guessVerdict, overlapSentence and
@@ -35,7 +35,7 @@ const close = (a, b) => Math.abs(a - b) <= 1e-9 * Math.max(Math.abs(a), Math.abs
 
 // Where the guess sits against tau*_log's range [logLo, logHi] (bandInfo). An end of the
 // range counts as inside. "above" names no cause: past the range the ion loses to optical
-// pumping, not to idling (F3), and the superconducting qubit to idling (F2) (E17 audit).
+// pumping, not to idling (F3), and the superconducting qubit to idling (F2) (final audit).
 const VERDICTS = {
   inside: 'Your guess is inside the code’s best range.',
   below: 'Shorter than the code wants: the reading is still too noisy there.',
@@ -173,7 +173,7 @@ function settingDistances(n) {
 }
 const joinAnd = (xs) => (xs.length === 1 ? String(xs[0]) : `${xs.slice(0, -1).join(', ')} and ${xs[xs.length - 1]}`);
 
-// A logical error as a percentage, rounded as formatNumber rounds (E17 audit: not 2 figures).
+// A logical error as a percentage, rounded as formatNumber rounds (final audit: not 2 figures).
 const percent = (p) => formatNumber(p * 100);
 
 export function twistCaption(decoder, data) {

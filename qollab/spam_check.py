@@ -1,5 +1,5 @@
 # Signal to Syndrome: prepare-and-measure check of the simulator's measurement error (V19,
-# DECISIONS E13) (runs on Qollab).
+# DECISIONS) (runs on Qollab).
 #
 # Does the forte-1 noise model already contain state-preparation and measurement (SPAM)
 # error? Circuit A prepares 5 qubits in |0> and measures them; circuit B applies one X to each
@@ -17,7 +17,7 @@ NOISE_MODEL = "forte-1"  # "ideal" or "forte-1"
 PART = "AB"  # "AB" (one job, both circuits), or "A" / "B" alone
 N_QUBITS = 5
 SHOTS = 4000
-# One fixed sampler seed per noise model (DECISIONS D2), distinct from every seed in
+# One fixed sampler seed per noise model, distinct from every seed in
 # bank_generator.py: draws 13 and 14 of random.Random(20261010).randrange(1, 2**31), after
 # the 12 held-out bank seeds.
 SEEDS = {
@@ -57,13 +57,13 @@ def build_spam_circuit(part, n=N_QUBITS):
 
 
 def run_native(qc, shots, noise_model, seed):
-    """The native-gate recipe of DECISIONS D1, as in bank_generator.py. Uses Qollab's
+    """The native-gate recipe of DECISIONS, as in bank_generator.py. Uses Qollab's
     pre-existing `backend`."""
     if backend.options.get("noise_model") != "forte-1":  # noqa: F821 (supplied by Qollab)
         raise RuntimeError("The backend is not IonQ Forte 1. Pick IonQ Forte 1 in the "
                            "Select QPU dialog, then run again.")
     nb = backend.with_name(backend.name, gateset="native", noise_model=noise_model)  # noqa: F821
-    # The seed only takes effect through set_options (DECISIONS D2), never as a run() argument.
+    # The seed only takes effect through set_options, never as a run() argument.
     nb.set_options(noise_model=noise_model, sampler_seed=seed)
     qn = transpile(qc, backend=nb)
     native_ops = {str(k): int(v) for k, v in dict(qn.count_ops()).items()}

@@ -1,9 +1,9 @@
 // Live run: one fresh d = 3, r = 3, L0 experiment on the IonQ simulator, fed to level 4.
 // The circuit must be submitted in native gates or IonQ's optimiser removes the noise
-// (DECISIONS, platform facts and D4), so JavaScript does not build it: it calls Person A's
+// (DECISIONS, platform facts), so JavaScript does not build it: it calls Person A's
 // Python helper qollab/live.py through the module that tools/build.mjs imports on the
-// first line of main.js as globalThis.s2sLive (CLAUDE.md rule 3, probe P10, D11).
-// Without that module (liveRun off, the local preview, or D11 "does not work") the panel
+// first line of main.js as globalThis.s2sLive (probe P10).
+// Without that module (liveRun off, the local preview, or the live run "does not work") the panel
 // shows a note with a link to the bank-generator project instead of the button.
 // U7.12 (B50): the panel moves through the states idle, submitting, running (elapsed timer),
 // done and error (data-state on the panel); when done it sets the fresh shots' detector rate
@@ -21,7 +21,7 @@ export const LIVE_R = 3;
 export const LIVE_SHOTS = 200;
 export const BANK_GENERATOR_URL = 'https://qollab.xyz/u/SQuant/signal-to-syndrome-bank-genera';
 
-// Seeds are integers in 1..2^31 (DECISIONS D2); a new one per press, never the previous one.
+// Seeds are integers in 1..2^31; a new one per press, never the previous one.
 export function nextSeed(previous, now) {
   let s = now % 2 ** 31;
   if (s === 0) s = 1;
@@ -30,7 +30,7 @@ export function nextSeed(previous, now) {
 }
 
 // Binary-key counts from Qiskit (classical bit 0 is the rightmost character) to an
-// in-memory s2s-bank/1 bank for d = 3, r = 3, logical 0, with the fixed CLAUDE.md layout
+// in-memory s2s-bank/1 bank for d = 3, r = 3, logical 0, with the fixed layout
 // and hex keys; validated with validateBank before it is returned.
 export function countsToBank(counts, { seed, d = LIVE_D, r = LIVE_R, date = null } = {}) {
   const nClbits = (d - 1) * r + d;

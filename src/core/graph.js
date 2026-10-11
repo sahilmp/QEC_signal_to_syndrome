@@ -51,7 +51,7 @@ export function weightFromP(p) {
 }
 
 // Soft weight of a single readout: |llr|, capped at weightFromP(1e-12) = 27.63 so that it
-// equals weightFromP(pFromLlr(llr)) (CLAUDE.md edge-weight rule; perfect readout is finite).
+// equals weightFromP(pFromLlr(llr)) (perfect readout is finite).
 const W_MAX = Math.log((1 - P_MIN) / P_MIN);
 export function weightFromLlr(llr) {
   return Math.min(Math.abs(llr), W_MAX);

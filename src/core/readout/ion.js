@@ -51,7 +51,7 @@ function optionalField(params, name, fallback) {
 
 const QUAD_N = 128;
 
-// Idle physics for a wait of tau (CLAUDE.md, "Idle errors"): the Z-basis memory sees T1, the
+// Idle physics for a wait of tau: the Z-basis memory sees T1, the
 // X-basis memory sees T2; crosstalk (detection light scattered onto a data ion) depolarizes
 // it at rate gXt in either basis. The parts combine with xorP.
 export function createIonReadout(params, tau, { crosstalkRate } = {}) {

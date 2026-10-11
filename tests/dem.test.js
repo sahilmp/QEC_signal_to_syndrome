@@ -40,7 +40,7 @@ function synth(d, r, rates, nShots, rng) {
   return out;
 }
 
-const se = (p, N) => Math.sqrt(p / N); // SE of a pair rate (prompt CC-A10)
+const se = (p, N) => Math.sqrt(p / N); // SE of a pair rate
 const RATES = { space: 0.008, spaceBoundary: 0.006, time: 0.010, diag: 0.009 };
 const D5 = 5;
 const R5 = 5;

@@ -265,7 +265,7 @@ test('the phase-flip memory swaps every results source to its *_x counterpart', 
   }
   for (const p of PLATFORMS) {
     assert.deepEqual(resultsFor(p, 'X'), headlineResults(xFiles[p.id]), `${p.id} curves`);
-    // CC-B21 item 1 (U3 row 31): Levels 3-4 show the learned decoder (was naiveResults while the SP5 cut held).
+    // U3 row 31: Levels 3-4 show the learned decoder (was naiveResults while the SP5 cut held).
     assert.ok(resultsFor(p, 'X').series.every((s) => s.decoder === 'learned'), `${p.id} learned curves`);
     assert.equal(budgetFor(p, 'X'), xFiles[p.id], `${p.id} budget`);
     assert.equal(budgetFor(p, 'Z'), zFiles[p.id]);

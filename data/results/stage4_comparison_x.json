@@ -2280,7 +2280,7 @@
         },
         "gate_layers_per_round": {
           "value": "2*(d-1)",
-          "source": "conservative choice: the 2(d-1) CNOTs of a round run one after another on the single chain (no published statement found that IonQ Forte runs two-qubit gates on disjoint pairs in parallel; simultaneous entangling gates in one chain are demonstrated only in research systems). See DECISIONS E8"
+          "source": "conservative choice: the 2(d-1) CNOTs of a round run one after another on the single chain (no published statement found that IonQ Forte runs two-qubit gates on disjoint pairs in parallel; simultaneous entangling gates in one chain are demonstrated only in research systems)."
         },
         "reset_us": {
           "value": 50,
@@ -2303,12 +2303,12 @@
       }
     },
     "definitions": {
-      "cycleTime": "layers * two_qubit_gate_us + tau + reset_us; layers = gate_layers_per_round (a number, or \"2*(d-1)\" evaluated at d: sequential ion gates, DECISIONS E8)",
+      "cycleTime": "layers * two_qubit_gate_us + tau + reset_us; layers = gate_layers_per_round (a number, or \"2*(d-1)\" evaluated at d: sequential ion gates)",
       "roundsPerSecond": "1e6 / cycleTime(us)",
       "tradeoff": "per d and mode, at every grid tau: roundsPerSecond and perRound = 0.5 (1 - (1 - 2 pL)^(1/r)); lo/hi are perRound of the Wilson bounds, loCluster/hiCluster of the cluster bounds",
       "perRound": "0.5 (1 - (1 - 2 pL)^(1/r)) at tau*_log; pL and its bounds interpolated linearly in ln tau between grid points (the best grid point when tau*_log is at the grid edge)",
       "perMicrosecond": "perRound / cycleTime at tau*_log and d",
-      "intervals": "lo/hi: Wilson 95% through the transform; loCluster/hiCluster: cluster bootstrap over quantum shots (B = 500, CC-A19) through the same transform. Cluster intervals are the honest ones where gate faults dominate; Wilson is kept beside them",
+      "intervals": "lo/hi: Wilson 95% through the transform; loCluster/hiCluster: cluster bootstrap over quantum shots (B = 500) through the same transform. Cluster intervals are the honest ones where gate faults dominate; Wilson is kept beside them",
       "budgetAtOptimum": "Stage 2/3 budget arrays interpolated in ln tau at tau*_log (d = 3, hard, learned); gate is the mean of the learned edge classes",
       "breakEven": "first sign change of pL(d=5) - pL(d=3) in tau order, x axis averageAssignmentError() (belief; empiricalAxis: the F1 empirical curve); interval from the crossings of hi5 - lo3 and lo5 - hi3 (Wilson) on the same grid segment"
     }

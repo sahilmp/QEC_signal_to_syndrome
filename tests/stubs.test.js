@@ -140,7 +140,7 @@ const hasAll = (obj, fields, where) => {
 };
 
 // Catches: a fixture file missing "fixture": true (so the release check could not
-// tell it from real data), or one that drops a field the CLAUDE.md results format
+// tell it from real data), or one that drops a field the results format
 // or the checklist parameter-card template requires, or whose arrays do not line up
 // with the x grid.
 test('every fixture file has its required fields and "fixture": true', () => {
@@ -228,7 +228,7 @@ test('fixture bank detector rates show the specified noise level', () => {
   }
 });
 
-// ---- v2 fixtures (team checklist Appendix U4, U5), bridges and flags (CC-B12).
+// ---- v2 fixtures (team checklist Appendix U4, U5), bridges and flags.
 
 const V2_FILES = [
   'dem_forte1_v2.json', 'stage1_flat_v2.json', 'stage2_ion_v2.json', 'stage3_sc_v2.json',

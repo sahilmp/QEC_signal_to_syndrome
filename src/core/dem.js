@@ -1,6 +1,6 @@
 // Learned detector error model: per-class edge rates from detector correlations.
 //
-// Edge classes (CLAUDE.md, "Decoding graph"), for detector (k, j) with index k*(d-1) + j,
+// Edge classes, for detector (k, j) with index k*(d-1) + j,
 // layers k = 0..r and checks j = 0..d-2:
 //   space:         (k, j)-(k, j+1), a flip of data qubit j+1 in layer k (layers 0..r);
 //   spaceBoundary: data qubit 0 joins (k, 0) to the boundary, data qubit d-1 joins (k, d-2);

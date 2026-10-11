@@ -3,14 +3,14 @@
 #
 # How to use: pick IonQ Forte 1 in the Select QPU dialog, set CONFIG below to one
 # configuration name, run, then copy everything from BEGIN_BANK to END_BANK out of the
-# console (DECISIONS D7) and assemble it locally with tools/assemble_bank.mjs.
+# console and assemble it locally with tools/assemble_bank.mjs.
 # Qollab allows one job per code run, so each configuration is its own run.
 
 # ---- Settings: CONFIG is the only line to edit between runs -----------------------------
 CONFIG = "rep_d3_r1_L0"
-SHOTS = 4000  # DECISIONS D8
+SHOTS = 4000
 V4_SHOTS = 100  # V4 injection batch, run on the "ideal" noise model
-# One fixed sampler seed per configuration (DECISIONS D2), distinct, in 1..2^31.
+# One fixed sampler seed per configuration, distinct, in 1..2^31.
 SEEDS = {
     "rep_d3_r1_L0": 1012386106,
     "rep_d3_r1_L1": 756216899,
@@ -59,7 +59,7 @@ SEEDS = {
     "v13_d3_r3_i0_k0": 1053593574,
     "v13_d3_r3_i1_k1": 2040420216,
     "v13_d3_r3_i2_k2": 1511624236,
-    # Held-out banks (V18, DECISIONS E11): same circuit, gate set and noise model as the
+    # Held-out banks (V18): same circuit, gate set and noise model as the
     # bank without the _h<n> suffix; only the seed differs. Generated once by
     #   g = random.Random(20261010); g.randrange(1, 2**31) per name, in this order,
     #   skipping any value already in SEEDS (none was skipped),
@@ -89,7 +89,7 @@ from qiskit.providers.jobstatus import JobStatus
 
 CHUNK = 4000
 POLL_SECONDS = 5
-# CLAUDE.md: n_clbits <= 29, so the JavaScript side's parseInt(hex, 16) is exact.
+# n_clbits <= 29, so the JavaScript side's parseInt(hex, 16) is exact.
 MAX_CLBITS = 29
 
 
@@ -102,7 +102,7 @@ def _check_clbits(d, r):
 
 def build_memory_circuit(d, r, logical, inject=None, basis="Z", inject_pauli="X"):
     """Fresh-ancilla repetition-code memory: data qubits 0..d-1, then one ancilla per
-    check per round. Returns (circuit, layout) with the CLAUDE.md classical-bit layout:
+    check per round. Returns (circuit, layout) with the classical-bit layout:
     check j of round k -> bit k*(d-1) + j, data qubit i -> bit (d-1)*r + i.
     basis "Z" (bit-flip memory) measures Z_j Z_{j+1}; basis "X" (phase-flip memory) prepares
     |+...+> or |-...->, measures X_j X_{j+1} and reads the data out in the X basis.
@@ -214,19 +214,19 @@ for _i, _k in [(0, 0), (1, 1), (2, 2)]:
     _n = f"v13_d3_r3_i{_i}_k{_k}"
     V13_BATCH[_n] = _parse_name(_n)
 
-# Held-out banks (V18, DECISIONS E11), in the order they are run on Qollab: d = 5 L0 and L1
+# Held-out banks (V18), in the order they are run on Qollab: d = 5 L0 and L1
 # interleaved by h, then d = 3, so a run cut short still has matched L0/L1 pairs.
 HELDOUT_ORDER = [f"rep_d5_r3_L{_L}_h{_h}" for _h in range(1, 6) for _L in (0, 1)] +     ["rep_d3_r3_L0_h1", "rep_d3_r3_L1_h1"]
 HELDOUT = {_n: _parse_name(_n) for _n in HELDOUT_ORDER}
 
 
 def run_native(qc, shots, noise_model, seed):
-    """The native-gate recipe of DECISIONS D1. Uses Qollab's pre-existing `backend`."""
+    """The native-gate recipe of DECISIONS. Uses Qollab's pre-existing `backend`."""
     if backend.options.get("noise_model") != "forte-1":  # noqa: F821 (supplied by Qollab)
         raise RuntimeError("The backend is not IonQ Forte 1. Pick IonQ Forte 1 in the "
                            "Select QPU dialog, then run again.")
     nb = backend.with_name(backend.name, gateset="native", noise_model=noise_model)  # noqa: F821
-    # The seed only takes effect through set_options (DECISIONS D2), never as a run() argument.
+    # The seed only takes effect through set_options, never as a run() argument.
     nb.set_options(noise_model=noise_model, sampler_seed=seed)
     qn = transpile(qc, backend=nb)
     native_ops = {str(k): int(v) for k, v in dict(qn.count_ops()).items()}
@@ -319,7 +319,7 @@ def to_bank(d, r, logical, layout, raw_counts, *, backend_name, noise_model, sam
 
 
 def emit(bank, name):
-    """Print the bank between BEGIN_BANK and END_BANK in 4000-character chunks (DECISIONS D7)."""
+    """Print the bank between BEGIN_BANK and END_BANK in 4000-character chunks."""
     s = json.dumps(bank, sort_keys=True, separators=(",", ":"))
     chunks = [s[i:i + CHUNK] for i in range(0, len(s), CHUNK)] or [""]
     n = len(chunks)
@@ -333,9 +333,9 @@ def emit(bank, name):
 def _expected_duration(cfg):
     if cfg["noise_model"] == "ideal":
         return "usually under a minute (ideal simulator, few shots)"
-    # D3: about 6-8 min per 4000 shots at d=3, r=3 (12 CNOTs); scale by shots and CNOT count.
+    # About 6-8 min per 4000 shots at d=3, r=3 (12 CNOTs); scale by shots and CNOT count.
     scale = (cfg["shots"] / 4000) * (2 * (cfg["d"] - 1) * cfg["r"]) / 12
-    return f"about {max(1, round(6 * scale))}-{max(2, round(8 * scale))} min (D3, rough scaling)"
+    return f"about {max(1, round(6 * scale))}-{max(2, round(8 * scale))} min (rough scaling)"
 
 
 def main():

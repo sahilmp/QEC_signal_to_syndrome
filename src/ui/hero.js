@@ -40,7 +40,7 @@ const isNaive = (o) => o.decoder === undefined || o.decoder === 'naive';
 
 // The one decoder the hero shows, on both arms (team checklist U3 rows 14a and 31). null: the
 // learned series when the results contain it (else naive). The SP5 cut rule had set it to
-// "naive" after V12(b) failed (DECISIONS E4); DECISIONS, Person A, records "SP5 cut lifted
+// "naive" after V12(b) failed; DECISIONS, Person A, records "SP5 cut lifted
 // (V18 passed)" (Sun 11 Oct; data/results/holdout.json, setting1), so U3 row 31 sets it to null.
 export const HERO_DECODER = null;
 
@@ -49,7 +49,7 @@ export const HERO_DECODER = null;
 // learned series when the results contain it, else the naive one. A requested learned
 // series that is missing falls back to naive (the returned decoder says which was used).
 // Its interval is the cluster interval when the series carries one, else Wilson (interval:
-// "cluster" or "wilson"; CC-B21 item 2). The readout error's interval is Wilson.
+// "cluster" or "wilson"). The readout error's interval is Wilson.
 export function heroCurves(results, decoder = null) {
   const tau = results?.x?.values;
   if (!Array.isArray(tau) || tau.length === 0) throw new Error('the results have no readout-time grid');
@@ -122,8 +122,8 @@ export function bandInfo({ tauLog, tauPhys }, { grid = null } = {}) {
 }
 
 // The live sentence for the chosen tau, worded by where tau sits against tau*_log's 95%
-// interval [logLo, logHi] (see bandInfo), not against the readout's reliability (A53 review
-// item 4: in the phase-flip memory 20 µs was called "too short" although the readout there is
+// interval [logLo, logHi] (see bandInfo), not against the readout's reliability (note:
+// in the phase-flip memory 20 µs was called "too short" although the readout there is
 // within 4% of its best). Below the range: too short; above it: too long; inside it: at or near
 // the code's best. The shaded band between the range and tau*_phys keeps its own sentence
 // (U7.2). A tau exactly on an end of the range or of the band counts as inside.
@@ -150,7 +150,7 @@ export function liveSentence(tau, band) {
 }
 
 // The slider's starting index for one case: the grid point nearest tau*_log, else 0. The hero
-// returns to it whenever the platform or the basis changes (A53 review item 4).
+// returns to it whenever the platform or the basis changes.
 export function startIndex(curves, optima) {
   return optima.tauLog && Number.isFinite(optima.tauLog.xMin) ? snapIndex(curves.tau, optima.tauLog.xMin) : 0;
 }
@@ -185,7 +185,7 @@ function el(tag, attrs = {}, text = null) {
 export function mountHero(container, { goDeeper = null } = {}) {
   // The slider starts at the grid point nearest the current case's tau*_log and returns there
   // whenever the platform or the basis changes, so the status never describes another case's
-  // readout time (A53 review item 4: the bit-flip 20 µs was kept in the phase-flip memory).
+  // readout time (the bit-flip 20 µs was kept in the phase-flip memory).
   let basis = currentBasis();
   const buildViews = () => new Map(HERO_PLATFORMS.map((p) => {
     const results = heroResults(p, basis);

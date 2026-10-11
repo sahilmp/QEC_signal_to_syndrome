@@ -301,7 +301,7 @@ export function mountLevel4(container) {
     const res = resultsFor(plat);
     const mem = memoryTag();
     const dec = decoderLabel(res);
-    // Intervals: the cluster bounds when the results carry them, else Wilson (CC-B21 item 2).
+    // Intervals: the cluster bounds when the results carry them, else Wilson.
     const shown = res.series.filter((s) => s.d === dSel).sort((a, b) => (a.mode === b.mode ? 0 : a.mode === 'hard' ? -1 : 1));
     const ivs = shown.map((s) => intervalOf(s));
     return {

@@ -1706,7 +1706,7 @@
         "planned": 5
       }
     },
-    "banksUsedNote": "all planned held-out banks used (DECISIONS E11)",
+    "banksUsedNote": "all planned held-out banks used",
     "training": "naive pGate = estimatePGate of the original L0 + L1 banks pooled; learned rates = ratesFromBanks(original L0, L1); no held-out bank feeds a rate",
     "learnedRates": {
       "d3_r3": {

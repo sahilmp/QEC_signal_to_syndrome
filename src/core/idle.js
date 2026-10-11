@@ -1,4 +1,4 @@
-// Idle errors on data qubits during readout of the ancillas (CLAUDE.md, Conventions).
+// Idle errors on data qubits during readout of the ancillas.
 // An X on data qubit i after round k flips m[k'][i-1] and m[k'][i] (checks that exist)
 // for every later round k' > k, and flips the final data readout x[i].
 

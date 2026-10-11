@@ -186,7 +186,7 @@ export function createScReadout(params, tau) {
   }
   const avgError = 0.5 * (err0 + err1);
 
-  // Idle physics for a wait of tau (CLAUDE.md, "Idle errors"): T1 in the Z basis, T2 in the
+  // Idle physics for a wait of tau: T1 in the Z basis, T2 in the
   // X basis, no crosstalk.
   const pT1 = -0.5 * Math.expm1(-tau / t1);
   const pT2 = -0.5 * Math.expm1(-tau / t2);

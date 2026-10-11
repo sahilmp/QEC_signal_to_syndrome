@@ -1,4 +1,4 @@
-// Assemble shot banks copied out of the Qollab console (DECISIONS D7).
+// Assemble shot banks copied out of the Qollab console.
 //
 //   node tools/assemble_bank.mjs <file or folder>... [--out <dir>]   (default data/banks)
 //
@@ -7,7 +7,7 @@
 // (shots, n_keys, counts sha256, s2s-bank/1 contract) and written to <out>/<name>.json.
 // Nothing is written unless every block passes; any mismatch exits with status 1.
 //
-// Held-out banks (names ending _h<n>, V18, DECISIONS E11) are written to <out>/heldout/,
+// Held-out banks (names ending _h<n>, V18) are written to <out>/heldout/,
 // never to <out>/ itself, so nothing that reads data/banks/*.json picks them up. Their raw
 // console text belongs in data/raw/heldout/.
 

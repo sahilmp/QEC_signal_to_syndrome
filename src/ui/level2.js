@@ -186,7 +186,7 @@ export function mountLevel2(container) {
   container.appendChild(live);
 
   // The learned decoder's curves (headlineResults), with the cluster intervals when the file
-  // carries them, else Wilson (CC-B21 item 2); the live estimate is a Wilson interval.
+  // carries them, else Wilson; the live estimate is a Wilson interval.
   const res1 = headlineResults(stage1);
   const hard1 = res1.series.filter((s) => s.mode === 'hard' && [3, 5, 7].includes(s.d)).sort((a, b) => a.d - b.d);
   const ivs = hard1.map((s) => intervalOf(s));

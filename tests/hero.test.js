@@ -7,7 +7,7 @@ import {
 import { findMinimum } from '../src/core/optimum.js';
 import { stage4v2 as stage4 } from '../src/ui/bridge_data.js';
 // A v1-format superconducting Stage 3 file (no decoder field, no tauPhysEmpirical). The real
-// data/results/stage3_sc.json is a v2 file since Person A's A48 rerun (handoff N6).
+// data/results/stage3_sc.json is a v2 file since Person A's v2 rerun (handoff N6).
 import stage3v1 from '../data/fixtures/stage3_sc.json' with { type: 'json' };
 
 // Synthetic v2 results: tau*_log (learned) = 2 [1.5, 2.5], tau*_phys (empirical) = 5, so
@@ -36,7 +36,7 @@ const band = bandInfo(optima);
 // tau*_log = 2 with interval [1.5, 2.5], tau*_phys = 5. tau = 1 (below the interval) is "too
 // short"; tau = 2 (inside the interval) is the code's best range; tau = 3 (past the interval,
 // inside the band) and tau = 5 (exactly on tau*_phys) are "between"; tau = 10 (one grid step
-// above) is "too long". A53 review item 4 moved the "too short" boundary from min(optima) to
+// above) is "too long". The authors moved the "too short" boundary from min(optima) to
 // the interval's lower end and reworded it (it used to blame the readout's reliability), and
 // gave the interval itself its own sentence; the "between" and "too long" sentences are as before.
 test('live sentence below, inside and above the tau*_log interval, and in the band', () => {
@@ -55,7 +55,7 @@ test('live sentence below, inside and above the tau*_log interval, and in the ba
   assert.equal(liveSentence(1.5, band), 'At 1.5 µs you are at or near the code\'s best readout time (τ*_log = 2 µs, 95% interval 1.5 µs to 2.5 µs).');
 });
 
-// A53 review item 4. Catches: fails if the phase-flip hero calls a readout time inside
+// Catches: fails if the phase-flip hero calls a readout time inside
 // tau*_log's interval "too short" (the trapped-ion X case: tau*_log = 31.6 µs, interval 15.9
 // to 52.0 µs, tau*_phys = 23 µs, so 20 µs lies inside it), or if the slider does not start at
 // the case's own tau*_log on the real results. Non-vacuous: 10 µs, one grid step below 15.9 µs
@@ -197,8 +197,8 @@ test('v2 file without a learned series: explicit naive series', () => {
 });
 
 // Replaces the test "SP5 cut: HERO_DECODER is naive …", because the decision changed: DECISIONS
-// (Person A) records "SP5 cut lifted (V18 passed)", so U3 row 31 sets HERO_DECODER to null
-// (CC-B21 item 4). Catches: fails if the hero still defaults to the naive decoder after the
+// (Person A) records "SP5 cut lifted (V18 passed)", so U3 row 31 sets HERO_DECODER to null.
+// Catches: fails if the hero still defaults to the naive decoder after the
 // lift, if the default does not pick the learned series and the learned tau_log when the results
 // contain them, if an explicit "naive" request no longer returns the naive series and tau_log,
 // or if an unknown decoder name is accepted silently. Non-vacuous: the synthetic results hold
@@ -217,7 +217,7 @@ test('SP5 cut lifted: HERO_DECODER is null (learned); an explicit "naive" reques
 });
 
 // Replaces the test "SP5 cut: both hero arms use the same decoder …", because the decision
-// changed (see above; CC-B21 item 4). Catches: fails if the two arms of the real hero data end
+// changed (see above). Catches: fails if the two arms of the real hero data end
 // up on different decoders (the K2 gate: the same decoder on both arms), if either arm is not on
 // the learned decoder, or if the hero's tau*_log differs from Stage 4's (ion 23.0 µs,
 // superconducting 0.710 µs, d = 3, hard) or its superconducting tau*_phys from 0.910 µs (the
@@ -240,7 +240,7 @@ test('SP5 cut lifted: both hero arms use the learned decoder and Stage 4\'s opti
   assert.equal(s3(got[1].o.tauPhys.xMin), s3(stage4.platforms.superconducting.tauPhys.empirical.xMin));
 });
 
-// CC-B21 item 2. Catches: fails if the hero's logical-error bars are the Wilson ones when the
+// Catches: fails if the hero's logical-error bars are the Wilson ones when the
 // series carries cluster intervals, or if a series without them loses its Wilson bars.
 test('curves: cluster interval when the series has one, Wilson otherwise', () => {
   const withCluster = {

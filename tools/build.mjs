@@ -1,4 +1,4 @@
-// Build script for dist/qollab/ (CLAUDE.md rule 3; DECISIONS D5, D9).
+// Build script for dist/qollab/.
 // dist/qollab/main.js   : src/ui/main.js bundled by esbuild (IIFE, minified, JSON embedded)
 // dist/qollab/main.css  : src/ui/tokens.css followed by src/ui/style.css
 // dist/qollab/index.html: body fragment from src/ui/index.template.html, no script or link tags
@@ -34,9 +34,9 @@ const result = await build({
   logLevel: 'warning',
 });
 let js = result.outputFiles[0].text;
-// CLAUDE.md rule 3: with liveRun on, main.js begins with the single import line for the
+// With liveRun on, main.js begins with the single import line for the
 // Python helper. Module name 'live': Qollab's upload takes files only, no folders, so
-// live.py sits at the top level of the main project (DECISIONS D11).
+// live.py sits at the top level of the main project.
 const LIVE_MODULE = 'live';
 if (FEATURES.liveRun === true) {
   js = `import * as s2sLive from '${LIVE_MODULE}'; globalThis.s2sLive = s2sLive;\n${js}`;
@@ -47,7 +47,7 @@ writeFileSync(join(qollabDir, 'main.js'), js);
 const css = `${readFileSync(p('src', 'ui', 'tokens.css'), 'utf8')}\n${readFileSync(p('src', 'ui', 'style.css'), 'utf8')}`;
 writeFileSync(join(qollabDir, 'main.css'), css);
 
-// 3. Body fragment (D9: Qollab strips <html>, <head>, <body> and does not run <script>).
+// 3. Body fragment (Qollab strips <html>, <head>, <body> and does not run <script>).
 const template = readFileSync(p('src', 'ui', 'index.template.html'), 'utf8');
 const fragment = template.replaceAll('{{VERSION}}', pkg.version);
 if (/<\/?(html|head|body|script|link|style)\b/i.test(fragment)) {
@@ -90,4 +90,4 @@ for (const f of outputs) {
   console.log(`  ${relative(root, f).replaceAll('\\', '/').padEnd(26)} ${String(statSync(f).size).padStart(9)} bytes`);
 }
 const d5 = statSync(join(qollabDir, 'main.js')).size + statSync(join(qollabDir, 'index.html')).size;
-console.log(`  main.js + index.html: ${d5} bytes (limit 1900000, DECISIONS D5)`);
+console.log(`  main.js + index.html: ${d5} bytes (limit 1900000)`);

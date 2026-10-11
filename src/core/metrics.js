@@ -40,7 +40,7 @@ function cardNumber(card, name) {
 }
 
 // Two-qubit gate layers per round: a number, or the one accepted expression "2*(d-1)" (the
-// 2(d - 1) CNOTs of a repetition-code round run one after another; DECISIONS E8), which
+// 2(d - 1) CNOTs of a repetition-code round run one after another), which
 // needs the distance d. Any other expression throws: the card is data, never evaluated code.
 const SEQUENTIAL_LAYERS = '2*(d-1)';
 function gateLayers(card, d) {

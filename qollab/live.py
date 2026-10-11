@@ -1,7 +1,7 @@
-# Signal to Syndrome: live-run helper for the main Qollab project (DECISIONS D11).
+# Signal to Syndrome: live-run helper for the main Qollab project.
 #
 # Uploaded alone as live.py at the top level of the main project (Qollab's upload takes no
-# folders, DECISIONS D11), next to index.html, main.css and main.js; main.js loads it
+# folders), next to index.html, main.css and main.js; main.js loads it
 # with `import * as s2sLive from 'live'` and calls
 # run_live.callPromising(backend, shots, seed). Standalone on purpose: it must not import
 # bank_generator, which is not uploaded to the main project.
@@ -35,14 +35,14 @@ def live_circuit():
 
 
 def run_live(backend, shots=200, seed=7):
-    """Run live_circuit() with the native-gate recipe of DECISIONS D1 on Qollab's `backend`
+    """Run live_circuit() with the native-gate recipe of DECISIONS on Qollab's `backend`
     (IonQ Forte 1, noise model "forte-1") and return the counts as a plain dict of
     binary-string keys to int."""
     if backend.options.get("noise_model") != "forte-1":
         raise RuntimeError("The backend is not IonQ Forte 1. Pick IonQ Forte 1 in the "
                            "Select QPU dialog, then run again.")
     nb = backend.with_name(backend.name, gateset="native", noise_model="forte-1")
-    # The seed only takes effect through set_options (DECISIONS D2), never as a run() argument.
+    # The seed only takes effect through set_options, never as a run() argument.
     nb.set_options(noise_model="forte-1", sampler_seed=int(seed))
     job = nb.run(transpile(live_circuit(), backend=nb), shots=int(shots))
     return {str(k): int(v) for k, v in job.result().get_counts().items()}

@@ -42,12 +42,12 @@ export const PLATFORMS = [
   { id: 'superconducting', label: 'Superconducting', results: naiveResults(stage3), params: paramsSc, tauName: 'Integration time' },
 ];
 // tau_phys as in level 3: the superconducting value comes from the simulated assignment error,
-// because the belief model ignores ring-up (DECISIONS, A28 item 2).
+// because the belief model ignores ring-up (DECISIONS).
 export const physOf = (p) => physicalOptimum(p.results, {
   physFromEmpirical: LEVEL3_PLATFORMS.find((q) => q.id === p.id)?.physFromEmpirical === true,
 });
 
-// Stage 4 v2 reports the learned decoder (CC-A15). The per-µs curves and the "not resolved"
+// Stage 4 v2 reports the learned decoder. The per-µs curves and the "not resolved"
 // rule take the same decoder from the stage 2 and 3 files (headlineResults, level3.js, shared
 // with Levels 2-4 and the hero since U3 row 31); a file without learned series keeps its naive ones.
 export { headlineResults };
@@ -85,8 +85,8 @@ const METRICS = [
   { id: 'perMicrosecond', label: 'Per microsecond', yLabel: 'Logical error per µs' },
 ];
 // [id, plan statement, verdict from the full-statistics runs]. The verdicts are Person A's
-// wording in docs/notes_results.md, "Verdicts (A28)"; the automated stage-4 rules are
-// stricter or weaker in places, so both are shown (DECISIONS, A28 item 4).
+// wording in docs/notes_results.md, "Verdicts"; the automated stage-4 rules are
+// stricter or weaker in places, so both are shown (DECISIONS).
 const HYPOTHESES = [
   ['C1', 'Superconducting readout has an idle-driven interior optimum below τ_phys; the ion has none.',
     'Held at d = 3 and 5; undetermined at d = 7.'],
@@ -97,14 +97,14 @@ const HYPOTHESES = [
   ['C4', 'The break-even assignment error (where d = 5 beats d = 3) is similar for both platforms.',
     'Refuted on the empirical ε̄ axis; undetermined on the belief axis.'],
 ];
-// Person A's caveat for the sensitivity table (DECISIONS, A28 item 4).
+// Person A's caveat for the sensitivity table (DECISIONS).
 export const SENSITIVITY_NOTE = 'Rows rerun at reduced statistics (R = 1, ≤ 1000 shots per bank, no bootstrap); compare with the baseline row. '
   + 'The C1 ion “flips” comes from an idle threshold of 1e-6, crossed between 20 and 30 µs, not from an idle-driven minimum; '
   + 'C2 “holds” reflects too few shots to resolve the ion loss.';
 export const SENSITIVITY_NOTE_V2 = 'Rows rerun at reduced statistics (R = 1, ≤ 1000 shots per bank, no bootstrap); compare with the baseline row.';
 export { MIN_ERRORS_RESOLVED, errorsAtMinimum, isResolved };
 // Why the automated stage-4 rules disagree with the full-statistics verdicts
-// (docs/notes_results.md, "Verdicts (A28)", C1 and C4).
+// (docs/notes_results.md, "Verdicts", C1 and C4).
 export const AUTOMATED_NOTE = 'The automated rules are stricter than the plan in places. C1 “flips” because the ion’s idle flip probability '
   + 'passes 1e-6 between 20 and 30 µs, although it never drives a minimum (at most 2.5×10⁻⁵, about 20× below the readout error). '
   + 'C4 is “undetermined” on the readout model’s ε̄ axis, where the superconducting grid only reaches ε̄ = 0.166; on the simulated axis '
@@ -180,7 +180,7 @@ function radioGroup(name, legend, options, selected, onChange) {
 }
 
 // Numbers in tables: three significant figures; below 0.01 or from 1000 on, a mantissa
-// times a power of ten with a superscript exponent (A28 item 6). { text, exp? }.
+// times a power of ten with a superscript exponent. { text, exp? }.
 export function sig3(v) {
   if (!Number.isFinite(v)) return { text: '—' };
   if (v === 0) return { text: '0' };
@@ -247,7 +247,7 @@ export function chartOptions(p, mode, metric, src = SRC_V1) {
     const e = perRoundFromTotal(pL, r);
     return metric === 'perRound' ? e : e / cycleTimeUs(p.id, tau, d, src.paramsCycle);
   };
-  // Intervals: the cluster bounds when the results carry them, else Wilson (CC-B21 item 2),
+  // Intervals: the cluster bounds when the results carry them, else Wilson,
   // converted with the same formula as the values.
   const kinds = [];
   const series = res.series.filter((s) => s.mode === mode).sort((a, b) => a.d - b.d).map((s) => {
@@ -269,7 +269,7 @@ export function chartOptions(p, mode, metric, src = SRC_V1) {
   const tl = stage4TauLog(src, p, mode);
   const vals = s4?.[metric]?.[mode] || [];
   // Each stage-4 point takes the shape and colour of its distance's series, drawn open, so
-  // the legend tells them apart (A28 item 6, CC-B10).
+  // the legend tells them apart.
   const seriesDs = res.series.filter((s) => s.mode === mode).map((s) => s.d).sort((a, b) => a - b);
   for (const t of [...tl].sort((a, b) => a.d - b.d)) {
     const v = vals.find((u) => u.d === t.d);
@@ -423,7 +423,7 @@ function sensitivityTable(src = SRC_V1) {
   wrap.appendChild(table);
   const box = el('div');
   // The v1 caveat on the C1 ion threshold and C2 belongs to the v1 sweep; v2 keeps only the
-  // reduced-statistics sentence, which CC-A15 reuses.
+  // reduced-statistics sentence, which Stage 4 v2 reuses.
   const note = el('p', { class: 'hint' }, src.v2 ? SENSITIVITY_NOTE_V2 : SENSITIVITY_NOTE);
   box.append(FEATURES.uxV2 === true ? explainMore([note]) : note, wrap);
   return box;
@@ -437,7 +437,7 @@ export function sensitivityCounts(rows, c) {
   return rows.length ? `${parts.join(', ')} (of ${rows.length})` : '—';
 }
 // The "Sensitivity rows" column of the v2 verdict table: the counts when some sensitivity row
-// carries the conclusion, "—" when none does (the final rows carry no verdicts; CC-A22).
+// carries the conclusion, "—" when none does (the final rows carry no verdicts).
 export const sensitivityColumn = (rows, id) => ((rows || []).some((s) => id in s) ? sensitivityCounts(rows, id) : '—');
 
 // The four hypotheses with the full-statistics verdict beside the automated stage-4 one.
@@ -486,7 +486,7 @@ function verdictTable(src = SRC_V1) {
   return box;
 }
 
-// Unit of a parameter-card value, from the suffix of its name (CLAUDE.md, Units).
+// Unit of a parameter-card value, from the suffix of its name.
 export function unitOf(name) {
   if (/_per_us$/.test(name)) return /^R_/.test(name) ? 'counts/µs' : '/µs';
   if (/_us$/.test(name)) return 'µs';
@@ -535,7 +535,7 @@ function cardTable(title, card) {
         cell.appendChild(el('strong', { class: 'unsourced' }, 'UNSOURCED'));
         cell.append(' ');
       }
-      // A source that itself starts with "UNSOURCED" drops that word after the badge (A28 item 6).
+      // A source that itself starts with "UNSOURCED" drops that word after the badge.
       const text = typeof r.source === 'string' ? r.source.trim().replace(/^UNSOURCED\b\s*/i, '') : '';
       cell.append(text !== '' ? text : 'no source given');
     }
@@ -687,7 +687,7 @@ export function tradeoffOptions(mode, src = SRC_V2) {
       if (!c?.tau?.length) continue;
       const order = c.tau.map((_, i) => i).sort((a, b) => c.tau[a] - c.tau[b]);
       const pick = (arr) => (Array.isArray(arr) ? order.map((i) => arr[i]) : undefined);
-      // Cluster bounds when the curve carries them, else Wilson (CC-B21 item 2).
+      // Cluster bounds when the curve carries them, else Wilson.
       const civ = intervalOf(c);
       kinds.push({ what: 'Curves', kind: civ.kind });
       series.push({
@@ -724,7 +724,7 @@ export function tradeoffOptions(mode, src = SRC_V2) {
 export const BUDGET_SEGMENTS = [
   { key: 'readout', name: 'Readout', color: 'var(--b-readout)' },
   { key: 'idle', name: 'Idle', color: 'var(--b-idle)' },
-  // The superconducting arm has no crosstalk by design (always 0); the name says so (A53 review item 13).
+  // The superconducting arm has no crosstalk by design (always 0); the name says so.
   { key: 'crosstalk', name: 'Crosstalk (trapped ion only)', color: 'var(--b-xt)' },
   { key: 'gate', name: 'Gate', color: 'var(--b-gate)' },
 ];
@@ -868,7 +868,7 @@ export function findingLines(n) {
   // not named, so the line reads the same in either memory of the page. The paired count (soft
   // minus hard, paired cluster interval above 0) leads and the Wilson count stands beside it;
   // an entry without a paired count is left out, never quoted by Wilson alone (team checklist
-  // 2.1; E17 audit).
+  // 2.1; final audit).
   const ins = n.inSample;
   if (ins && typeof ins === 'object') {
     const by = new Map();
@@ -938,7 +938,7 @@ function findingsList(src) {
 // arm when the parameter is scaled by 0.5 and by 2. The change is the row's effect minus the
 // baseline's (sensitivityBaseline.effect, the same reduced statistics); parameters are sorted
 // by their largest absolute change.
-// Readable names of the sensitivity parameters (A53 review item 7: the raw card keys were shown);
+// Readable names of the sensitivity parameters (the raw card keys were shown);
 // an unknown key is shown as it is.
 export const PARAM_NAMES = {
   R_bright_per_us: 'bright count rate', R_dark_per_us: 'dark count rate',
@@ -952,7 +952,7 @@ const paramName = (k) => PARAM_NAMES[k] ?? k;
 const ownerLabel = (src, id) => src.platforms.find((p) => p.id === id)?.label ?? id;
 
 // Tornado rows: each parameter belongs to one arm, and the other arm's bars are zero by
-// construction, so only the owning arm's bars are drawn (A53 review item 7).
+// construction, so only the owning arm's bars are drawn.
 export function tornadoRows(src = SRC_V2) {
   const base = src.stage4.sensitivityBaseline?.effect?.perRound_d3_hard || {};
   const armIndex = (id) => src.platforms.findIndex((p) => p.id === id);
@@ -982,8 +982,8 @@ export function tornadoRows(src = SRC_V2) {
   }
   return rows.sort((a, b) => b.maxAbs - a.maxAbs || a.label.localeCompare(b.label));
 }
-// Sensitivity rows without an effect (A53 review item 7: such rows were dropped silently). The
-// reason is the row's own note, else the T2 <= 2 T1 rule (CLAUDE.md, Idle errors) checked on the
+// Sensitivity rows without an effect (such rows were dropped silently). The
+// reason is the row's own note, else the T2 <= 2 T1 rule checked on the
 // arm's card with the scaled value ("T2 would exceed 2·T1"), else none. `status` is the cell
 // text of the tornado's values table, `text` the line in the list under the chart.
 const T_PAIRS = { T1_us: ['T1_us', 'T2_us'], T2_us: ['T1_us', 'T2_us'], T1_idle_us: ['T1_idle_us', 'T2_idle_us'], T2_idle_us: ['T1_idle_us', 'T2_idle_us'] };
@@ -1099,7 +1099,7 @@ function safeUpdate(chart, opts, what) {
   }
 }
 
-// A53 review item 1 (blocking): while a Stage 4 file is marked provisional, every place that
+// While a Stage 4 file is marked provisional, every place that
 // shows its verdicts or sensitivity rows carries a visible banner (icon and words, not colour
 // alone). It disappears by itself when the final file (provisional false or absent) lands.
 export const PROVISIONAL_TEXT = 'Provisional: these verdicts and sensitivity rows come from a preliminary run and may still change. '
@@ -1115,7 +1115,7 @@ function provisionalBanner(...stage4s) {
   return p;
 }
 
-// Notes in the phase-flip memory (A53 review item 8): the scoreboard already covers both
+// Notes in the phase-flip memory: the scoreboard already covers both
 // memories (C1 and C2 pool both bases; C6 and O4 compare them); only the sensitivity rows and
 // the comparison table below are bit-flip only.
 export const BASIS_NOTES = {
@@ -1183,7 +1183,7 @@ function mountLevel5v2(container) {
 
   container.appendChild(el('h3', {}, 'Scoreboard'));
   for (const n of [provisionalBanner(zSrc.stage4), xNote('scoreboard')]) if (n) container.appendChild(n);
-  // The findings (F1 first) above the hypotheses (CC-B21 item 5).
+  // The findings (F1 first) above the hypotheses.
   const findings = findingsList(zSrc);
   if (findings) container.append(el('h4', {}, 'Findings'), findings, el('h4', {}, 'Hypotheses and observations'));
   container.appendChild(scoreboard(zSrc));

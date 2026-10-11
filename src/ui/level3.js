@@ -67,10 +67,10 @@ export const decoderLabel = (results) => ((results?.series || []).some((s) => s.
 // The readout platforms of levels 3 and 4, each behind its FEATURES flag. The curves are the
 // learned decoder's (headlineResults) from the files Stage 4 uses: stage2v2 (v2b) for the ion,
 // stage3v2 (the dense grid) for the superconducting qubit, so Levels 3-5 and the hero quote the
-// same optima (CC-B21 item 1). The slider stays on the card's tau_grid_us; every grid point is
+// same optima. The slider stays on the card's tau_grid_us; every grid point is
 // a point of both results files (tests/level3.test.js). physFromEmpirical:
 // the belief model's tauPhys (results.optima) is not the simulated one, because the belief
-// model ignores resonator ring-up (DECISIONS, A28 item 2), so tau_phys is located on
+// model ignores resonator ring-up (DECISIONS), so tau_phys is located on
 // assignment.empirical instead and the belief value is quoted beside it.
 export const PLATFORMS = [
   {
@@ -173,13 +173,13 @@ export function tauGrid(platform = ION) {
   return grid.map(Number);
 }
 
-// Three significant figures are enough for every readout time on the page (A28 item 6).
+// Three significant figures are enough for every readout time on the page.
 export const formatTau = (tau) => `${Number(tau.toPrecision(3))} µs`;
 
 // A tau_log whose curve has fewer logical errors than this at its lowest grid point is
 // "not resolved": with k < 10 errors the relative standard error 1/sqrt(k) exceeds 30%, so
 // neighbouring grid points cannot be told apart (ion d = 7: 3 and 8 errors of 32 000;
-// docs/notes_results.md, Stage 2; DECISIONS, A28 item 5).
+// docs/notes_results.md, Stage 2; DECISIONS).
 export const MIN_ERRORS_RESOLVED = 10;
 
 // Logical errors at the lowest grid point of the results curve for (d, mode), or null.
@@ -211,8 +211,8 @@ export function defaultTauIndex(grid, target = 0.1, platform = ION) {
 }
 
 // tau_phys of a stage-2 or stage-3 results file: { xMin, atEdge, empirical, belief }, or null.
-// Always the simulated value where the file allows it, as the hero and C1 use (A53 review
-// item 9: the ion's model value 23.5 µs was shown beside the simulated 23.0 µs). With
+// Always the simulated value where the file allows it, as the hero and C1 use (note:
+// the ion's model value 23.5 µs was shown beside the simulated 23.0 µs). With
 // physFromEmpirical (see PLATFORMS) it is the minimum of assignment.empirical (log x), and
 // belief carries optima.tauPhys for comparison (the superconducting model ignores ring-up);
 // otherwise optima.tauPhysEmpirical (the same rule, stored by Person A's sweep), else
@@ -232,7 +232,7 @@ export function physicalOptimum(results, { physFromEmpirical = false } = {}) {
 const sig3 = (v) => formatNumber(Number(v.toPrecision(3)));
 
 // The assignment-error sentence under the slider. With physFromEmpirical the model ignores
-// ring-up, so its value can be far from what the IQ plot shows (A28 item 1); the simulated
+// ring-up, so its value can be far from what the IQ plot shows; the simulated
 // value from the results (assignment.empirical at this grid point) leads, and the model's
 // value and signal-to-noise ratio are labelled as such.
 export function assignmentText(plat, readout, tau) {
@@ -251,8 +251,8 @@ export function assignmentText(plat, readout, tau) {
     return `At τ = ${formatTau(tau)} the readout model (no ring-up) predicts an assignment error of ${sig3(eps)}${snrText}; `
       + 'the simulated value is only available at the grid points of the results.';
   }
-  // Trapped ion: the simulated value too, as the budget bar at the same tau quotes it (A53
-  // review item 10: the model's 0.0475 beside the budget's 0.048); the model only off the grid.
+  // Trapped ion: the simulated value too, as the budget bar at the same tau quotes it (note:
+  // the model's 0.0475 beside the budget's 0.048); the model only off the grid.
   if (a && i >= 0 && Number.isFinite(a.empirical?.[i])) {
     const ci = Number.isFinite(a.lo?.[i]) && Number.isFinite(a.hi?.[i]) ? ` (95% interval ${sig3(a.lo[i])} to ${sig3(a.hi[i])})` : '';
     return `At τ = ${formatTau(tau)} the simulated assignment error (average chance of reading the wrong state) is ${sig3(a.empirical[i])}${ci}${snrText}.`;
@@ -310,21 +310,21 @@ export function distanceMarkers(results, d, tau, { physFromEmpirical = false } =
   return [{ x: tau, label: `τ = ${formatTau(tau)}` }, ...optimaInfo(results, 'hard', [d], { physFromEmpirical }).vlines];
 }
 
-// Ion measurement-crosstalk scan (CC-B20, handoff N6), from crosstalkScan of the v2 stage-2
+// Ion measurement-crosstalk scan (handoff N6), from crosstalkScan of the v2 stage-2
 // results: one row per rate in rates_per_us and (d, mode), d = 3 and 5, learned decoder.
 // The shift column says "yes" only when the shift is resolved: entry.shiftDelta.resolved
 // when shiftDelta exists, otherwise interiorBelowTauPhysResolved. The point-estimate flag
-// interiorBelowTauPhys flips with noise (DECISIONS E12) and is never shown.
+// interiorBelowTauPhys flips with noise and is never shown.
 export const CROSSTALK_TITLE = 'Measurement crosstalk scan (d = 3 and 5, learned decoder)';
 export const CROSSTALK_SENTENCE = 'Crosstalk only moves the best readout time when it is far above the measured value.';
 // The tau*_phys column is the scan's own crosstalkScan.tauPhys (the readout model's 23.5 µs,
 // not the simulated 23.0 µs shown elsewhere), because the shift column was decided against it;
-// the header says so (A53 review item 9).
+// the header says so.
 export const CROSSTALK_COLUMNS = [
   'Crosstalk rate', 'd', 'Decoding', 'Best readout time for the code (τ*_log, 95% interval)',
   'Best readout time for one qubit (τ*_phys, readout model, used for the shift test)', 'Shift below the single-qubit optimum',
 ];
-// A53 review item 11: the scan runs at reduced statistics with its own seeds, so its row at the
+// The scan runs at reduced statistics with its own seeds, so its row at the
 // measured rate differs from the main learned curve at the same rate.
 export function crosstalkNote(scan) {
   const R = Number.isFinite(scan?.readoutDrawsPerShot) ? `R = ${scan.readoutDrawsPerShot}, ` : '';
@@ -555,7 +555,7 @@ const SHORT_INTRO = {
 
 export function mountLevel3(container) {
   // The batch decodes the stored d = 3, r = 3 shots of the current memory (the X-basis bank in
-  // the phase-flip memory, A53 review item 14); runPoint reads the basis from the bank.
+  // the phase-flip memory); runPoint reads the basis from the bank.
   const batchBanks = Object.fromEntries([['Z', bankD3R3], ['X', bankXD3R3]]
     .filter(([, b]) => b)
     .map(([basis, b]) => [basis, sampleBank(b, expandShots(b), BATCH_SHOTS, SEED + 1)]));
@@ -664,7 +664,7 @@ export function mountLevel3(container) {
   }
   const optList = el('ul', { class: 'optima' });
   container.appendChild(ux ? explainMore([optList], 'Explain more: the optima in numbers') : optList);
-  // Trapped ion only, behind FEATURES.crosstalk: the crosstalk scan (CC-B20).
+  // Trapped ion only, behind FEATURES.crosstalk: the crosstalk scan.
   // In the phase-flip memory the scan comes from the X-basis file (U7.9).
   const crosstalkHolder = el('div');
   const crosstalkBox = FEATURES.crosstalk === true && ION.budgetResults?.crosstalkScan
@@ -700,7 +700,7 @@ export function mountLevel3(container) {
     const mem = memoryTag(basis);
     const hard = res.series.filter((s) => s.mode === 'hard').sort((a, b) => a.d - b.d);
     optima = optimaInfo(res, 'hard', hard.map((s) => s.d), { physFromEmpirical: p.physFromEmpirical });
-    // Intervals: the cluster bounds when the results carry them, else Wilson (CC-B21 item 2).
+    // Intervals: the cluster bounds when the results carry them, else Wilson.
     const ivs = hard.map((s) => intervalOf(s));
     const dec = decoderLabel(res);
     chartBase = {

@@ -48,7 +48,7 @@ test('bootstrap passes nItems in-range indices and orders lo <= mean <= hi', () 
   assert.deepEqual(c, { mean: 3, lo: 3, hi: 3 });
 });
 
-// ---- V17: cluster bootstrap and paired differences (CC-A19) ----
+// ---- V17: cluster bootstrap and paired differences ----
 
 const width = (x) => x.hi - x.lo;
 

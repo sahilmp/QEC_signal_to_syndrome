@@ -212,7 +212,7 @@ test('describeCorrections: one-round wording "check j misfired"', () => {
   assert.equal(old.text, 'wrong reading of check 2 in round 1');
 });
 
-// ---- CC-B21 item 1: the learned decoder in levels 1-4 (U3 rows 14 and 31) ----
+// ---- The learned decoder in levels 1-4 (U3 rows 14 and 31) ----
 import { learnedNoise } from '../src/ui/level1.js';
 import { bankD3R1, bankD3R3, bankXD3R3, demForte1 } from '../src/ui/bridge_data.js';
 

@@ -238,7 +238,7 @@ function makeBank(d, r, rng) {
     sampler_seed: BANK_SEED,
     job_id: 'fixture',
     native_ops: {},
-    date: '2026-10-07T00:00:00Z',
+    date: '2026-10-09T00:00:00Z',
     detector_rate: 0,
     shots: BANK_SHOTS,
     n_qubits: 2 * d - 1,

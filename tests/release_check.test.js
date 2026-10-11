@@ -17,7 +17,7 @@ const literal = (name, open, close) => {
 const NEEDS = literal('NEEDS', '{', '}');
 const RESULTS_FILES = literal('RESULTS_FILES', '[', ']');
 
-// CC-B21 item 7. Catches: fails if a flag can be switched on while a bridge export it now uses
+// Catches: fails if a flag can be switched on while a bridge export it now uses
 // still points at a stub or fixture, because NEEDS does not list it: the held-out file for
 // "Learn the noise", the phase-flip bank for Level 3's batch, and the learned rates (demForte1)
 // for every flag whose level decodes with the learned decoder.
@@ -29,7 +29,7 @@ test('NEEDS lists the exports each flag uses after U3 rows 29-31', () => {
   assert.ok(NEEDS.ion.includes('stage2v2') && NEEDS.superconducting.includes('stage3v2'));
 });
 
-// CC-B21 item 7. Catches: fails if the release check does not know a results file the bridges
+// Catches: fails if the release check does not know a results file the bridges
 // now use (U3 rows 29-30 and the dense-grid deviation), or if a bridge points at a results file
 // outside its list, or if its run does not pass the results-file row of each such export.
 test('RESULTS_FILES knows the 2.1 files, and the run passes each bridge results file', () => {

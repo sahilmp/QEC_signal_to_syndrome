@@ -23,7 +23,7 @@ const fin = (...xs) => xs.every((x) => Number.isFinite(x));
 
 // F1's sentence from its out-of-sample block (also Level 5's short line with FEATURES.compactText);
 // null when a count is missing. It names the held-out circuits: F1 is labelled out of sample
-// (team checklist 1.4; E17 audit).
+// (team checklist 1.4; final audit).
 export function f1Line(f) {
   const oos = f?.numbers?.outOfSample;
   const c = oos?.softWorseCount;
@@ -62,7 +62,7 @@ export function findingCards(sources = DEFAULT_SOURCES) {
   const b = s4?.platforms?.['trapped-ion']?.budgetAtOptimum;
   return [
     {
-      // F1 is shown for the trapped ion only (project page F1; E17 audit), so the title says so.
+      // F1 is shown for the trapped ion only (project page F1; final audit), so the title says so.
       id: 'F1',
       title: gain ? `Trapped ion: modelling hidden faults cuts errors ${Math.round(gain.ratio)}×` : 'Trapped ion: modelling hidden faults cuts errors',
       line: line1, detail: detail1,
@@ -78,7 +78,7 @@ export function findingCards(sources = DEFAULT_SOURCES) {
     {
       id: 'F3', title: 'Trapped ion: idling never sets the readout time',
       line: fin(b?.readout, b?.idle) && b.idle > 0
-        // Rounded as formatNumber rounds, as the hero's whySentence does (E17 audit: 523, not 520).
+        // Rounded as formatNumber rounds, as the hero's whySentence does (final audit: 523, not 520).
         ? `Idling is ${formatNumber(b.readout / b.idle)}× smaller than readout error at the best readout time`
         : null,
       detail: null, note: null, target: 'level3:trapped-ion', headline: false,

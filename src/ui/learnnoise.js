@@ -3,7 +3,7 @@
 // diagonal pair: it needs two edges. 3. The p_ij heatmap of the forte-1 banks, the space-time
 // lattice with edge thickness proportional to p, and a naive / learned graph toggle. Below the
 // held-out test, the first number is the soft-against-hard reversal on the trapped ion (holdout
-// setting2, CC-B21 item 3); the second is the logical error from decoderComparison. Graphs and
+// setting2); the second is the logical error from decoderComparison. Graphs and
 // matching come from graph.js and matching.js; edge rates from demForte1 (dem.js classes,
 // bridge_data.js).
 
@@ -116,8 +116,8 @@ export function outOfSampleFor(dem, { d, r, basis = 'Z' }) {
   return (dem.outOfSample || []).filter((o) => o.d === d && o.r === r && (o.basis ?? 'Z') === basis);
 }
 
-// The held-out test (V18, data/results/holdout.json setting1), which step 3 leads with (A53
-// review item 6): rates learned from the original stored shots only, tested on circuits run
+// The held-out test (V18, data/results/holdout.json setting1), which step 3 leads with:
+// rates learned from the original stored shots only, tested on circuits run
 // afterwards. One clause per pooled distance; null without the file.
 const thin = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 export function heldOutText(h) {
@@ -131,7 +131,7 @@ export function heldOutText(h) {
 }
 export const IN_SAMPLE = 'In sample (rates learned from the same stored shots): ';
 
-// The soft-against-hard reversal (finding F1; CC-B21 item 3): on the trapped ion, d = 3,
+// The soft-against-hard reversal (finding F1): on the trapped ion, d = 3,
 // tau = 20 µs (the bit-flip memory), soft minus hard logical error for the naive and the learned
 // decoder, from the paired differences of holdout.json -> setting2 (held-out circuits, rates
 // learned from the original stored shots only) when present, otherwise from stage2v2 -> paired
@@ -183,8 +183,8 @@ export function comparisonSentence(row) {
   return `${base}: ${formatNumber(1 / f)} times more logical errors.`;
 }
 
-// Every cheapest explanation of the lit detectors with at most maxErrors edges (A53 review
-// item 5: with one rate on every naive edge, a diagonal pair has three two-error explanations
+// Every cheapest explanation of the lit detectors with at most maxErrors edges (note:
+// with one rate on every naive edge, a diagonal pair has three two-error explanations
 // of equal cost, and only one of them flips data 1, so the naive decoder's choice is a
 // tie-break). Returns { nErrors, cost, sets: [{ edges, flip }] } (flip: the parity of the
 // observable edges), or null when no set of at most maxErrors edges explains them.
@@ -540,7 +540,7 @@ export function mountLearnNoise(container) {
     const used = naive.paths.flatMap((p) => p.edges);
     const learned = decode(learnedSmall, edgeWeights(learnedSmall, { classes: smallBank.classes }), lit);
     const lEdges = learned.paths.flatMap((p) => p.edges).map((id) => learnedSmall.edges[id]);
-    // A53 review item 5: the naive choice among equal-cost explanations is a tie-break.
+    // The naive choice among equal-cost explanations is a tie-break.
     const tie = tieSentences(cheapestExplanations(naiveSmall, edgeWeights(naiveSmall, { naiveP: pNaive }), lit), naive.flip);
     s2Status.replaceChildren(
       el('p', { class: 'status' }, `The naive decoder pairs them with ${used.length} errors: ${used.map((id) => edgeText(naiveSmall, naiveSmall.edges[id])).join(', and ')}. `
@@ -594,8 +594,8 @@ export function mountLearnNoise(container) {
   latticeCol.append(el('div', { class: 'control-row' }), latticeBox, latticeText);
   latticeCol.firstChild.appendChild(toggle);
 
-  // The held-out test comes first; below it the first number, the soft-against-hard reversal
-  // (CC-B21 item 3), then the second, the in-sample comparison of the two graphs.
+  // The held-out test comes first; below it the first number, the soft-against-hard reversal,
+  // then the second, the in-sample comparison of the two graphs.
   const heldOut = el('p', { class: 'status' });
   s3.appendChild(heldOut);
   const reversal = el('div', { class: 'ln-reversal', 'aria-live': 'polite' });

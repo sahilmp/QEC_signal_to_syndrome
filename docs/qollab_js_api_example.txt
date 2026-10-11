@@ -1,5 +1,5 @@
-Source: "JS / Qiskit projects" (Qollab docs), https://qollab.xyz/learn/docs/js-qiskit-projects, copied 2026-10-05
-Also quoted below: "The runtime environment" (https://qollab.xyz/learn/docs/runtime-environment), "Run your code" (https://qollab.xyz/learn/docs/run-your-code) and "Compute backends" (https://qollab.xyz/learn/docs/compute-backends), copied 2026-10-05.
+Source: "JS / Qiskit projects" (Qollab docs), https://qollab.xyz/learn/docs/js-qiskit-projects, copied 2026-10-09
+Also quoted below: "The runtime environment" (https://qollab.xyz/learn/docs/runtime-environment), "Run your code" (https://qollab.xyz/learn/docs/run-your-code) and "Compute backends" (https://qollab.xyz/learn/docs/compute-backends), copied 2026-10-09.
 Nothing in this file is invented: code is verbatim from the docs; notes are close paraphrases or quotes of the docs. Anything the docs do not cover is listed under "NOT DOCUMENTED" and must be settled by probe P5 / P6 and recorded in DECISIONS.md.
 
 ==========================================================================
@@ -65,7 +65,7 @@ const counts = (await bell.run_bell.callPromising(backend, 1000)).toJs();
 - index.html and main.js at the top level make a JS project (editor label: HTML/JS).
   If index.html, main.js and main.py are all present, it runs as JS. Files in folders do not count.
 - "index.html is placed inside the page body, so write body content only. The runtime drops
-  <html>, <head> and <body> tags."                     -> answers D9: BODY FRAGMENT
+  <html>, <head> and <body> tags."
 - "<script> tags do not run, so put your code in main.js."
 - "main.css is optional and is the only stylesheet the runtime loads. Other .html and .css
   files are not loaded."                               -> file names are index.html, main.css, main.js
@@ -77,7 +77,7 @@ const counts = (await bell.run_bell.callPromising(backend, 1000)).toJs();
 - Everything runs in the browser in a sandboxed iframe. GET requests via fetch(url) are allowed
   (CORS permitting); POST/PUT/DELETE, XMLHttpRequest, WebSocket and web workers are not available.
 - Limits: "A project holds up to 100 files of up to 2 MB each, and all your projects together
-  can use 200 MB. A run has no time limit."            -> relevant to D5 (still confirm with P6)
+  can use 200 MB. A run has no time limit."
 - Browser: needs WebAssembly JSPI: recent Chrome, Edge or Opera, or Firefox 153+.
 
 ==========================================================================
@@ -100,7 +100,7 @@ NOT DOCUMENTED (settle by probe, record in DECISIONS.md)
 ==========================================================================
 
 - Any backend.run option other than shots (noise_model, seed) passed from code, JS or Python.
-  Docs imply noise is chosen only in the Select QPU dialog.      -> D1, D2 (Person A, P3)
-- Whether backend.run from JS works on the IonQ remote simulators exactly as in section 1.  -> D4 (P5)
-- Largest main.js that saves and reloads (docs say 2 MB per file).                         -> D5 (P6)
-- Whether a second account can edit a project (no docs mention collaborators editing).     -> D10 (B2)
+  Docs imply noise is chosen only in the Select QPU dialog.
+- Whether backend.run from JS works on the IonQ remote simulators exactly as in section 1.
+- Largest main.js that saves and reloads (docs say 2 MB per file).
+- Whether a second account can edit a project (no docs mention collaborators editing).

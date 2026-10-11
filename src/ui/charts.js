@@ -201,8 +201,8 @@ export function formatNumber(v) {
   return v.toExponential(2).replace('e', '×10^').replace('^+', '^');
 }
 
-// Intervals of a logical-error series or point (CC-B21 item 2): the cluster bounds
-// (loCluster/hiCluster, a bootstrap over quantum shots; DECISIONS E14) when the results carry
+// Intervals of a logical-error series or point: the cluster bounds
+// (loCluster/hiCluster, a bootstrap over quantum shots) when the results carry
 // them, otherwise the Wilson lo/hi. Works on arrays (a series) and on numbers (a point).
 // Returns { lo, hi, kind } with kind "cluster" or "wilson".
 export const INTERVAL_TEXT = {
@@ -224,7 +224,7 @@ export function intervalCaption(parts) {
   const seen = new Set();
   return ps.filter((x) => (seen.has(x.what) ? false : seen.add(x.what))).map((x) => `${x.what}: ${INTERVAL_TEXT[x.kind]}.`).join(' ');
 }
-// A signed change with its 95% interval in one power of ten (CC-B21 item 5):
+// A signed change with its 95% interval in one power of ten:
 // "+5.69×10⁻³ [4.19, 7.19]×10⁻³". Three significant figures for each number; the power of ten
 // is the change's own unless `exp` is given (to put several changes on one scale).
 export function formatChange(diff, lo, hi, { exp = null } = {}) {

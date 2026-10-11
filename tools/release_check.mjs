@@ -1,5 +1,5 @@
-// Release check for dist/qollab/ and src/ui/features.js (CLAUDE.md rule 3, team rules;
-// DECISIONS D5, D9). Prints a pass/fail table and exits 1 if any row fails.
+// Release check for dist/qollab/ and src/ui/features.js (team rules;
+// DECISIONS). Prints a pass/fail table and exits 1 if any row fails.
 
 import { readFileSync, existsSync, statSync, readdirSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -11,11 +11,11 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const p = (...parts) => join(root, ...parts);
 const rel = (f) => relative(root, f).replaceAll('\\', '/');
 
-const MAX_BYTES = 1_900_000; // D5: main.js + index.html
+const MAX_BYTES = 1_900_000; // main.js + index.html
 const FORBIDDEN = ['fetch(', 'XMLHttpRequest', 'WebSocket', 'import('];
 const ALLOWED_HOSTS = ['qollab.xyz', 'ionq.com', 'docs.ionq.com', 'arxiv.org', 'doi.org', 'github.com'];
 const ATTRIBUTION = 'This effort is supported by Qollab & IonQ.';
-// CC-B21 (U3 rows 29-31): levels 1-4 decode with the learned decoder, whose rates come from
+// U3 rows 29-31: levels 1-4 decode with the learned decoder, whose rates come from
 // demForte1 (the classes of the bank of the same d, r and basis), and Levels 3-4 read their
 // curves from stage2v2 / stage3v2 (the v2b and dense-grid files), not the v1 stage2 / stage3.
 const NEEDS = {
@@ -32,7 +32,7 @@ const NEEDS = {
   // holdout: the held-out test and the reversal (step 3); stage2v2: the reversal's in-sample fallback.
   learnNoise: ['demForte1', 'holdout', 'stage2v2'],
   // stage4x: Level 5 v2 in the phase-flip memory (B49, U7.9); bankXD3R3: Level 3's phase-flip
-  // batch (A53 review item 14), decoded with demForte1's X-basis rates.
+  // batch, decoded with demForte1's X-basis rates.
   phaseFlip: ['stage1x', 'stage2x', 'stage3x', 'stage4x', 'bankXD3R3', 'demForte1'],
   crosstalk: ['stage2v2', 'paramsIonV2'],
   level5v2: ['findMinimum', 'stage2v2', 'stage3v2', 'stage4v2', 'paramsIonV2', 'paramsScV2', 'paramsCycleV2'],
@@ -52,7 +52,7 @@ const NEEDS = {
   // The colour theme reads no data.
   theme: [],
 };
-// Results files the bridges may point at (data/results, Person A's data; CC-B21 item 7). Each
+// Results files the bridges may point at (data/results, Person A's data). Each
 // bridge export under data/results/ must be one of these, exist, and carry schema s2s-results/1.
 // The 2.1 files: stage2_ion_v2b.json and stage2_ion_x_v2b.json (U3 row 29), the dense-grid
 // superconducting files (row 29 deviation agreed with Person A) and holdout.json (row 30).
@@ -82,9 +82,9 @@ const jsFile = distFiles[2];
 const htmlFile = distFiles[0];
 if (existsSync(jsFile) && existsSync(htmlFile)) {
   const total = statSync(jsFile).size + statSync(htmlFile).size;
-  row('main.js + index.html <= 1 900 000 bytes (D5)', total <= MAX_BYTES, `${total} bytes`);
+  row('main.js + index.html <= 1 900 000 bytes', total <= MAX_BYTES, `${total} bytes`);
 } else {
-  row('main.js + index.html <= 1 900 000 bytes (D5)', false, 'files missing');
+  row('main.js + index.html <= 1 900 000 bytes', false, 'files missing');
 }
 
 // 2. No network or dynamic-import calls; 3. URL allowlist.
@@ -219,8 +219,8 @@ for (const [name, { bridge, path }] of sources) {
     stored !== null && stored === current ? `sha256 ${current.slice(0, 12)}` : 'run node tools/make_writeup.mjs');
 }
 
-// 7. Live-run import line (CLAUDE.md rule 3): only with liveRun on, and then exactly as the
-// first line of main.js. LIVE_MODULE must match tools/build.mjs ('live': top-level live.py, D11).
+// 7. Live-run import line: only with liveRun on, and then exactly as the
+// first line of main.js. LIVE_MODULE must match tools/build.mjs ('live': top-level live.py).
 const LIVE_MODULE = 'live';
 const LIVE_IMPORT = `import * as s2sLive from '${LIVE_MODULE}'; globalThis.s2sLive = s2sLive;`;
 const mainJs = read(jsFile);
@@ -390,6 +390,6 @@ const warned = rows.filter((r) => r.warn).length;
 console.log(`\n${rows.length - failed - warned} passed, ${warned} warned, ${failed} failed.`);
 if (FEATURES.liveRun === true) {
   const helper = existsSync(p('qollab', 'live.py')) ? 'qollab/live.py' : 'qollab/live.py (NOT FOUND in this repository)';
-  console.log(`\nReminder: liveRun is on. Upload ${helper} to the main Qollab project as live.py at the top level (D11: no folders), together with the three files in dist/qollab/.`);
+  console.log(`\nReminder: liveRun is on. Upload ${helper} to the main Qollab project as live.py at the top level (no folders), together with the three files in dist/qollab/.`);
 }
 process.exit(failed === 0 ? 0 : 1);

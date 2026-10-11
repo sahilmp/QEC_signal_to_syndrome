@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { validateBank, bitsFromKey, expandShots, split } from '../src/core/bank.js';
 
-// d = 3, r = 2: n_clbits = (d-1)*r + d = 7, layout from the CLAUDE.md formula.
+// d = 3, r = 2: n_clbits = (d-1)*r + d = 7, layout from the formula.
 function makeBank(extra = {}) {
   return {
     schema: 's2s-bank/1',

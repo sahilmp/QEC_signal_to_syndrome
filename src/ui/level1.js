@@ -99,7 +99,7 @@ export function litShotPool(bank) {
 // Human-readable list of what the decoder's matching corrects (1-based labels). With
 // oneRound (the U7.4 wording) a wrong check reading is "check j misfired", without rounds.
 // A diagonal edge (learned graph) is a flip of its data qubit between that qubit's two checks
-// of one round (CLAUDE.md, Decoding graph); it counts as a data-qubit correction.
+// of one round; it counts as a data-qubit correction.
 export function describeCorrections(graph, paths, { oneRound = false } = {}) {
   const items = [];
   for (const p of paths) {

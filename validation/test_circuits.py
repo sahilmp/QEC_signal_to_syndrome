@@ -47,7 +47,7 @@ def test_noiseless_memory_single_outcome(d, r, logical):
 
 # Catches: an injected X placed in the wrong round (before instead of after round k), on the
 # wrong qubit, or a check that reads the wrong neighbours; the ancilla pattern then differs
-# from the CLAUDE.md idle-error rule (checks i-1 and i flip in every round > k, x[i] flips).
+# from the idle-error rule (checks i-1 and i flip in every round > k, x[i] flips).
 @pytest.mark.parametrize("i", range(3))
 @pytest.mark.parametrize("k", range(3))
 def test_injection_matches_prediction(i, k):
@@ -105,7 +105,7 @@ def test_detector_rate_zero_and_positive():
 
 
 # Catches: a configuration without its own seed, two banks sharing a seed (correlated noise),
-# or a seed outside the range IonQ accepts (DECISIONS D2: integer 1 to 2^31). Covers the
+# or a seed outside the range IonQ accepts (integer 1 to 2^31). Covers the
 # basis-X lists (CONFIGS_X, V13_BATCH) and the held-out banks (HELDOUT, V18) as well as the
 # basis-Z ones.
 def test_seeds_table():
@@ -132,7 +132,7 @@ def test_config_lists():
 
 
 # Boundary test (non-vacuous pair). Catches: a configuration whose classical register is wider
-# than 29 bits (CLAUDE.md; the JavaScript side reads keys with parseInt) being built or
+# than 29 bits (the JavaScript side reads keys with parseInt) being built or
 # packaged. d = 3, r = 13 needs exactly 29 bits and is accepted; r = 14 needs 31 and is
 # rejected by both build_memory_circuit and to_bank, before any job would be submitted.
 def test_n_clbits_limit_29():
@@ -173,7 +173,7 @@ def test_to_bank_and_emit_round_trip(capsys):
     assert lines[-1] == "END_BANK rep_d3_r3_L0"
 
 
-# Catches: the standalone live-run helper (qollab/live.py, CC-A1 part E) drifting from the
+# Catches: the standalone live-run helper (qollab/live.py) drifting from the
 # bank generator, for example a different qubit order, a CNOT on the wrong ancilla, or an
 # ancilla/data bit written to a different classical bit; the CNOT list, the qubit-to-bit
 # measurement map or the noiseless outcome would then differ from build_memory_circuit(3, 3, 0).

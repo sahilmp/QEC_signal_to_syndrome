@@ -2,7 +2,7 @@
   "schema": "s2s-params/1",
   "trapped-ion": {
     "two_qubit_gate_us": { "value": 970, "source": "IonQ Forte 1, 2-q gate speed 970 us (ZZ gate) at job submission: Robertson et al., 'Variational Gibbs State Preparation on Trapped-Ion Devices', arXiv:2603.03801 (2026), Table 1. For comparison: Aria two-qubit gate 600 us (Microsoft Azure Quantum IonQ provider page, Aria system timing); Forte Enterprise 1 650 us (same Table 1)" },
-    "gate_layers_per_round": { "value": "2*(d-1)", "source": "conservative choice: the 2(d-1) CNOTs of a round run one after another on the single chain (no published statement found that IonQ Forte runs two-qubit gates on disjoint pairs in parallel; simultaneous entangling gates in one chain are demonstrated only in research systems). See DECISIONS E8" },
+    "gate_layers_per_round": { "value": "2*(d-1)", "source": "conservative choice: the 2(d-1) CNOTs of a round run one after another on the single chain (no published statement found that IonQ Forte runs two-qubit gates on disjoint pairs in parallel; simultaneous entangling gates in one chain are demonstrated only in research systems)." },
     "reset_us": { "value": 50, "source": "IonQ Forte 1, reset speed 50 us at job submission: Robertson et al., arXiv:2603.03801 (2026), Table 1 (Aria 1: 20 us; Forte Enterprise 1: 150 us, same table)" }
   },
   "superconducting": {

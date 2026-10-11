@@ -4,7 +4,7 @@ Working notes by Person A: every number here comes from `data/results/*.json` or
 
 ## Stage 1: flat readout (F0)
 
-Source: `data/results/stage1_flat.json` and the console output of `node tools/sweep.mjs --stage 1` (rerun Thu 8 Oct 2026 after the B14 review fixes; two runs, identical output). The rerun changed the numbers below slightly, within their intervals: idle errors are now drawn before readout (DECISIONS, Person A, M1), which reorders the random draws even though the flat model has no idle errors. Banks: `rep_d{3,5,7}_r3_L{0,1}.json` (IonQ simulator, forte-1 noise, native gates, 4000 shots each). Readout: flat model, the same flip probability ε for every ancilla and data measurement, no idle errors. Decoding: hard mode, exact matching (no non-exact matchings), pGate calibrated per bank. Each point pools L0 and L1, so n = 8000.
+Source: `data/results/stage1_flat.json` and the console output of `node tools/sweep.mjs --stage 1` (rerun Fri 9 Oct 2026 after the B14 review fixes; two runs, identical output). The rerun changed the numbers below slightly, within their intervals: idle errors are now drawn before readout (DECISIONS, Person A), which reorders the random draws even though the flat model has no idle errors. Banks: `rep_d{3,5,7}_r3_L{0,1}.json` (IonQ simulator, forte-1 noise, native gates, 4000 shots each). Readout: flat model, the same flip probability ε for every ancilla and data measurement, no idle errors. Decoding: hard mode, exact matching (no non-exact matchings), pGate calibrated per bank. Each point pools L0 and L1, so n = 8000.
 
 ### Logical error rate pL against ε (d = 3, 5, 7; r = 3)
 
@@ -30,23 +30,23 @@ What the figure shows:
 | Check | Result | Outcome |
 |---|---|---|
 | V1, flat flip rate at ε = 0.05 | 0.04936 [0.04842, 0.05032] from 200 000 draws (seed 101); within 4 binomial standard errors of 0.05 | **Pass** |
-| V5, gate-noise floor across banks | Bulk detector firing rate (readout off): d3 r3 0.0481 / 0.0476 (L0 / L1), d5 r3 0.0506 / 0.0502, d5 r5 0.0490 / 0.0507, d7 r3 0.0501 / 0.0533; d3 r1 0.0195 / 0.0200 (layer 0 only, so not comparable). pGate 0.0124 to 0.0139 for r ≥ 3, 0.0066 to 0.0068 for r = 1 (inverted with 3 edges per layer-0 detector since Thu 8 Oct; the 4-edge inversion gave 0.0049 to 0.0051, see DECISIONS, Person A, m1). All well below 0.1 | **Pass.** L0 and L1 intervals overlap for every (d, r) except d7 r3 (0.0501 [0.0482, 0.0521] against 0.0533 [0.0514, 0.0554]; the intervals just miss, a difference of ~6% in rate) |
+| V5, gate-noise floor across banks | Bulk detector firing rate (readout off): d3 r3 0.0481 / 0.0476 (L0 / L1), d5 r3 0.0506 / 0.0502, d5 r5 0.0490 / 0.0507, d7 r3 0.0501 / 0.0533; d3 r1 0.0195 / 0.0200 (layer 0 only, so not comparable). pGate 0.0124 to 0.0139 for r ≥ 3, 0.0066 to 0.0068 for r = 1 (inverted with 3 edges per layer-0 detector since Fri 9 Oct; the 4-edge inversion gave 0.0049 to 0.0051, see DECISIONS, Person A). All well below 0.1 | **Pass.** L0 and L1 intervals overlap for every (d, r) except d7 r3 (0.0501 [0.0482, 0.0521] against 0.0533 [0.0514, 0.0554]; the intervals just miss, a difference of ~6% in rate) |
 | V6, L0 against L1 logical error | Hard mode, r = 3, every ε and d: the L0 and L1 intervals overlap at all 24 points. Largest relative gaps: d = 5 at ε = 0.005 (L0 0.00175 [0.00085, 0.00361] against L1 0.00075 [0.00026, 0.00220]) and d = 7 at ε = 0.05 (0.00075 against 0.00150) | **Pass**, no significant asymmetry |
 | F0 shape (C19 check 4) | At ε = 0, pL falls with d: 0.0289 → 0.0035 → 0.0005. At large ε the curves rise together without crossing | **Pass** (the ε = 0 level itself is the tie artefact above) |
 | Soft equals hard for the flat model | rep_d3_r3_L0 at ε = 0.05: k = 80 of 4000 in both modes. Expected: every flat measurement has the same \|llr\|, so soft and hard weights agree | **Pass** |
-| V9 fingerprint | `diagnostic(rep_d3_r3_L0)` = **`53933f98`** (`node tools/sweep.mjs --diag`, Thu 8 Oct). It was `e80b58c8` until the M1 idle-order change (DECISIONS, Person A, M1) | Recorded; the local-preview (C21) and Qollab (C22) comparisons must be redone against the new hash |
+| V9 fingerprint | `diagnostic(rep_d3_r3_L0)` = **`53933f98`** (`node tools/sweep.mjs --diag`, Fri 9 Oct). It was `e80b58c8` until the idle-order change (DECISIONS, Person A) | Recorded; the local-preview (C21) and Qollab (C22) comparisons must be redone against the new hash |
 
 ### Method change during Stage 1
 
-The checklist rule gave time-like edges the readout probability only. That made them almost unusable at small ε, and pL at ε ≤ 0.01 came out near 0.03 for every distance. Time-like edges now use p = xorP(pGate, pRead), consistent with `calibrate.js`. See DECISIONS.md (Person A notes, Wed 7 Oct) for the reason and the before/after numbers.
+The checklist rule gave time-like edges the readout probability only. That made them almost unusable at small ε, and pL at ε ≤ 0.01 came out near 0.03 for every distance. Time-like edges now use p = xorP(pGate, pRead), consistent with `calibrate.js`. See DECISIONS.md (Person A notes, Fri 9 Oct) for the reason and the before/after numbers.
 
 ### Provenance caveat
 
-`stage1_flat.json` records commit `df32781`, which was HEAD at both runs of Thu 8 Oct, but the code that produced it (the B14 review fixes) was not yet committed. Order to fix it: commit the code, rerun `node tools/sweep.mjs --stage 1`, then commit the results. The second run reproduced every number and the V9 hash exactly (all seeds are fixed), so the rerun changes only the commit and date in the provenance.
+`stage1_flat.json` records commit `df32781`, which was HEAD at both runs of Fri 9 Oct, but the code that produced it (the B14 review fixes) was not yet committed. Order to fix it: commit the code, rerun `node tools/sweep.mjs --stage 1`, then commit the results. The second run reproduced every number and the V9 hash exactly (all seeds are fixed), so the rerun changes only the commit and date in the provenance.
 
 ## Stage 2: trapped-ion readout
 
-Source: `data/results/stage2_ion.json` and the console output of `node tools/sweep.mjs --stage 2` (rerun Thu 8 Oct 2026 after the B14 review fixes; two runs, identical output, ~26 s each). Since that rerun, idle errors act on the true bits before readout (DECISIONS, Person A, M1), and tied grid minima give the midpoint in ln τ instead of the first tied point (m3). The F1 and V7/V10 numbers do not go through the decoder and did not change; the F2, C2 and τ*_log numbers changed slightly. Readout: `createIonReadout(params/ion.json, τ)` (Crain et al. 2019 lab values, not Forte values; see DECISIONS A15). Banks: `rep_d{3,5,7}_r3_L{0,1}.json`, L0 and L1 pooled. pGate calibrated per bank with readout off (0.0124 to 0.0139). R = 4 readout draws per quantum shot, so n = 32 000 per point; hard and soft see the same readout draws. No non-exact matchings. τ*_log: bootstrap over quantum shots, B = 200, 95% percentile interval; the minimum is located by a parabola in ln τ through the lowest grid point and its two neighbours (`src/core/optimum.js`).
+Source: `data/results/stage2_ion.json` and the console output of `node tools/sweep.mjs --stage 2` (rerun Fri 9 Oct 2026 after the B14 review fixes; two runs, identical output, ~26 s each). Since that rerun, idle errors act on the true bits before readout (DECISIONS, Person A), and tied grid minima give the midpoint in ln τ instead of the first tied point (m3). The F1 and V7/V10 numbers do not go through the decoder and did not change; the F2, C2 and τ*_log numbers changed slightly. Readout: `createIonReadout(params/ion.json, τ)` (Crain et al. 2019 lab values, not Forte values; see DECISIONS). Banks: `rep_d{3,5,7}_r3_L{0,1}.json`, L0 and L1 pooled. pGate calibrated per bank with readout off (0.0124 to 0.0139). R = 4 readout draws per quantum shot, so n = 32 000 per point; hard and soft see the same readout draws. No non-exact matchings. τ*_log: bootstrap over quantum shots, B = 200, 95% percentile interval; the minimum is located by a parabola in ln τ through the lowest grid point and its two neighbours (`src/core/optimum.js`).
 
 ### Validation (V7, V10)
 
@@ -66,8 +66,8 @@ Deviation: the checklist states V10 with both gammas 0. With the card's rates an
 | Empirical (Wilson 95%) | 0.311 | 0.122 | 0.0480 | 4.9e-3 [4.6, 5.2]e-3 | 9.8e-4 [8.5e-4, 1.1e-3] | 5.7e-4 [4.7e-4, 6.8e-4] | 7.0e-4 [5.9e-4, 8.2e-4] | 9.4e-4 [8.1e-4, 1.1e-3] | 1.3e-3 [1.2e-3, 1.5e-3] | 2.3e-3 [2.1e-3, 2.6e-3] | 5.0e-3 [4.7e-3, 5.3e-3] |
 | Belief, no pumping | 0.312 | 0.121 | 0.0472 | 4.5e-3 | 4.5e-4 | 8.2e-5 | 5.4e-6 | 8.5e-9 | 4e-16 | 9e-31 | 2e-74 |
 
-- **With pumping the assignment error has an interior minimum: τ*_phys = 23.5 µs** (fitted error 5.4e-4; grid minimum at 20 µs). It then rises about 8× by 500 µs, driven by dark→bright pumping (DECISIONS A15).
-- **Without pumping it falls monotonically**: no interior minimum (lowest at the grid end, 500 µs). This matches the A15/CC-A4 expectation.
+- **With pumping the assignment error has an interior minimum: τ*_phys = 23.5 µs** (fitted error 5.4e-4; grid minimum at 20 µs). It then rises about 8× by 500 µs, driven by dark→bright pumping (DECISIONS).
+- **Without pumping it falls monotonically**: no interior minimum (lowest at the grid end, 500 µs). This matches the expectation.
 
 ### F2-ion: logical error against τ (r = 3, Wilson 95%)
 
@@ -117,7 +117,7 @@ The pooled numbers hide a strong asymmetry between the logical states. Errors pe
 - **The per-logical asymmetry is intrinsic, not a bug.** Minimum-weight matching with correct priors minimises the error averaged over L, not the error for each L. On synthetic data drawn from the decoder's own edge model (every edge of the d = 3, r = 3 graph flips with pGate = 0.0125; ion card at τ = 5 µs; hard and soft on identical readout draws) soft is also worse on L0 and better on L1: L0 220 against 323 and L1 1742 against 1456 errors (hard, soft) of 40 000 each (Person A rerun of Person B's B14 check; Person B's own run: 182 / 336 and 1632 / 1260).
 - **The evidence for a gate-model mismatch is the pooled rate.** On that model-matched data soft beats hard pooled (1962 against 1779 of 80 000, 9.0 paired SE; locked by a test in `tests/sweep.test.js`, 2 × 20 000 shots, about 7.8 paired SE). On the real banks soft loses pooled from τ ≈ 7 µs on. So the simulator's gate noise is not the decoder's model: one uniform pGate for every edge, and no correlated or diagonal circuit faults in the graph.
 - **The soft code is correct.** `decode` is exact on soft weights: a brute force over all 2^18 edge subsets of the d = 3, r = 3 graph found 0 cost mismatches in 3000 shots (Person B, reproduced by Person A). A weight-table test pins every edge's p in hard and soft mode to known llrs. On one failing synthetic shot (Person B's s = 645) the exact generative posterior and the edge-model class posterior both give P(L = 0) = 0.4825; they agree by construction, so this checks the coding, not the model.
-- **Single-shot probe (before the M1 change; at τ = 20 µs the idle flip probability is below 2e-6, so it does not matter): rep_d3_r3_L0, soft 41 errors against hard 13 of 4000.** Once τ ≳ 5 µs, readout errors (≈ 6e-4) are tiny next to gate errors (pGate ≈ 0.0125). Every candidate matching then costs almost the same, about ln(1/pGate) ≈ 4.37 per edge, with differences of about 0.01, and soft breaks these near-ties with small llr differences (the dark/bright bias above). Hard gives all readout edges the same slightly higher p, and that choice happens to fit the simulator's noise better.
+- **Single-shot probe (before the idle-order change; at τ = 20 µs the idle flip probability is below 2e-6, so it does not matter): rep_d3_r3_L0, soft 41 errors against hard 13 of 4000.** Once τ ≳ 5 µs, readout errors (≈ 6e-4) are tiny next to gate errors (pGate ≈ 0.0125). Every candidate matching then costs almost the same, about ln(1/pGate) ≈ 4.37 per edge, with differences of about 0.01, and soft breaks these near-ties with small llr differences (the dark/bright bias above). Hard gives all readout edges the same slightly higher p, and that choice happens to fit the simulator's noise better.
 - **Not changed.** A fix (for example per-edge-class gate rates from detector-pair correlations) touches `graph.js` and `calibrate.js`, so it is a joint decision, probably after the hackathon, and would change the Stage 1 numbers too.
 
 ### τ*_log per distance (C1, ion part)
@@ -140,19 +140,19 @@ Tied grid minima (several grid points with the same lowest error count) now give
 
 **C1, ion part: holds.** There is no idle-driven optimum. The idle flip probability is 0.5 (1 − e^(−τ/T1)) ≤ 2.5e-5 at every grid point, 20× below the readout error at τ*_phys. The hard-mode τ*_log intervals at d = 3 and 5 contain τ*_phys, which is set by dark→bright pumping. Beyond about 10 µs the logical error is limited by the gate-noise floor, not by τ.
 
-### Compared with the A15 / CC-A4 expectation
+### Compared with the expectation
 
-- τ*_phys near 20 µs: as computed in CC-A4 (grid minimum 20 µs, fitted 23.5 µs).
+- τ*_phys near 20 µs: as computed earlier (grid minimum 20 µs, fitted 23.5 µs).
 - No idle-driven minimum: as expected.
 - The surprise is C2. Soft decoding helps only when readout is photon-starved (τ ≤ 3–5 µs), and hurts once readout is far better than the gates, because the decoder's uniform gate-noise model makes nearly every matching cost the same (see "Diagnosis" under C2).
 
 ### Provenance caveat
 
-`stage2_ion.json` records commit `df32781`, which was HEAD at both runs of Thu 8 Oct, but the code that produced it (the B14 review fixes) was not yet committed. Same fix as Stage 1: commit the code, rerun `node tools/sweep.mjs --stage 2` (all seeds are fixed; the output was reproduced exactly), then commit the results.
+`stage2_ion.json` records commit `df32781`, which was HEAD at both runs of Fri 9 Oct, but the code that produced it (the B14 review fixes) was not yet committed. Same fix as Stage 1: commit the code, rerun `node tools/sweep.mjs --stage 2` (all seeds are fixed; the output was reproduced exactly), then commit the results.
 
 ## Stage 3: superconducting readout
 
-Source: `data/results/stage3_sc.json` and the console output of `node tools/sweep.mjs --stage 3` (Thu 8 Oct 2026, 534 s; identical to the 17:35 trial run with the same values in a scratch copy, DECISIONS Person A, CC-A7 addendum). Readout: `createScReadout(params/sc.json, τ)` with the plan §7.4 values, χ/2π = 1 MHz, κ/2π = 2 MHz (κ = 2χ), n̄ = 5, η = 0.3, T1 = 50 µs, heterodyne, **ring-up on**. These are representative values, not one device; n̄ is UNSOURCED (illustrative), and Walter et al., PRApplied 7, 054020 (2017) is cited for comparison (χ/2π 7.9 MHz, κ/2π 37.5 MHz, η 0.66, T1 7.6 µs). Banks, pooling, pGate, R = 4 (n = 32 000 per point) and the bootstrap as in Stage 2. 26 non-exact matchings in the whole run.
+Source: `data/results/stage3_sc.json` and the console output of `node tools/sweep.mjs --stage 3` (Fri 9 Oct 2026, 534 s; identical to the 17:35 trial run with the same values in a scratch copy, DECISIONS Person A, addendum). Readout: `createScReadout(params/sc.json, τ)` with the plan §7.4 values, χ/2π = 1 MHz, κ/2π = 2 MHz (κ = 2χ), n̄ = 5, η = 0.3, T1 = 50 µs, heterodyne, **ring-up on**. These are representative values, not one device; n̄ is UNSOURCED (illustrative), and Walter et al., PRApplied 7, 054020 (2017) is cited for comparison (χ/2π 7.9 MHz, κ/2π 37.5 MHz, η 0.66, T1 7.6 µs). Banks, pooling, pGate, R = 4 (n = 32 000 per point) and the bootstrap as in Stage 2. 26 non-exact matchings in the whole run.
 
 ### Validation (V4, V8, V10)
 
@@ -165,7 +165,7 @@ Source: `data/results/stage3_sc.json` and the console output of `node tools/swee
 
 ### Ring-up mismatch (belief model against truth)
 
-The belief model in `sc.js` ignores ring-up (CC-A6 design: steady-state means), but the sampler, following the card, rings the resonator up over about 2/κ ≈ 0.16 µs. At short τ the real signal is therefore much smaller than the belief model assumes. The F1 belief and empirical curves disagree beyond 4 SE for τ ≤ 0.7 µs and agree from τ = 1 µs. Consequences:
+The belief model in `sc.js` ignores ring-up (by design: steady-state means), but the sampler, following the card, rings the resonator up over about 2/κ ≈ 0.16 µs. At short τ the real signal is therefore much smaller than the belief model assumes. The F1 belief and empirical curves disagree beyond 4 SE for τ ≤ 0.7 µs and agree from τ = 1 µs. Consequences:
 
 - **τ*_phys has two values.** From the belief curve it is 0.587 µs (the value stored in `optima.tauPhys`); from the empirical curve it is **0.906 µs**. The empirical value is the physical one, the error a real readout of this card would show. Both are reported below.
 - **Soft weights at short τ are miscalibrated** (overconfident). Soft still beats hard everywhere (C2 below), so the miscalibration costs gain but does not reverse it.
@@ -232,7 +232,7 @@ Stage 1 bears on none of them directly; it fixes the gate-noise floor (pGate ≈
 
 Source: `data/results/stage2_ion.json` (Wilson 95% for pL and assignment error, n = 32 000 per point; 95% bootstrap with B = 200 for τ*_log). **On the ion arm C1 holds and C2 fails as stated.** For C1, the idle flip probability 0.5 (1 − e^(−τ/T1)) stays at or below 2.5e-5 over the whole 1–500 µs grid, about 20× below the readout error at its optimum, so idling cannot create an optimum; the optimum that does appear comes from dark→bright pumping during detection. The empirical assignment error falls to 5.7e-4 [4.7e-4, 6.8e-4] at τ = 20 µs and rises to 5.0e-3 [4.7e-3, 5.3e-3] at 500 µs (fitted τ*_phys = 23.5 µs), and the hard-mode logical optima are consistent with it: τ*_log = 31.6 µs [20.0, 81.2] at d = 3 (an exact tie between 20 and 50 µs) and 22.9 µs [14.1, 189] at d = 5, both intervals containing τ*_phys. The minimum is shallow, though: from 10 to 500 µs the d = 3 hard pL stays between 0.0035 [0.0029, 0.0042] and 0.0040 [0.0034, 0.0048], so beyond about 10 µs the gate-noise floor, not τ, sets the logical error; the d = 7 hard optimum (11.8 µs [11.2, 44.7]) rests on 3, 4 and 5 errors at τ = 10, 15 and 20 µs and is not resolved. For C2, soft is at or below hard at only 13 of the 39 (d, τ) points. It wins clearly where readout is photon-starved (τ ≤ 3 µs at every d, and also τ = 5 µs at d = 5 and 7): at τ = 1 µs, d = 7 soft gives 0.0499 [0.0475, 0.0523] against hard 0.394 [0.389, 0.400], and d = 3 gives 0.148 [0.144, 0.152] against 0.352 [0.347, 0.358], so the falsifier "no significant gain anywhere" is not met and the second half of C2 ("helps most where readouts are short and ambiguous") holds. From τ = 7 µs on, soft is worse: above hard beyond the intervals at 11 points, 9 of them at d = 3 (every τ from 7 to 500 µs; τ = 20 µs gives 0.0072 [0.0063, 0.0081] against 0.0035 [0.0029, 0.0042]) and 2 at d = 5, and with overlapping intervals at d = 7. The soft-mode τ*_log is therefore unresolved (at d = 3 and 5 the lowest point is the grid end, with 67–68% of bootstrap replicates there). Split by logical state, the soft loss is on L0 at short and intermediate τ and moves to L1 from about 50 µs, following which readings the llr makes cheap; that asymmetry is intrinsic to matching with correct priors and also appears on model-matched synthetic data, where soft nevertheless wins pooled. The pooled loss on the real banks therefore points to the decoder's uniform-pGate edge model (no correlated or diagonal circuit faults), not to the readout model, whose llr passes V10, nor to the soft decoder, which is exact on soft weights.
 
-### Verdicts (A28, Fri 9 Oct)
+### Verdicts (Fri 9 Oct)
 
 Source: `data/results/stage4_comparison.json` (`conclusions`, `sensitivity`, `sensitivityBaseline`; `tools/sweep.mjs --stage 4`, 373 s, 38 non-exact matchings), with Stages 2 and 3 above. Per-round and per-µs values are at τ*_log (plan §16.5); intervals are Wilson 95% carried through, τ*_log intervals 95% bootstrap. Both arms decode the **same** IonQ-simulator banks with the same calibrated pGate (0.0124 to 0.0139), so every difference between the platforms comes from the readout model, the idle flips and the cycle time.
 
@@ -249,7 +249,7 @@ Source: `data/results/stage4_comparison.json` (`conclusions`, `sensitivity`, `se
 
 - **Superconducting.** Every case has an interior τ*_log (no bootstrap replicate at a grid edge). Against the empirical τ*_phys = 0.906 µs, τ*_log lies below it beyond the interval at d = 3 (hard 0.793 [0.436, 0.854], soft 0.601 [0.574, 0.668] µs) and d = 5 (hard 0.756 [0.688, 0.875], soft 0.592 [0.569, 0.857] µs). At d = 7 the intervals contain 0.906 µs (hard 0.783 [0.579, 0.990], soft 0.582 [0.553, 1.311] µs). Against the belief τ*_phys = 0.587 µs there is no shift. The verdict depends on the empirical value (ring-up mismatch, Stage 3).
 - **Ion.** The hard-mode optima at d = 3 and 5 (31.6 [20.0, 81.2] and 22.9 [14.1, 189] µs) contain τ*_phys = 23.5 µs, which is set by dark→bright pumping. The idle flip probability is at most 2.5e-5 on the grid, about 20× below the readout error at τ*_phys (5.7e-4) and about 500× below pGate. So none of the interior minima can be idle-driven.
-- **Why the automated verdict says "flips".** The CC-A8 rule calls the ion part "holds" only if the idle probability is below 1e-6 at **every** τ. 0.5 (1 − e^(−τ/T1)) passes 1e-6 between τ = 20 and 30 µs (2.5e-5 at 500 µs), so the rule fails on the long-τ grid points, where pL is flat and set by gate noise. The rule is stricter than the plan's falsifier ("the ion curve shows an idle-driven minimum"), and the plan's falsifier is not met. The same rule makes every sensitivity row "flips", including T1 × 2 (maximum idle probability 1.25e-5). The superconducting part is "undetermined" in every row and in the baseline, because the reduced runs have no bootstrap intervals. So the sweep does not test C1.
+- **Why the automated verdict says "flips".** The pre-registered rule calls the ion part "holds" only if the idle probability is below 1e-6 at **every** τ. 0.5 (1 − e^(−τ/T1)) passes 1e-6 between τ = 20 and 30 µs (2.5e-5 at 500 µs), so the rule fails on the long-τ grid points, where pL is flat and set by gate noise. The rule is stricter than the plan's falsifier ("the ion curve shows an idle-driven minimum"), and the plan's falsifier is not met. The same rule makes every sensitivity row "flips", including T1 × 2 (maximum idle probability 1.25e-5). The superconducting part is "undetermined" in every row and in the baseline, because the reduced runs have no bootstrap intervals. So the sweep does not test C1.
 - **Why it holds.** On the superconducting arm each extra µs of readout also costs about 1% idle flips per round on the data qubits, which the single-qubit assignment error does not count, so the logical optimum comes earlier. On the ion arm the idle flips are negligible and the optimum follows the readout itself.
 
 #### C2: refuted as stated (fails on the ion arm, holds on the superconducting arm)
@@ -280,12 +280,12 @@ Cycle times at τ*_log: ion 2002–2490 µs, SC 0.92–1.13 µs. Hand check of d
 - **Ion:** hard break-even ε̄ = 0.236 [0.210, 0.267] at τ = 1.56 µs (empirical axis 0.236 [0.210, 0.266]). In soft mode d = 5 is below d = 3 at every τ, so there is no break-even.
 - **Superconducting:** there is no crossing in either mode. d = 5 is below d = 3 at every grid point. At τ = 0.1 µs (empirical ε̄ = 0.448) it is still below beyond the intervals: hard 0.4377 [0.4323, 0.4432] against 0.4533 [0.4479, 0.4588]. The two curves merge only at the coin-toss limit (τ = 0.05 µs, ε̄ = 0.491: 0.4825 against 0.4862, overlapping). So the superconducting break-even lies above ε̄ ≈ 0.45 on the empirical axis, at least 0.18 above the ion's upper bound of 0.267. That is a difference far beyond the uncertainties, so the falsifier is met. On the belief axis the grid only reaches ε̄ = 0.166 (ring-up ignored), so the superconducting break-even is just bounded below (beyond the intervals at belief ε̄ = 0.085). That is compatible with 0.236, and the automated rule reports "undetermined" for this reason.
 - **Sensitivity:** "undetermined" in all 28 rows. The hard part shows "holds" at χ × 0.5 (ion 0.201, SC 0.163) and κ × 2 (0.201, 0.188). These superconducting crossings are on the belief axis, at reduced statistics, where both curves sit near 0.5, so they carry no weight.
-- **Why:** ε̄ is not a platform-neutral axis, because the ion error is one-sided. At short τ only bright ions are misread, as dark (e^(−0.472 · 1.56) = 0.48 at break-even), so ε̄ = 0.24 means about 0.48 on one state, where distance stops helping. The superconducting error is nearly symmetric (0.448 and 0.450 for |0⟩ and |1⟩ at 0.1 µs; corrected in A31 from 0.459 and 0.471, which did not average to ε̄ = 0.448), and majority voting keeps helping until about 0.5. The second half of C4 does hold: the readout time needed differs by more than 15× (ion 1.56 µs against SC below 0.1 µs).
+- **Why:** ε̄ is not a platform-neutral axis, because the ion error is one-sided. At short τ only bright ions are misread, as dark (e^(−0.472 · 1.56) = 0.48 at break-even), so ε̄ = 0.24 means about 0.48 on one state, where distance stops helping. The superconducting error is nearly symmetric (0.448 and 0.450 for |0⟩ and |1⟩ at 0.1 µs; corrected from 0.459 and 0.471, which did not average to ε̄ = 0.448), and majority voting keeps helping until about 0.5. The second half of C4 does hold: the readout time needed differs by more than 15× (ion 1.56 µs against SC below 0.1 µs).
 
 #### Consequences for the project page and for Person B
 
 - The page must not show the automated C1 "flips" or the sensitivity rows without the caveats above. The C1 ion "flips" comes from the 1e-6 idle threshold. The sensitivity C2 "holds" reflects too little statistical power and is not robustness.
-- Stage 4 `breakEven.byMode` is per mode. Level 5 should use it rather than repeat the hard value for soft (CC-B9 handoff, item 3).
+- Stage 4 `breakEven.byMode` is per mode. Level 5 should use it rather than repeat the hard value for soft (handoff, item 3).
 - Superconducting τ*_phys: the page should quote the empirical 0.906 µs, or both values. `optima.tauPhys` holds the belief value 0.587 µs.
 
 ## v2 hypotheses (pre-registered Sat 10 Oct, before any rerun)
@@ -300,9 +300,9 @@ Cycle times at τ*_log: ion 2002–2490 µs, SC 0.92–1.13 µs. Hand check of d
 | C6 (new) | In the phase-flip memory the superconducting τ*_log is shorter than in the bit-flip memory when T2 < T1 | Stage 3 in both bases | τ*_log(X) ≥ τ*_log(Z) beyond the intervals |
 | O4 (measurement, no hypothesis) | Ratio of bulk detector rates, X-basis to Z-basis banks, per (d, r): how biased forte-1 noise looks to the decoder | Stage dem | — |
 
-## v2 results: Stage dem and Stages 1–2 with both decoders (A44/A45, Sat 10 Oct)
+## v2 results: Stage dem and Stages 1–2 with both decoders (Sat 10 Oct)
 
-Sources: `data/results/dem_forte1.json`, `stage1_flat.json`, `stage2_ion.json` and the console output of `node tools/sweep.mjs --stage dem`, `--stage 1`, `--stage 2` (CC-A12, Sat 10 Oct 2026). Z basis only: the X-basis banks arrive at A48. Naive = one calibrated pGate per bank on space and time edges (as in v1). Learned = per-class rates (space, spaceBoundary, time, diag) from `ratesFromBanks` of the L0 and L1 banks of the same (d, r), on a graph with diagonal edges. Both decoders see the same readout draws (same seeds). The naive numbers are identical to the v1 files above, so every v1 statement about the naive decoder still stands. Results for C1–C6 are interim until Stages 3 and 4 are rerun (A48, A50).
+Sources: `data/results/dem_forte1.json`, `stage1_flat.json`, `stage2_ion.json` and the console output of `node tools/sweep.mjs --stage dem`, `--stage 1`, `--stage 2` (Sat 10 Oct 2026). Z basis only: the X-basis banks arrive with the v2 rerun. Naive = one calibrated pGate per bank on space and time edges (as in v1). Learned = per-class rates (space, spaceBoundary, time, diag) from `ratesFromBanks` of the L0 and L1 banks of the same (d, r), on a graph with diagonal edges. Both decoders see the same readout draws (same seeds). The naive numbers are identical to the v1 files above, so every v1 statement about the naive decoder still stands. Results for C1–C6 are interim until Stages 3 and 4 are rerun (the v2 rerun and the provisional Stage 4).
 
 ### Learned rates (`dem_forte1.json` → `banks`)
 
@@ -310,7 +310,7 @@ Space / spaceBoundary / time / diag (antiDiag), L0 + L1 pooled, against the naiv
 
 ### V12b: out of sample (`outOfSample`, `outOfSamplePooled`)
 
-Train on one logical state's bank, decode the other's; flat ε = 0.02, hard, pooled over both directions (n = 8000). Naive → learned: d3 r3 0.00700 [0.00539, 0.00908] → 0.00625 [0.00474, 0.00823]; d5 r3 0.00162 [0.00095, 0.00278] → 0.00088 [0.00042, 0.00181]; d5 r5 0.00250 [0.00162, 0.00386] → 0.00112 [0.00059, 0.00214]; d7 r3 0.00025 → 0.00013; d3 r1 0.00250 → 0.00250. **Learned ≤ naive at every (d, r); not beyond the intervals at d = 5** (k = 13 → 7 and 20 → 9 are too few errors). V12b requires both, and the first clause alone is not a pass (team checklist Section 1.3, clarified Sat 10 Oct), so **V12b fails and the SP5 cut rule applies**: levels 1–4 and the hero show the naive decoder on both arms until a decision recorded in DECISIONS lifts the cut (DECISIONS E4). The learned results below are reported as results, not as the page's default decoder.
+Train on one logical state's bank, decode the other's; flat ε = 0.02, hard, pooled over both directions (n = 8000). Naive → learned: d3 r3 0.00700 [0.00539, 0.00908] → 0.00625 [0.00474, 0.00823]; d5 r3 0.00162 [0.00095, 0.00278] → 0.00088 [0.00042, 0.00181]; d5 r5 0.00250 [0.00162, 0.00386] → 0.00112 [0.00059, 0.00214]; d7 r3 0.00025 → 0.00013; d3 r1 0.00250 → 0.00250. **Learned ≤ naive at every (d, r); not beyond the intervals at d = 5** (k = 13 → 7 and 20 → 9 are too few errors). V12b requires both, and the first clause alone is not a pass (team checklist Section 1.3, clarified Sat 10 Oct), so **V12b fails and the SP5 cut rule applies**: levels 1–4 and the hero show the naive decoder on both arms until a decision recorded in DECISIONS lifts the cut. The learned results below are reported as results, not as the page's default decoder.
 
 ### Decoder comparison (`decoderComparison`, in sample, R = 2, n = 16 000 per point)
 
@@ -339,15 +339,15 @@ pL against ε = 0, 0.005, 0.01, 0.02, 0.03, 0.05, 0.08, 0.12 (hard, r = 3, n = 8
 - τ*_log, learned (bootstrap B = 200): d = 3 hard 21.8 µs [20.0, 60.1], soft 31.6 µs [11.9, 500]; d = 5 hard 248 µs [11.0, 500], soft 269 µs [9.9, 500]. Above about 10 µs the learned curves are flat within their intervals, so these minima are not resolved. d = 7 learned has 0 to 2 errors out of 32 000 at every τ from 15 to 200 µs (the minimum is a 100% tie): not resolved.
 - Non-exact matchings: 0 in every run.
 
-## v2 verdicts at A49 (Sat 10 Oct, 22:10 IST)
+## First v2 verdicts (Sat 10 Oct, 22:10 IST)
 
-Sources: `data/results/stage2_ion.json`, `stage2_ion_x.json`, `stage3_sc.json`, `stage3_sc_x.json` (A48 rerun, commit 58fe92c: both decoders, both bases, ion crosstalk at the card rate 1.67e-5 /µs, R = 4, n = 32 000 per point) and `dem_forte1.json` (the `--stage dem` rerun at A48). Every number below names its file and field. The A48 rerun replaced the Stage 2 file used in the A44/A45 section above, so the Stage 2 numbers quoted there (learned τ*_log, the C2 example at τ = 20 µs, naive 11 of 39) are superseded by the ones here; the difference comes from switching ion crosstalk on at the card rate.
+Sources: `data/results/stage2_ion.json`, `stage2_ion_x.json`, `stage3_sc.json`, `stage3_sc_x.json` (v2 rerun, commit 58fe92c: both decoders, both bases, ion crosstalk at the card rate 1.67e-5 /µs, R = 4, n = 32 000 per point) and `dem_forte1.json` (the `--stage dem` v2 rerun). Every number below names its file and field. The v2 rerun replaced the Stage 2 file used in the section above, so the Stage 2 numbers quoted there (learned τ*_log, the C2 example at τ = 20 µs, naive 11 of 39) are superseded by the ones here; the difference comes from switching ion crosstalk on at the card rate.
 
-**Stage 4.** No number from `stage4_comparison.json` is quoted: it was built on 8 Oct from Stage 2 and 3 files that have since been replaced. It is regenerated at A50 (provisional) and A53c (final).
+**Stage 4.** No number from `stage4_comparison.json` is quoted: it was built on 9 Oct from Stage 2 and 3 files that have since been replaced. It is regenerated as a provisional file and again at the final step.
 
 **Tie rule.** A τ*_log whose `fractionTied` ≥ 0.5 (half or more of the bootstrap replicates have a tied grid minimum) is **UNRESOLVED**: it is marked, kept in the tables, and excluded from every verdict. This applies to all τ*_log tables in this file. The v1 tables in Stages 2 and 3 have no such row (largest: 36%, ion d = 7 hard).
 
-### A49 check table
+### v2 check table
 
 | Check | Source | Result | Outcome |
 |---|---|---|---|
@@ -414,7 +414,7 @@ Sources: `data/results/stage2_ion.json`, `stage2_ion_x.json`, `stage3_sc.json`, 
 
 No non-exact matchings (`crosstalkScan.nonExact` 0 in both files).
 
-**C1 (ion), three sub-verdicts.** The pre-registered rule uses the point flag; the resolved flag was added after seeing the data (DECISIONS E12). Both are given.
+**C1 (ion), three sub-verdicts.** The pre-registered rule uses the point flag; the resolved flag was added after seeing the data. Both are given.
 
 - **(a) Crosstalk off, no idle-driven optimum: holds.** The point flag is true at rate 0 only in Z at d = 3 (hard 15.2 µs, soft 14.1 µs), and both intervals contain τ*_phys = 23.5 µs (hard [13.9, 27.4]). With crosstalk off the idle probability is 5e-8 to 2.5e-5 per round (`stage2_ion.json` → `budget.idle`; about 1e-6 near τ*_phys): this is noise in the location of a flat minimum, not physics. X at rate 0 has the point flag false everywhere.
 - **(b) Crosstalk at the card value 1.67e-5 /µs, an interior τ*_log < τ*_phys appears: REFUTED under the resolved flag.** Every interval contains τ*_phys in both bases. Under the pre-registered point flag the result is **split between the bases**: Z says none at every (d, mode) (d = 3 hard 30.2 [21.2, 36.8]); X says one exists at every (d, mode) (d = 3 hard 19.3 [16.2, 47.5]), but the X d = 5 rows are 100% tied and therefore UNRESOLVED. The split is a sign that the point flag reads noise at this rate, which is why the resolved flag is reported beside it.
@@ -443,7 +443,7 @@ No non-exact matchings (`crosstalkScan.nonExact` 0 in both files).
 
 ### C6 (`stage3_sc.json`, `stage3_sc_x.json`, learned, `optima.tauLog`)
 
-**NOT APPLICABLE with the card.** C6 is conditional on T2 < T1; `params/sc.json` has T2 = 77 µs > T1 = 50 µs. With this card the phase-flip idle probability is the smaller one (`budget.idle` at 1 µs: X 0.0065, Z 0.0099), so physics predicts an X optimum at or beyond the Z one. The data are consistent with that but do not resolve it: the X point estimate is later at d = 3 (hard 0.820 [0.772, 0.896] against 0.764 [0.732, 0.802]; soft 0.812 against 0.716), d = 5 hard (0.837 against 0.781) and d = 7 soft (1.30 against 0.777), and earlier at d = 5 soft (0.801 against 0.850) and d = 7 hard (0.721 against 0.810); the intervals overlap at every (d, mode). C6 is tested with a variant card (T2 = 25 µs) at CC-A19 (DECISIONS E12).
+**NOT APPLICABLE with the card.** C6 is conditional on T2 < T1; `params/sc.json` has T2 = 77 µs > T1 = 50 µs. With this card the phase-flip idle probability is the smaller one (`budget.idle` at 1 µs: X 0.0065, Z 0.0099), so physics predicts an X optimum at or beyond the Z one. The data are consistent with that but do not resolve it: the X point estimate is later at d = 3 (hard 0.820 [0.772, 0.896] against 0.764 [0.732, 0.802]; soft 0.812 against 0.716), d = 5 hard (0.837 against 0.781) and d = 7 soft (1.30 against 0.777), and earlier at d = 5 soft (0.801 against 0.850) and d = 7 hard (0.721 against 0.810); the intervals overlap at every (d, mode). C6 is tested with a variant card (T2 = 25 µs).
 
 ### C2 (learned, Wilson intervals)
 
@@ -456,7 +456,7 @@ Points with soft above hard beyond the Wilson intervals (`validation.C2` → `so
 | Superconducting | Z | **0 of 36** (soft ≤ hard at 33) | 0 of 36 |
 | Superconducting | X | **0 of 36** (soft ≤ hard at 35) | 0 of 36 |
 
-**C2 (learned): holds on both arms in both bases at this level of evidence.** Wilson intervals treat the R readout draws of one quantum shot as independent, so they are too narrow where gate faults dominate; CC-A19 adds cluster and paired intervals and these counts are redone at A53a.
+**C2 (learned): holds on both arms in both bases at this level of evidence.** Wilson intervals treat the R readout draws of one quantum shot as independent, so they are too narrow where gate faults dominate; the v2 statistics add cluster and paired intervals and these counts are redone at the final step.
 
 ### O4 (`dem_forte1.json` → `ratioXoverZ`, bulk detector rate, X-basis over Z-basis banks)
 
@@ -472,7 +472,7 @@ All intervals contain or nearly contain 1: forte-1 gate noise looks unbiased to 
 
 ### Finding F1 (post hoc, not pre-registered): the v1 soft-decoding loss was a decoder-model artefact
 
-From `stage2_ion.json` (Z, d = 3, τ = 20 µs, `series`): naive soft 0.00738 [0.00649, 0.00837] against hard 0.00347 [0.00288, 0.00418]; soft is worse beyond the intervals at 13 of 39 points with the naive decoder. Learned soft 0.00356 [0.00297, 0.00428] against hard 0.00331 [0.00274, 0.00400]; 0 of 39. The X basis shows the same (naive 9 of 39, learned 0 of 39). Mechanism: the diagonal edge class is as strong as the time-like class (`dem_forte1.json` → `banks`, d3 r3 Z: diag 0.0099, time 0.0100) and is missing from the naive graph. Caveats: this is in sample (the rates are learned from the banks being decoded), and V12(b) is underpowered at d = 5 (13 → 7 and 20 → 9 errors, DECISIONS E4). The held-out test is V18 (CC-A18, CC-A21).
+From `stage2_ion.json` (Z, d = 3, τ = 20 µs, `series`): naive soft 0.00738 [0.00649, 0.00837] against hard 0.00347 [0.00288, 0.00418]; soft is worse beyond the intervals at 13 of 39 points with the naive decoder. Learned soft 0.00356 [0.00297, 0.00428] against hard 0.00331 [0.00274, 0.00400]; 0 of 39. The X basis shows the same (naive 9 of 39, learned 0 of 39). Mechanism: the diagonal edge class is as strong as the time-like class (`dem_forte1.json` → `banks`, d3 r3 Z: diag 0.0099, time 0.0100) and is missing from the naive graph. Caveats: this is in sample (the rates are learned from the banks being decoded), and V12(b) is underpowered at d = 5 (13 → 7 and 20 → 9 errors). The held-out test is V18.
 
 ### Budget magnitudes (`budget`, per round, per qubit)
 
@@ -487,13 +487,13 @@ Near the optima: ion readout 4.8e-3, 5.7e-4, 9.3e-4 at 10, 20, 50 µs (idle ≤ 
 
 ### Tie rule applied to earlier tables
 
-- A44/A45 Stage 2 rerun: ion d = 7 learned (100% tie): **UNRESOLVED**, as already stated there. The A48 file confirms it (`stage2_ion.json` learned d = 7 hard 54.8 [44.7, 70.7], soft 27.4 [22.4, 86.6], both 100% tied).
-- A48 Stage 2, X basis (`stage2_ion_x.json` → `optima.tauLog`): learned d = 5 hard 31.6 [27.4, 44.7] and soft 22.4 [22.4, 31.6], learned d = 7 hard 38.7 and soft 44.7, naive d = 5 hard 17.3 and naive d = 7 hard 54.8 are all ≥ 98% tied: **UNRESOLVED**.
+- First v2 Stage 2 run: ion d = 7 learned (100% tie): **UNRESOLVED**, as already stated there. The v2 rerun file confirms it (`stage2_ion.json` learned d = 7 hard 54.8 [44.7, 70.7], soft 27.4 [22.4, 86.6], both 100% tied).
+- v2 rerun, Stage 2, X basis (`stage2_ion_x.json` → `optima.tauLog`): learned d = 5 hard 31.6 [27.4, 44.7] and soft 22.4 [22.4, 31.6], learned d = 7 hard 38.7 and soft 44.7, naive d = 5 hard 17.3 and naive d = 7 hard 54.8 are all ≥ 98% tied: **UNRESOLVED**.
 - v1 Stage 2 and Stage 3 tables: no row reaches 50% (unchanged).
 
-## V18 and F1 out of sample (A53b, CC-A21, Sun 11 Oct 00:43 IST)
+## V18 and F1 out of sample (Sun 11 Oct 00:43 IST)
 
-Source: `data/results/holdout.json` (`node tools/sweep.mjs --stage holdout`). Design: DECISIONS E11, written and committed (b231184) before any held-out bank existed. All 12 planned held-out banks were used (`params.banksUsed`: d5 r3 5 of 5 per logical state, d3 r3 1 of 1). Naive pGate and learned rates come only from the original `rep_d3_r3_L0/L1` and `rep_d5_r3_L0/L1` banks; a test (`tests/sweep.test.js`, "nothing is learned from a held-out bank") fails if a held-out bank reaches `ratesFromBanks` or `estimatePGate`.
+Source: `data/results/holdout.json` (`node tools/sweep.mjs --stage holdout`). Design written and committed (b231184) before any held-out bank existed. All 12 planned held-out banks were used (`params.banksUsed`: d5 r3 5 of 5 per logical state, d3 r3 1 of 1). Naive pGate and learned rates come only from the original `rep_d3_r3_L0/L1` and `rep_d5_r3_L0/L1` banks; a test (`tests/sweep.test.js`, "nothing is learned from a held-out bank") fails if a held-out bank reaches `ratesFromBanks` or `estimatePGate`.
 
 ### V18: pass (`setting1`; flat ε = 0.02, hard, R = 1, both decoders on the same seed)
 
@@ -505,7 +505,7 @@ Source: `data/results/holdout.json` (`node tools/sweep.mjs --stage holdout`). De
 - **Verdict (the V12(b) two-clause rule, unchanged):** clause 1, learned ≤ naive at every (d, r): holds. Clause 2, learned below naive beyond the Wilson intervals at d = 5: holds (0.00127 < 0.00139; the margin is narrow, and the cluster intervals agree: 0.00122 < 0.00135). **V18 passes.**
 - **Paired (an addition, does not change the verdict):** learned − naive is below 0 beyond the paired interval at both distances, and in each of the four (d, L) rows at d = 5 and at d3 L0 (d3 L1: −0.0015 [−0.0038, +0.0008]).
 - **Consequences:** V18 replaces V12(b) next to every naive/learned comparison (team checklist 2.1); the SP5 cut is lifted (DECISIONS, Person A section, Sun 11 Oct 00:45); HANDOFF N11 to Person B.
-- **Changed from v2 (A45):** the in-sample V12(b) failed clause 2 because it had too few errors at d = 5 (13 → 7 and 20 → 9 in 8000 shots, E4); with 40 000 held-out shots the halving is resolved.
+- **Changed from v2:** the in-sample V12(b) failed clause 2 because it had too few errors at d = 5 (13 → 7 and 20 → 9 in 8000 shots); with 40 000 held-out shots the halving is resolved.
 
 ### F1 out of sample (`setting2`; ion card, Z basis, Stage 2 τ grid, d = 3 and 5, hard and soft, R = 4)
 
@@ -513,28 +513,28 @@ Source: `data/results/holdout.json` (`node tools/sweep.mjs --stage holdout`). De
 - d = 3, τ = 20 µs (`series`, cluster intervals): naive soft 0.01019 [0.00794, 0.01233] against hard 0.00491 [0.00345, 0.00642], paired soft − hard +0.0053 [+0.0037, +0.0071]; learned soft 0.00381 [0.00256, 0.00513] against hard 0.00372 [0.00242, 0.00505], paired +0.0001 [−0.0003, +0.0005].
 - **F1 is now out of sample:** the in-sample pattern (naive soft loses, learned soft does not; "Finding F1" above) holds on banks from new simulator seeds, decoded with rates learned elsewhere. It is still post hoc (not pre-registered), and it is shown for the ion card only.
 
-## Verdicts v2 (A53a, CC-A20, Sun 11 Oct 02:15 IST)
+## Verdicts v2 (Sun 11 Oct 02:15 IST)
 
-**Sources.** Ion: `stage2_ion_v2b.json` and `stage2_ion_x_v2b.json` (23982f7; the A48 pL values, with `loCluster`/`hiCluster`, `paired` and `shiftDelta` added; R = 4, n = 32 000 per point). Superconducting: `stage3_sc_dense.json` and `stage3_sc_x_dense.json` (42d68a3; dense grid, 27 points from 0.05 to 3 µs, R = 4, n = 32 000), and the C6 variant `stage3_sc_x_T2_25.json` (42d68a3; `provenance.overrides` T2_us = 25, UNSOURCED, illustrative, E14 (c)). Also `stage1_flat.json`, `stage1_flat_x.json`, `dem_forte1.json` and `holdout.json`, and DECISIONS rows E4 and E11–E14. `stage4_comparison.json` is not used. C3 and C4 are decided at A53c.
+**Sources.** Ion: `stage2_ion_v2b.json` and `stage2_ion_x_v2b.json` (23982f7; the v2 rerun pL values, with `loCluster`/`hiCluster`, `paired` and `shiftDelta` added; R = 4, n = 32 000 per point). Superconducting: `stage3_sc_dense.json` and `stage3_sc_x_dense.json` (42d68a3; dense grid, 27 points from 0.05 to 3 µs, R = 4, n = 32 000), and the C6 variant `stage3_sc_x_T2_25.json` (42d68a3; `provenance.overrides` T2_us = 25, UNSOURCED, illustrative). Also `stage1_flat.json`, `stage1_flat_x.json`, `dem_forte1.json` and `holdout.json`, and DECISIONS. `stage4_comparison.json` is not used. C3 and C4 are decided at the final step.
 
 **Conventions.**
 - Intervals are Wilson 95% in square brackets and cluster 95% (`loCluster`/`hiCluster`, a bootstrap over quantum shots) in round brackets.
 - "Paired" is `paired` → `pairedClusterDiff`: the same resampled shots for both arms, and the arms share readout draws.
 - τ*_log is from `optima.tauLog`. Its interval is the bootstrap over shots (B = 200); it carries no Wilson or cluster interval.
 - Tie rule: any τ*_log with `fractionTied` ≥ 0.5 is **UNRESOLVED** and excluded from verdicts.
-- `shiftDelta` is reported beside the pre-registered rule, never in place of it (E12, E14 (b)). It is post hoc.
+- `shiftDelta` is reported beside the pre-registered rule, never in place of it. It is post hoc.
 
 ### Summary
 
-| ID | Pre-registered verdict | Changed from A49 | Changed from v1 |
+| ID | Pre-registered verdict | Changed from first v2 verdicts | Changed from v1 |
 |---|---|---|---|
-| C1, superconducting | **Refuted** at d = 3 and 5 (dense grid) | Yes: A49, on the standard grid, had it holding at d = 3 | Yes: v1 (naive) held at d = 3 and 5 |
+| C1, superconducting | **Refuted** at d = 3 and 5 (dense grid) | Yes: the first v2 verdicts, on the standard grid, had it holding at d = 3 | Yes: v1 (naive) held at d = 3 and 5 |
 | C1, ion (a) crosstalk off | **Holds** | No | v1 had no crosstalk |
 | C1, ion (b) card crosstalk | **Refuted** under the resolved flag and `shiftDelta`; the pre-registered point flag splits between the bases | No (`shiftDelta` added) | New clause |
 | C1, ion (c) any scanned rate | Clause **not met**: an optimum below τ*_phys is resolved at 1e-3 /µs, 60× the card value | No (`shiftDelta` narrows it to X, d = 3) | New clause |
 | C2 | **Holds** with the learned decoder on both arms and in both bases: Wilson, cluster and paired all count 0 points | No | **Yes:** v1 "refuted on the ion arm" was a naive-decoder artefact (F1) |
-| C3 | Decided at A53c; the outcome is fixed by construction (team checklist Section 1.2 note) | — | — |
-| C4 | Decided at A53c | — | — |
+| C3 | Decided at the final step; the outcome is fixed by construction (team checklist Section 1.2 note) | — | — |
+| C4 | Decided at the final step | — | — |
 | C5 | **Holds in sample** (no point with learned above naive at τ*_log); out of sample, see V18 | No | New |
 | C6 | Not applicable with the card. With the T2 = 25 µs variant: **undetermined** (X below Z in the point estimate at all four (d, mode) pairs, with every interval overlapping) | New (variant run) | New |
 | O4 | X/Z ratio ≈ 1 at every (d, r) (measurement, no hypothesis) | No | New |
@@ -542,7 +542,7 @@ Source: `data/results/holdout.json` (`node tools/sweep.mjs --stage holdout`). De
 
 ### Decoder artefacts in v1, named plainly
 
-1. **The v1 C2 loss on the ion arm was a naive-decoder artefact.** v1 reported soft decoding worse than hard on the ion arm and called C2 refuted (A28). With the learned decoder on the same banks, soft is never worse than hard beyond any interval: 0 of 39 points in Z and in X, by Wilson, cluster and paired counts (table under C2). This also holds out of sample: in `holdout.json` → `setting2.softWorseCount`, naive 13 of 26, learned 0 of 26. The mechanism is the diagonal edge class missing from the naive graph (F1 at A49).
+1. **The v1 C2 loss on the ion arm was a naive-decoder artefact.** v1 reported soft decoding worse than hard on the ion arm and called C2 refuted. With the learned decoder on the same banks, soft is never worse than hard beyond any interval: 0 of 39 points in Z and in X, by Wilson, cluster and paired counts (table under C2). This also holds out of sample: in `holdout.json` → `setting2.softWorseCount`, naive 13 of 26, learned 0 of 26. The mechanism is the diagonal edge class missing from the naive graph (F1 in the first v2 verdicts).
 2. **The ε = 0 spike in Stage 1 was a naive-decoder artefact.** `stage1_flat.json`, d = 3 hard: naive pL 0.0289 [0.0254, 0.0328] at ε = 0 against 0.00450 [0.00325, 0.00622] at ε = 0.005. Learned 0.00325 [0.00222, 0.00476] against 0.00387 [0.00273, 0.00549], so the spike is gone. X basis (`stage1_flat_x.json`): naive 0.0307 against 0.00363; learned 0.00263 against 0.00337. A noiseless readout is never the worst point with the learned decoder.
 3. **The size of the v1 superconducting C1 shift partly came from the naive decoder.** On the dense grid only naive soft still resolves below τ*_phys (Z d = 3 soft 0.545 [0.515, 0.703] µs; `shiftDelta` resolved). No learned row does (C1 below).
 
@@ -567,32 +567,32 @@ Pre-registered rule: refuted if the τ*_log interval contains or exceeds τ*_phy
 
 **Verdict: refuted at d = 3 and d = 5.** Only X d = 3 soft has its upper bound below 0.910 µs, and only by 0.004 µs. No learned row resolves `shiftDelta`.
 
-The reason is visible in the curve. The dense grid shows a flat valley: `stage3_sc_dense.json`, learned Z d = 3 hard, pL is 0.0065–0.0073 at every point from 0.65 to 1.0 µs. The standard grid, with points at 0.5, 0.7 and 1.0 µs only, could not show this. Its bootstrap intervals were narrower, which is why A49 had C1 holding at d = 3 (Z d = 3 hard 0.764 [0.732, 0.802] in `stage3_sc.json`). The point estimates sit below τ*_phys in 8 of the 9 resolved rows; the exception is Z d = 5 hard, at 0.942 µs. So the readout time that is best for the code most likely lies somewhat below 0.91 µs, but within a flat valley that these statistics cannot separate from τ*_phys.
+The reason is visible in the curve. The dense grid shows a flat valley: `stage3_sc_dense.json`, learned Z d = 3 hard, pL is 0.0065–0.0073 at every point from 0.65 to 1.0 µs. The standard grid, with points at 0.5, 0.7 and 1.0 µs only, could not show this. Its bootstrap intervals were narrower, which is why the first v2 verdicts had C1 holding at d = 3 (Z d = 3 hard 0.764 [0.732, 0.802] in `stage3_sc.json`). The point estimates sit below τ*_phys in 8 of the 9 resolved rows; the exception is Z d = 5 hard, at 0.942 µs. So the readout time that is best for the code most likely lies somewhat below 0.91 µs, but within a flat valley that these statistics cannot separate from τ*_phys.
 
 For comparison, the naive dense rows: Z d = 3 soft 0.545 [0.515, 0.703] µs and Z d = 5 soft 0.547 [0.533, 0.756] µs have upper bounds below 0.910 µs; only the d = 3 soft row resolves `shiftDelta` (+2.1e-3 [+8.6e-4, +3.6e-3]).
 
-- **Changed from A49:** d = 3 moves from "holds" to "refuted", because the dense grid replaces the standard grid (E14 (d)). Cluster intervals play no part.
+- **Changed from the first v2 verdicts:** d = 3 moves from "holds" to "refuted", because the dense grid replaces the standard grid. Cluster intervals play no part.
 - **Changed from v1:** v1 (naive, standard grid) held at d = 3 and 5.
 
 ### C1, ion (`crosstalkScan` in the v2b files, learned, R = 2, n = 16 000 per point, B = 200)
 
-τ*_phys = 23.5 µs (`crosstalkScan.tauPhys`, the belief value; the empirical value is 23.0 µs). The point and resolved flags are as at A49, with identical τ*_log values. New is `shiftDelta`, with τ_ref = 20 µs and τ_short = 15 µs.
+τ*_phys = 23.5 µs (`crosstalkScan.tauPhys`, the belief value; the empirical value is 23.0 µs). The point and resolved flags are as in the first v2 verdicts, with identical τ*_log values. New is `shiftDelta`, with τ_ref = 20 µs and τ_short = 15 µs.
 
 - **(a) Crosstalk off, no idle-driven optimum: holds.** The point flag is true only for Z d = 3 at rate 0, and both of those intervals contain 23.5 µs (hard 15.2 [13.9, 27.4] µs; soft 14.1 [11.8, 500] µs). The resolved flag is false everywhere. `shiftDelta` is not resolved anywhere at rate 0 (Z d = 3 hard +1.9e-4 [0, +4.4e-4]: the lower bound is 0, not above it). Z d = 5 hard at rate 0 is 61.5% tied and UNRESOLVED.
 - **(b) Crosstalk at the card value (1.67e-5 /µs): REFUTED under the resolved flag and under `shiftDelta`. The pre-registered point flag splits between the bases.**
   - Every interval contains 23.5 µs: Z d = 3 hard 30.2 [21.2, 36.8] µs; X d = 3 hard 19.3 [16.2, 47.5] µs.
   - `shiftDelta` resolves in neither basis: Z d = 3 hard −1.3e-4 [−5.6e-4, +1.9e-4]; X d = 3 hard −6e-5 [−2.8e-4, +1.3e-4].
   - Under the point flag, Z shows no optimum below τ*_phys at any (d, mode) and X shows one at every (d, mode). The X d = 5 rows are 100% tied and so UNRESOLVED.
-  - The verdict by the pre-registered point flag is therefore split (E12 (a)).
+  - The verdict by the pre-registered point flag is therefore split.
 - **(c) "No interior optimum at any scanned rate": not met.**
   - Resolved flag: an optimum below τ*_phys is resolved only at 1e-3 /µs (60× the card value), in Z at d = 3 and 5 and in X at d = 3, each in both modes.
   - `shiftDelta` resolves it in only two of those rows, X d = 3 at 1e-3 /µs: hard +1.75e-3 [+4.4e-4, +3.0e-3], soft +1.37e-3 [+6e-5, +2.5e-3]. The Z rows at 1e-3 /µs are not resolved by `shiftDelta` (d = 3 hard +7.5e-4 [−5.6e-4, +2.0e-3]).
-  - Either way the clause is met only where crosstalk is as large as gate noise (A49), so meeting it says little.
-- **Changed from A49:** none in the verdicts; `shiftDelta` is added. **Changed from v1:** v1 had no crosstalk term, and its "held on the ion arm" referred to the v1 statement.
+  - Either way the clause is met only where crosstalk is as large as gate noise (first v2 verdicts), so meeting it says little.
+- **Changed from the first v2 verdicts:** none in the verdicts; `shiftDelta` is added. **Changed from v1:** v1 had no crosstalk term, and its "held on the ion arm" referred to the v1 statement.
 
 ### C2 (learned): soft decoding at or below hard at every τ, most gain at short τ
 
-These are the A49 counts redone. "Wilson" is `validation.C2` → `softAboveBeyondIntervals`. "Cluster" is soft `loCluster` > hard `hiCluster` (unpaired). "Paired" is `paired` → `softMinusHard` with lo > 0. Points shown are per arm and basis (ion: 13 τ × d = 3, 5, 7; superconducting dense: 27 τ × 3 d).
+These are the first v2 counts redone. "Wilson" is `validation.C2` → `softAboveBeyondIntervals`. "Cluster" is soft `loCluster` > hard `hiCluster` (unpaired). "Paired" is `paired` → `softMinusHard` with lo > 0. Points shown are per arm and basis (ion: 13 τ × d = 3, 5, 7; superconducting dense: 27 τ × 3 d).
 
 | Arm (file) | Basis | Decoder | Points | Soft above hard: Wilson | Cluster | Paired | Soft below hard, paired |
 |---|---|---|---|---|---|---|---|
@@ -613,7 +613,7 @@ With the naive decoder the paired count on the ion arm is higher than the Wilson
 
 ### C3 and C4
 
-C3: decided at A53c; the outcome is fixed by construction (team checklist Section 1.2 note). C4: decided at A53c.
+C3: decided at the final step; the outcome is fixed by construction (team checklist Section 1.2 note). C4: decided at the final step.
 
 ### C5 (in sample): learned at or below naive at τ*_log
 
@@ -645,12 +645,12 @@ Each (arm, basis, d, mode) is compared at the grid point nearest the learned τ*
 - Of the 15 rows with a resolved τ*_log, learned is above naive beyond the intervals at 0, under Wilson and under paired intervals. It is below beyond them at 13 (the bold rows), under both Wilson and paired intervals.
 - The two exceptions are ion d = 3 hard in Z and in X, where learned equals naive within about 5%. The statement "lowers … at every (d, arm, mode)" is met only in the weak sense: learned is never higher, but it is not always lower.
 - Over all grid points, the paired learned − naive is above 0 at 2 of 162 superconducting Z points: d = 3 hard at 0.2 µs (+6.3e-3) and d = 5 soft at 0.05 µs (+3.3e-3). Both are short-τ points where pL is 0.1 to 0.5, far from τ*_log. It is above 0 at no superconducting X point and no ion point.
-- **Out of sample:** V18 passes (`holdout.json` → `setting1`; flat ε = 0.02, hard, d = 3 and 5 r = 3; DECISIONS E4 and E11). The held-out ion-card comparison (`setting2`) is the basis for the final C5 at A53c.
-- **Changed from A49/A50:** the paired intervals are added, and the verdict is unchanged. The A50 note "IN SAMPLE … V18 decides it at A53b" is now answered: V18 passed.
+- **Out of sample:** V18 passes (`holdout.json` → `setting1`; flat ε = 0.02, hard, d = 3 and 5 r = 3). The held-out ion-card comparison (`setting2`) is the basis for the final C5 at the final step.
+- **Changed from the first v2 and provisional verdicts:** the paired intervals are added, and the verdict is unchanged. The provisional note "IN SAMPLE … V18 decides it at the final step" is now answered: V18 passed.
 
 ### C6 (variant card T2 = 25 µs, X, against the dense Z file; learned, d = 3 and 5)
 
-C6 is not applicable with the card, where T2 = 77 µs ≥ T1 = 50 µs (E12 (b)). The variant (E14 (c)) changes only T2. Its X idle probability at 1 µs is 0.0196, against Z 0.0099 and X with the card 0.0065 (`budget.idle`). Refutation: τ*_log(X) ≥ τ*_log(Z) beyond the intervals.
+C6 is not applicable with the card, where T2 = 77 µs ≥ T1 = 50 µs. The variant changes only T2. Its X idle probability at 1 µs is 0.0196, against Z 0.0099 and X with the card 0.0065 (`budget.idle`). Refutation: τ*_log(X) ≥ τ*_log(Z) beyond the intervals.
 
 | d | Mode | Z (`stage3_sc_dense.json`) τ*_log [95%] | X, T2 = 25 (`stage3_sc_x_T2_25.json`) | X, card (`stage3_sc_x_dense.json`), for reference | Outcome |
 |---|---|---|---|---|---|
@@ -670,18 +670,18 @@ No row is tied 50% or more (largest 16%).
 
 The extra dephasing raises X pL more the longer the readout, and this is resolved at d = 3. That is the mechanism C6 relies on. At d = 5, near the optimum, the curves cannot be told apart.
 
-**Changed from A49:** not applicable at A49; the variant is new.
+**Changed from the first v2 verdicts:** not applicable there; the variant is new.
 
 ### O4 (`dem_forte1.json` → `ratioXoverZ`)
 
-These are unchanged from A49. The X/Z bulk detector-rate ratio is 1.041 [0.894, 1.213] (d3 r1), 1.027 [0.959, 1.100] (d3 r3), 1.000 [0.953, 1.048] (d5 r3), 1.029 [0.995, 1.064] (d5 r5) and 1.021 [0.983, 1.061] (d7 r3). All 5 intervals contain 1. Measurement, no hypothesis (E5).
+These are unchanged from the first v2 verdicts. The X/Z bulk detector-rate ratio is 1.041 [0.894, 1.213] (d3 r1), 1.027 [0.959, 1.100] (d3 r3), 1.000 [0.953, 1.048] (d5 r3), 1.029 [0.995, 1.064] (d5 r5) and 1.021 [0.983, 1.061] (d7 r3). All 5 intervals contain 1. Measurement, no hypothesis.
 
 ### F1 (post hoc): the naive decoder makes soft decoding lose; the learned decoder does not
 
 - **In sample** (v2b files, soft worse than hard beyond the intervals). Z: naive 13 of 39 (Wilson) and 18 of 39 (paired); learned 0 and 0. X: naive 9 and 10; learned 0 and 0.
   - Example, Z d = 3 at 20 µs: naive soft 0.00737 [0.00649, 0.00837] (0.00562, 0.00916) against hard 0.00347 [0.00288, 0.00418] (0.00220, 0.00475), paired +3.9e-3 [+2.5e-3, +5.3e-3].
   - Learned at the same point: soft 0.00356 (0.00237, 0.00488) against hard 0.00331 (0.00217, 0.00456), paired +2.5e-4 [−3e-5, +5.6e-4].
-- **Out of sample** (`holdout.json` → `setting2`, paired cluster): naive 13 of 26 points, learned 0 of 26 (A53b).
+- **Out of sample** (`holdout.json` → `setting2`, paired cluster): naive 13 of 26 points, learned 0 of 26.
 - **Changed from v1:** F1 is what replaces v1's "C2 refuted"; it is not a pre-registered result.
 
 ### Where a cluster or paired result changes a verdict reached with Wilson intervals
@@ -692,12 +692,12 @@ These are unchanged from A49. The X/Z bulk detector-rate ratio is 1.041 [0.894, 
 2. **C5 at τ*_log:** ion X d = 5 soft is "overlap" under Wilson and "learned below" under the paired interval. Its τ*_log is UNRESOLVED, so it is excluded either way. No row moves towards "learned above".
 3. **C1 ion (c):** under the resolved flag, an optimum below τ*_phys at 1e-3 /µs is shown in 6 rows. Under `shiftDelta` it is shown in 2 (X d = 3, both modes). The clause is not met either way.
 4. **C1 ion (b):** `shiftDelta` agrees with the resolved flag (refuted in both bases).
-5. **C1 superconducting:** `shiftDelta` resolves no learned row, which agrees with "refuted". Note that the verdict change from A49 (d = 3 holds → refuted) comes from the dense grid, not from cluster or paired intervals.
-6. **V18** (A53b): the cluster intervals agree with the Wilson verdict (learned upper bound 0.00122 against naive lower bound 0.00135 at d = 5).
+5. **C1 superconducting:** `shiftDelta` resolves no learned row, which agrees with "refuted". Note that the verdict change from the first v2 verdicts (d = 3 holds → refuted) comes from the dense grid, not from cluster or paired intervals.
+6. **V18**: the cluster intervals agree with the Wilson verdict (learned upper bound 0.00122 against naive lower bound 0.00135 at d = 5).
 
-## Final verdicts in plain language (A55, Sun 11 Oct 03:18 IST)
+## Final verdicts in plain language (Sun 11 Oct 03:18 IST)
 
-Final Stage 4 (`stage4_comparison.json`, 0fdb7c4; learned decoder). The plain texts are copied from `conclusions[*].plain`, `findings[*].plain` and `framingPlain`, edited by Person A at A55 (DECISIONS E15). This is the verdict column for the scoreboard and the page.
+Final Stage 4 (`stage4_comparison.json`, 0fdb7c4; learned decoder). The plain texts are copied from `conclusions[*].plain`, `findings[*].plain` and `framingPlain`, edited by Person A. This is the verdict column for the scoreboard and the page.
 
 **Framing:** Same IonQ-simulated circuits and gate noise, two ways of reading qubits out: a controlled comparison, not a hardware benchmark.
 

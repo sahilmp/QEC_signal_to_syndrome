@@ -10,7 +10,7 @@ const plat = (id) => PLATFORMS.find((p) => p.id === id);
 const physLine = (opts) => opts.vlines.find((v) => v.label === 'τ_phys');
 
 // Catches: fails if the Level 5 superconducting chart marks tau_phys at the belief optimum
-// (optima.tauPhys, 0.587 µs, A28 item 2) instead of the minimum of the simulated
+// (optima.tauPhys, 0.587 µs) instead of the minimum of the simulated
 // assignment error, in either metric or decoding mode.
 test('superconducting tau_phys marker is the empirical minimum in every chart', () => {
   const want = findMinimum(stage3.x.values, stage3.assignment.empirical, { logX: true }).xMin;
@@ -22,7 +22,7 @@ test('superconducting tau_phys marker is the empirical minimum in every chart', 
   }
 });
 
-// A53 review item 9 (replaces "trapped-ion tau_phys marker stays optima.tauPhys", which the
+// (Replaces "trapped-ion tau_phys marker stays optima.tauPhys", which the
 // review asked to change). Catches: fails if the trapped-ion chart's dashed tau_phys line sits
 // at the model's 23.5 µs (optima.tauPhys) instead of the simulated 23.0 µs
 // (optima.tauPhysEmpirical) that the hero and C1 quote, in either metric or mode.
@@ -42,7 +42,7 @@ test('physOf: belief value carried only for the superconducting platform', () =>
   assert.equal(physOf(plat('trapped-ion')).belief, null);
 });
 
-// Catches: fails if table numbers keep more than three significant figures (A28 item 6) or
+// Catches: fails if table numbers keep more than three significant figures or
 // switch notation at the wrong place: 0.01 is the boundary (plain), one step below it is
 // written with a power of ten.
 test('sig3: three significant figures, power of ten below 0.01 and from 1000 on', () => {
@@ -80,7 +80,7 @@ test('breakEvenParts: exact text for a fixed break-even', () => {
     'none (d = 5 below d = 3 at every grid point)');
 });
 
-// Catches: fails if the soft rows repeat the hard break-even (A28 item 3): on the real
+// Catches: fails if the soft rows repeat the hard break-even: on the real
 // stage-4 file the ion has a break-even in hard mode and none in soft mode, and the hard
 // text carries that file's own ε̄, interval and τ (read from the file, so a re-run of
 // Person A's sweep does not break the test).
@@ -92,7 +92,7 @@ test('breakEvenParts: per decoding mode from breakEven.byMode', () => {
   assert.match(breakEvenParts(be.soft).join(''), /^none \(d = 5 below d = 3 at every grid point\)$/);
 });
 
-// Catches: fails if parameter-card values lose their units (A28 item 6) or a rate per µs
+// Catches: fails if parameter-card values lose their units or a rate per µs
 // is labelled as a time.
 test('unitOf: units from the parameter name suffix', () => {
   assert.deepEqual(['R_bright_per_us', 'gamma_bright_to_dark_per_us', 'T1_idle_us', 'kappa_over_2pi_MHz', 'nbar'].map(unitOf),
@@ -109,8 +109,8 @@ test('sensitivityCounts: exact text for fixed rows', () => {
   assert.equal(sensitivityCounts([], 'C1'), '—');
 });
 
-// CC-B21 item 5 (changed because the Stage 4 file became final: its sensitivity rows carry no
-// C1-C4 verdicts, DECISIONS, Person A, CC-A22). Catches: fails if the "Sensitivity rows" column
+// Author\'s decision (changed because the Stage 4 file became final: its sensitivity rows carry no
+// C1-C4 verdicts, DECISIONS, Person A). Catches: fails if the "Sensitivity rows" column
 // of the verdict table shows anything but "—" for a conclusion that no row carries (it used to
 // count "undefined" verdicts), or if it stops counting when rows do carry one. On the real file:
 // every conclusion gives "—", and the rows carry none of C1-C6, O4. Non-vacuous: the same
@@ -279,8 +279,8 @@ test('gateLayers: number, "2*(d-1)", and anything else throws', () => {
   assert.throws(() => gateLayers({ value: 'd+1' }, 5), /unknown gate-layer expression/);
 });
 
-// CC-B21 item 5 (changed because the Stage 4 file became final, with the verdict "not
-// applicable", informative: false and observation rows; DECISIONS, Person A, CC-A22). Catches:
+// Author\'s decision (changed because the Stage 4 file became final, with the verdict "not
+// applicable", informative: false and observation rows; DECISIONS, Person A). Catches:
 // fails if the scoreboard drops, reorders or duplicates a conclusion; shows the wrong badge
 // (e.g. "held" for a refuted hypothesis, or colour without the word and icon); shows "?
 // undetermined" for C6's "not applicable"; gives C3 (informative: false) a verdict badge instead
@@ -321,7 +321,7 @@ test('scoreboard: one row per conclusion, C1–C6 then O4, with the right badge'
   assert.equal(rowMark(synth.find((r) => r.id === 'C9')), '✓ held');
 });
 
-// CC-B21 item 5. Catches: fails if the scoreboard rows in the page lose the grey labels or the
+// Catches: fails if the scoreboard rows in the page lose the grey labels or the
 // badge words (C3, O4, C6), or if the findings are not shown above the scoreboard with F1 first.
 test('Level 5 v2: findings above the scoreboard, F1 first, and the labels in the page', () => {
   const root = mountWith(true);
@@ -342,7 +342,7 @@ test('Level 5 v2: findings above the scoreboard, F1 first, and the labels in the
   assert.deepEqual(f.map((x) => x.id), ['F1', 'F2']);
 });
 
-// Catches (E17 audit; team checklist 2.1, Wilson never alone): fails if F1's in-sample line
+// Catches (final audit; team checklist 2.1, Wilson never alone): fails if F1's in-sample line
 // quotes the Wilson count alone or before the paired count, if the counts are not the file's
 // sums over both memories (paired 18 + 10, Wilson 13 + 9, points 39 + 39), or if an entry with no
 // paired count is still quoted. Boundary: paired 0 is quoted; paired missing is left out.
@@ -372,7 +372,7 @@ test('scoreboard: unknown verdicts and missing conclusions are said in words', (
 // Catches: fails if the tornado keeps the input order (A, B, C) instead of sorting by the
 // largest absolute change (B: |−0.5|, A: 0.3, C: 0.1), ignores a negative change's size, or
 // forgets to subtract the baseline (A's ion change at × 0.5 is 0.25 − 0.25 = 0). A's 0.3 is
-// its ion change at × 2 (0.55 − 0.25); before A53 review item 7 it came from the
+// its ion change at × 2 (0.55 − 0.25); previously it came from the
 // superconducting bar of this ion parameter, which is no longer drawn (its values, up to 0.3,
 // would reorder the rows if they leaked in).
 test('tornado: parameters sorted by largest absolute change from the baseline', () => {
@@ -385,14 +385,14 @@ test('tornado: parameters sorted by largest absolute change from the baseline', 
   assert.deepEqual(rows.map((r) => r.parameter), ['B', 'A', 'C']);
   assert.ok(Math.abs(rows[0].maxAbs - 0.5) < 1e-12);
   assert.equal(rows[1].bars.find((b) => b.arm === 'trapped-ion' && b.scale === 0.5).change, 0);
-  // A53 review item 7 (changed from four bars per parameter, both arms): only the arm that owns
+  // Changed from four bars per parameter, both arms: only the arm that owns
   // the parameter is drawn; the superconducting values above (0.3, 0.1, 0, 0.05) must not appear.
   assert.deepEqual(rows[1].bars.map((b) => `${b.arm} ${b.scale}`), ['trapped-ion 0.5', 'trapped-ion 2']);
   const opts = tornadoOptions(src);
   assert.deepEqual(opts.groups.map((g) => g.label), rows.map((r) => r.label));
 });
 
-// A53 review item 7; CC-B21 item 5 (changed because the Stage 4 file became final: its six rows
+// Author's decision (changed because the Stage 4 file became final: its six rows
 // are γ dark→bright, η and T1, so the χ/2π row checked before no longer exists). Catches: fails
 // if a bar of the arm that does not own the parameter is drawn on the real data (those bars are
 // zero by construction), if the raw card key is the visible name, or if a final row is missing
@@ -411,7 +411,7 @@ test('tornado on the real data: only the owning arm, readable names', () => {
   assert.ok(!rows.some((r) => /_per_us|_MHz|_us$/.test(r.label)), 'raw parameter key shown');
 });
 
-// A53 review item 7; CC-B21 item 5 (changed because the Stage 4 file became final: only
+// Author's decision (changed because the Stage 4 file became final: only
 // superconducting T1 × 0.5 is not run, and the wording is now "not run (T2 would exceed 2·T1)").
 // Catches: fails if the row without an effect disappears silently or gets the wrong reason
 // (T1 = 25 µs gives 2·T1 = 50 < T2 = 77), or if it is missing from the tornado's values table.
@@ -425,7 +425,7 @@ test('notRunRows: the rows that would break T2 ≤ 2·T1 are listed with the rea
   assert.deepEqual(tableRows[0].slice(0, 3), ['Superconducting: T1', 'Superconducting', '× 0.5']);
 });
 
-// CC-B21 item 5. Catches: fails if a paired change whose 95% interval touches 0 is shown as
+// Catches: fails if a paired change whose 95% interval touches 0 is shown as
 // resolved (the rule is strict: lo > 0 or hi < 0), or the cell text loses its sign, interval,
 // power of ten or tau. Boundary: [−1.9×10⁻⁴, 0] is not resolved; the same interval moved one
 // step past 0 is (1e-12 for the rule itself, one shot in 32 000 for the cell text).
@@ -443,7 +443,7 @@ test('pairedCell: resolved only when the interval excludes 0 strictly', () => {
   assert.equal(formatChange(-0.000625, -0.0010625, -0.0003125), '−6.25×10⁻⁴ [−10.6, −3.13]×10⁻⁴');
 });
 
-// CC-B21 item 5. Catches: fails if the tornado's values table misses the paired change against
+// Catches: fails if the tornado's values table misses the paired change against
 // the baseline, or resolves a row whose interval includes 0. On the final file exactly three rows
 // are resolved, all superconducting: η × 0.5 (+), η × 2 (−) and T1 × 2 (−); ion γ × 0.5 (interval
 // ending at 0) and γ × 2 are not.
@@ -462,7 +462,7 @@ test('tornado values table: paired change against the baseline, three rows resol
   assert.ok(/resampling quantum shots/.test(t.caption));
 });
 
-// CC-B21 item 5. Catches: fails if a Stage 4 file with sensitivity null still draws the tornado
+// Catches: fails if a Stage 4 file with sensitivity null still draws the tornado
 // or the "not run" list, or hides the file's sensitivityNote. Non-vacuous: the real file draws
 // the tornado and the list.
 test('Level 5 v2: sensitivity null hides the tornado and shows sensitivityNote', () => {
@@ -485,7 +485,7 @@ test('Level 5 v2: sensitivity null hides the tornado and shows sensitivityNote',
   }
 });
 
-// A53 review item 13. Catches: fails if the budget legend names "Crosstalk" plainly although
+// Catches: fails if the budget legend names "Crosstalk" plainly although
 // the superconducting arm has none by design (its value is 0).
 test('budget bars: the crosstalk segment says it is trapped ion only', () => {
   const o = budgetOptions();
@@ -495,7 +495,7 @@ test('budget bars: the crosstalk segment says it is trapped ion only', () => {
   assert.equal(xt.value, 0);
 });
 
-// A53 review item 1 (blocking); CC-B21 item 5 (changed because the Stage 4 file became final,
+// Author's decision (changed because the Stage 4 file became final,
 // provisional: false; the banners are now checked on a synthetic provisional file). Catches:
 // fails if Level 5 v2 shows provisional Stage 4 verdicts without a visible banner at the top,
 // above the scoreboard and above the tornado chart (and inside "Data"), or if any banner shows
@@ -515,7 +515,7 @@ test('Level 5 v2: provisional banner while stage4.provisional is true, none when
   }
 });
 
-// A53 review item 8. Catches: fails if the phase-flip notes say again that the verdicts come
+// Catches: fails if the phase-flip notes say again that the verdicts come
 // from the bit-flip memory only (C1 and C2 pool both bases; C6 and O4 compare them).
 test('phase-flip notes: the scoreboard covers both memories', () => {
   assert.equal(BASIS_NOTES.scoreboard, 'The scoreboard covers both memories.');
@@ -577,7 +577,7 @@ test('Level 5 v2: the old tables are inside the "Data" expander; v1 unchanged', 
   assert.equal(SRC_V2.stage4, stage4v2);
 });
 
-// ---- CC-B21 items 1 and 2: decoder label and intervals on the Level 5 charts ----
+// ---- Decoder label and intervals on the Level 5 charts ----
 import { LEARNED_LABEL } from '../src/ui/level3.js';
 
 // Catches: fails if the per-µs chart draws the Wilson bounds while the results carry cluster

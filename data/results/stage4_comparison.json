@@ -2525,14 +2525,14 @@
       "statement": "Superconducting: τ*_log < τ*_phys (empirical), with the learned decoder, in both bases. Trapped ion with crosstalk off: no idle-driven optimum. Trapped ion with crosstalk at the card value: an interior τ*_log < τ*_phys appears",
       "verdict": "refuted",
       "automated": "refuted",
-      "note": "Superconducting (stage3_sc_dense.json, stage3_sc_x_dense.json; learned; against τ*_phys (empirical) = 0.910 µs): refuted. Interval below τ*_phys: X d3 soft 0.677 [0.599, 0.906] µs. Containing or above it: Z d3 hard 0.710 [0.662, 0.990] µs; Z d3 soft 0.694 [0.563, 0.912] µs; Z d5 hard 0.942 [0.643, 0.977] µs; Z d5 soft 0.844 [0.518, 0.983] µs; X d3 hard 0.696 [0.685, 0.946] µs; X d5 hard 0.653 [0.629, 1.01] µs; X d5 soft 0.900 [0.642, 1.01] µs. shiftDelta resolves no learned row. Trapped ion (crosstalkScan, learned), pre-registered point flag: crosstalk off refuted (flag at Z d3 hard, Z d3 soft); card rate undetermined (2 of 6 rows flagged); any rate held. Resolved flag (whole interval below τ*_phys, E12): off held, card rate refuted, any rate held (Z 0.001 /µs d3 hard, Z 0.001 /µs d3 soft, Z 0.001 /µs d5 hard, Z 0.001 /µs d5 soft, X 0.001 /µs d3 hard, X 0.001 /µs d3 soft). shiftDelta (E14): off held, card rate refuted, any rate held (X 0.001 /µs d3 hard, X 0.001 /µs d3 soft). Person A's reading of the ion parts uses the resolved flag (refuted), because the point flag reads noise in a flat minimum (E12 (a)). The overall verdict is refuted under either flag, because the superconducting part is.",
+      "note": "Superconducting (stage3_sc_dense.json, stage3_sc_x_dense.json; learned; against τ*_phys (empirical) = 0.910 µs): refuted. Interval below τ*_phys: X d3 soft 0.677 [0.599, 0.906] µs. Containing or above it: Z d3 hard 0.710 [0.662, 0.990] µs; Z d3 soft 0.694 [0.563, 0.912] µs; Z d5 hard 0.942 [0.643, 0.977] µs; Z d5 soft 0.844 [0.518, 0.983] µs; X d3 hard 0.696 [0.685, 0.946] µs; X d5 hard 0.653 [0.629, 1.01] µs; X d5 soft 0.900 [0.642, 1.01] µs. shiftDelta resolves no learned row. Trapped ion (crosstalkScan, learned), pre-registered point flag: crosstalk off refuted (flag at Z d3 hard, Z d3 soft); card rate undetermined (2 of 6 rows flagged); any rate held. Resolved flag (whole interval below τ*_phys): off held, card rate refuted, any rate held (Z 0.001 /µs d3 hard, Z 0.001 /µs d3 soft, Z 0.001 /µs d5 hard, Z 0.001 /µs d5 soft, X 0.001 /µs d3 hard, X 0.001 /µs d3 soft). shiftDelta: off held, card rate refuted, any rate held (X 0.001 /µs d3 hard, X 0.001 /µs d3 soft). Person A's reading of the ion parts uses the resolved flag (refuted), because the point flag reads noise in a flat minimum. The overall verdict is refuted under either flag, because the superconducting part is.",
       "plain": "In neither qubit type does the code reliably want a shorter readout than a single qubit does.",
       "informative": true,
       "deviations": [
-        "E12 (a): the ion parts are also reported with interiorBelowTauPhysResolved (the whole interval below τ*_phys), decided after seeing the A48 data; the automated verdict uses the pre-registered point flag.",
-        "E14 (b): shiftDelta, pL(τ_ref) − pL(τ_short) with a paired cluster interval, is a post-hoc addition reported beside the pre-registered rule.",
-        "E14 (d): the superconducting part uses the dense grid (27 points); on the standard grid (A49) d = 3 held in both bases.",
-        "E12: a τ*_log with fractionTied ≥ 0.5 is UNRESOLVED and enters no verdict."
+        "The ion parts are also reported with interiorBelowTauPhysResolved (the whole interval below τ*_phys), decided after seeing the v2 rerun data; the automated verdict uses the pre-registered point flag.",
+        "shiftDelta, pL(τ_ref) − pL(τ_short) with a paired cluster interval, is a post-hoc addition reported beside the pre-registered rule.",
+        "The superconducting part uses the dense grid (27 points); on the standard grid (first v2 verdicts) d = 3 held in both bases.",
+        "A τ*_log with fractionTied ≥ 0.5 is UNRESOLVED and enters no verdict."
       ]
     },
     "C2": {
@@ -2552,7 +2552,7 @@
       "plain": "The ion makes fewer errors per round, the superconducting qubit more rounds per second; our parameters guaranteed this.",
       "informative": false,
       "deviations": [
-        "E12 (c): reported with informative: false; the U4 rule itself is unchanged."
+        "Reported with informative: false; the U4 rule itself is unchanged."
       ]
     },
     "C4": {
@@ -2572,26 +2572,26 @@
       "plain": "Learning the noise from the data never made decoding worse, and usually made it clearly better.",
       "informative": true,
       "deviations": [
-        "Out of sample only where held-out banks exist (DECISIONS E11): trapped ion, Z basis, d = 3 and 5; the other rows decode the banks the rates were learned from and carry inSample: true."
+        "Out of sample only where held-out banks exist: trapped ion, Z basis, d = 3 and 5; the other rows decode the banks the rates were learned from and carry inSample: true."
       ]
     },
     "C6": {
       "statement": "In the phase-flip memory the superconducting τ*_log is shorter than in the bit-flip memory when T2 < T1",
       "verdict": "not applicable",
       "automated": "not applicable",
-      "note": "Not applicable with the card: the statement is conditional on T2 < T1, and the card has T2 = 77 µs ≥ T1 = 50 µs (DECISIONS E7, E12 (b)). Variant card T2 = 25 µs (UNSOURCED, illustrative; stage3_sc_x_T2_25.json against stage3_sc_dense.json, learned): d3 hard: X 0.691 [0.640, 0.792] µs against Z 0.710 [0.662, 0.990] µs; d3 soft: X 0.644 [0.548, 0.728] µs against Z 0.694 [0.563, 0.912] µs; d5 hard: X 0.798 [0.596, 0.810] µs against Z 0.942 [0.643, 0.977] µs; d5 soft: X 0.603 [0.561, 0.805] µs against Z 0.844 [0.518, 0.983] µs. The rule gives \"undetermined\": X is shorter in every point estimate, but the intervals overlap. pL(X) − pL(Z) at the grid point nearest the Z τ*_log (unpaired, different banks; cluster half-widths in quadrature): d3 hard +0.00300 [0.000983, 0.00500] at 0.7 µs; d3 soft +0.00263 [0.000633, 0.00476] at 0.7 µs; d5 hard +0.00103 [0.000427, 0.00163] at 0.95 µs; d5 soft +0.000219 [-0.000444, 0.000816] at 0.85 µs.",
+      "note": "Not applicable with the card: the statement is conditional on T2 < T1, and the card has T2 = 77 µs ≥ T1 = 50 µs. Variant card T2 = 25 µs (UNSOURCED, illustrative; stage3_sc_x_T2_25.json against stage3_sc_dense.json, learned): d3 hard: X 0.691 [0.640, 0.792] µs against Z 0.710 [0.662, 0.990] µs; d3 soft: X 0.644 [0.548, 0.728] µs against Z 0.694 [0.563, 0.912] µs; d5 hard: X 0.798 [0.596, 0.810] µs against Z 0.942 [0.643, 0.977] µs; d5 soft: X 0.603 [0.561, 0.805] µs against Z 0.844 [0.518, 0.983] µs. The rule gives \"undetermined\": X is shorter in every point estimate, but the intervals overlap. pL(X) − pL(Z) at the grid point nearest the Z τ*_log (unpaired, different banks; cluster half-widths in quadrature): d3 hard +0.00300 [0.000983, 0.00500] at 0.7 µs; d3 soft +0.00263 [0.000633, 0.00476] at 0.7 µs; d5 hard +0.00103 [0.000427, 0.00163] at 0.95 µs; d5 soft +0.000219 [-0.000444, 0.000816] at 0.85 µs.",
       "plain": "Does not apply: our superconducting qubit loses phase more slowly than energy. An invented faster-dephasing qubit leans yes, unresolved.",
       "informative": true,
       "deviations": [
-        "E14 (c): the variant card T2 = 25 µs is UNSOURCED (illustrative) and post hoc, chosen only to meet the premise T2 < T1.",
-        "CC-A22 asked for pairedClusterDiff of pL at matching τ; the X and Z files decode different banks (repx_* against rep_*) and per-shot failure counts are not stored, so the difference is unpaired, with the cluster half-widths combined in quadrature."
+        "The variant card T2 = 25 µs is UNSOURCED (illustrative) and post hoc, chosen only to meet the premise T2 < T1.",
+        "A paired difference (pairedClusterDiff) of pL at matching τ was the author's decision; the X and Z files decode different banks (repx_* against rep_*) and per-shot failure counts are not stored, so the difference is unpaired, with the cluster half-widths combined in quadrature."
       ]
     },
     "O4": {
       "statement": "Ratio of bulk detector rates, X-basis to Z-basis banks, per (d, r): how biased forte-1 noise looks to the decoder (measurement, no hypothesis)",
       "verdict": "undetermined",
       "automated": "undetermined",
-      "note": "Measurement, no hypothesis (no verdict). X over Z bulk detector rate (dem_forte1.json -> ratioXoverZ): d3 r1 1.041 [0.894, 1.213]; d3 r3 1.027 [0.959, 1.100]; d5 r3 1.000 [0.953, 1.048]; d5 r5 1.029 [0.995, 1.064]; d7 r3 1.021 [0.983, 1.061]; 5 of 5 intervals contain 1 (DECISIONS E5).",
+      "note": "Measurement, no hypothesis (no verdict). X over Z bulk detector rate (dem_forte1.json -> ratioXoverZ): d3 r1 1.041 [0.894, 1.213]; d3 r3 1.027 [0.959, 1.100]; d5 r3 1.000 [0.953, 1.048]; d5 r5 1.029 [0.995, 1.064]; d7 r3 1.021 [0.983, 1.061]; 5 of 5 intervals contain 1.",
       "plain": "Measured, not tested: IonQ’s simulated gate noise looks the same to the decoder for bit flips and phase flips.",
       "informative": true,
       "deviations": []
@@ -5394,7 +5394,7 @@
         },
         "gate_layers_per_round": {
           "value": "2*(d-1)",
-          "source": "conservative choice: the 2(d-1) CNOTs of a round run one after another on the single chain (no published statement found that IonQ Forte runs two-qubit gates on disjoint pairs in parallel; simultaneous entangling gates in one chain are demonstrated only in research systems). See DECISIONS E8"
+          "source": "conservative choice: the 2(d-1) CNOTs of a round run one after another on the single chain (no published statement found that IonQ Forte runs two-qubit gates on disjoint pairs in parallel; simultaneous entangling gates in one chain are demonstrated only in research systems)."
         },
         "reset_us": {
           "value": 50,
@@ -5525,16 +5525,16 @@
       }
     },
     "definitions": {
-      "cycleTime": "layers * two_qubit_gate_us + tau + reset_us; layers = gate_layers_per_round (a number, or \"2*(d-1)\" evaluated at d: sequential ion gates, DECISIONS E8)",
+      "cycleTime": "layers * two_qubit_gate_us + tau + reset_us; layers = gate_layers_per_round (a number, or \"2*(d-1)\" evaluated at d: sequential ion gates)",
       "roundsPerSecond": "1e6 / cycleTime(us)",
       "tradeoff": "per d and mode, at every grid tau: roundsPerSecond and perRound = 0.5 (1 - (1 - 2 pL)^(1/r)); lo/hi are perRound of the Wilson bounds, loCluster/hiCluster of the cluster bounds",
       "perRound": "0.5 (1 - (1 - 2 pL)^(1/r)) at tau*_log; pL and its bounds interpolated linearly in ln tau between grid points (the best grid point when tau*_log is at the grid edge)",
       "perMicrosecond": "perRound / cycleTime at tau*_log and d",
-      "intervals": "lo/hi: Wilson 95% through the transform; loCluster/hiCluster: cluster bootstrap over quantum shots (B = 500, CC-A19) through the same transform. Cluster intervals are the honest ones where gate faults dominate; Wilson is kept beside them",
+      "intervals": "lo/hi: Wilson 95% through the transform; loCluster/hiCluster: cluster bootstrap over quantum shots (B = 500) through the same transform. Cluster intervals are the honest ones where gate faults dominate; Wilson is kept beside them",
       "budgetAtOptimum": "Stage 2/3 budget arrays interpolated in ln tau at tau*_log (d = 3, hard, learned); gate is the mean of the learned edge classes",
       "breakEven": "first sign change of pL(d=5) - pL(d=3) in tau order, x axis averageAssignmentError() (belief; empiricalAxis: the F1 empirical curve); interval from the crossings of hi5 - lo3 and lo5 - hi3 (Wilson) on the same grid segment",
-      "conclusions": "C1-C6 and O4 follow team checklist Section 1.2 (statements verbatim) with the rules in tools/sweep.mjs (c1Conclusion ... o4Conclusion); verdict equals automated unless the note gives Person A's different reading; informative and deviations per U4 revision 2.1; plain is a draft edited at A55",
-      "tieRule": "a tau*_log with fractionTied >= 0.5 is UNRESOLVED and enters no verdict (DECISIONS E12)"
+      "conclusions": "C1-C6 and O4 follow team checklist Section 1.2 (statements verbatim) with the rules in tools/sweep.mjs (c1Conclusion ... o4Conclusion); verdict equals automated unless the note gives Person A's different reading; informative and deviations per U4 revision 2.1; plain is a draft edited by Person A",
+      "tieRule": "a tau*_log with fractionTied >= 0.5 is UNRESOLVED and enters no verdict"
     },
     "sensitivity": {
       "rows": [

@@ -43,7 +43,7 @@ for (const file of files) {
 
 // V13: phase-flip memory banks (basis X) from the ideal simulator with one physical Z gate
 // injected on data qubit i after round k. A Z in the X basis must give the same bit pattern as
-// an X in the Z basis (CLAUDE.md, "Idle errors"), so the single outcome must equal the basis-Z
+// an X in the Z basis, so the single outcome must equal the basis-Z
 // prediction: applyX on the error-free bits for the same site, and the matching v4 bank's key.
 const v13Files = readdirSync(BANK_DIR).filter((f) => /^v13_.*\.json$/.test(f)).sort();
 

@@ -11,7 +11,7 @@ import { decode } from '../src/core/matching.js';
 
 const ionCard = JSON.parse(readFileSync(new URL('../params/ion.json', import.meta.url), 'utf8'));
 
-// Standard layout from CLAUDE.md: check j of round k is bit k*(d-1) + j, data i is (d-1)*r + i.
+// Standard layout: check j of round k is bit k*(d-1) + j, data i is (d-1)*r + i.
 function layoutFor(d, r) {
   const ancilla = [];
   for (let k = 0; k < r; k++) ancilla.push(Array.from({ length: d - 1 }, (_, j) => k * (d - 1) + j));
@@ -191,7 +191,7 @@ test('edge weight table: per-edge p in hard and soft mode from known llrs', () =
   }
 });
 
-// Boundary test (non-vacuous pair) for the idle order (DECISIONS: Person A, M1). Catches:
+// Boundary test (non-vacuous pair) for the idle order (DECISIONS: Person A). Catches:
 // fails if idle errors are applied after readout (flipping hard bits and negating llrs)
 // instead of to the true bits before readout. d = 3, r = 2, pIdle = 1: an X on every data
 // qubit after round 0 flips each check of round 1 twice (no change) and every data bit once,
@@ -302,9 +302,9 @@ test('soft beats hard on model-matched synthetic data (ion, tau = 5), paired, > 
   assert.ok(hard - soft > 4 * se, `hard ${hard}, soft ${soft}, paired SE ${se.toFixed(1)}`);
 });
 
-// ---- CC-A12: naive and learned noise models ----
+// ---- naive and learned noise models ----
 
-// Pinned output of the pre-CC-A12 decodeShot (pGate only, no noise argument), computed with
+// Pinned output of the pre-learned-model decodeShot (pGate only, no noise argument), computed with
 // that version on this shot: d = 5, r = 3, ion card at tau = 7 us, pGate 0.012, seed 4242,
 // bits m[0][1], m[1][1], m[1][3], x[0], x[4] set. Hard and soft choose different matchings.
 const PIN_PRE_A12 = {
@@ -315,10 +315,10 @@ const PIN_PRE_A12 = {
   soft: [{ a: 1, b: 9, edges: [21, 25] }, { a: 7, b: 'B', edges: [9] }, { a: 11, b: 15, edges: [31] }, { a: 12, b: 'B', edges: [15] }],
 };
 
-// Catches: fails if the naive model changed with CC-A12 (graph gains diagonal edges, weights
+// Catches: fails if the naive model changed with the learned model (graph gains diagonal edges, weights
 // differ, the idle or readout draw order moves, or basis "Z" changes the idle probability),
-// for either calling form: pGate alone (every pre-CC-A12 caller) and noise { model: "naive" }.
-test('naive decodeShot reproduces the pre-CC-A12 result on a fixed shot, both call forms', () => {
+// for either calling form: pGate alone (every pre-learned-model caller) and noise { model: "naive" }.
+test('naive decodeShot reproduces the pre-learned-model result on a fixed shot, both call forms', () => {
   const d = 5;
   const r = 3;
   const layout = layoutFor(d, r);
@@ -464,7 +464,7 @@ test('runPoint passes bank.basis to idleFlipProbability; malformed noise throws'
   assert.throws(() => runPoint({ bank, readout, mode: 'hard', noise: { model: 'other' }, seed: 1 }), /noise\.model/);
 });
 
-// ---- tools/sweep.mjs helpers (CC-A14): error budget, crosstalk scan rates, C1 ion verdict ----
+// ---- tools/sweep.mjs helpers: error budget, crosstalk scan rates, C1 ion verdict ----
 
 const { errorBudget, crosstalkScanRates, interiorBelowTauPhys } = await import('../tools/sweep.mjs');
 const { createScReadout } = await import('../src/core/readout/sc.js');
@@ -527,7 +527,7 @@ test('interiorBelowTauPhys: strict, interior only; boundary at tau*_phys', () =>
   assert.equal(interiorBelowTauPhys({ xMin: 1, atEdge: true }, tauPhys), false);
 });
 
-// ---- tools/sweep.mjs helpers (CC-A19): dense grid, shiftDelta, --set overrides ----
+// ---- tools/sweep.mjs helpers: dense grid, shiftDelta, --set overrides ----
 
 const { denseGrid, shiftDeltaPoints, shiftDelta, applyOverrides } = await import('../tools/sweep.mjs');
 
@@ -594,7 +594,7 @@ test('applyOverrides: --set T2_us=25 on a copy; unknown keys refused; card check
   assert.throws(() => createScReadout(applyOverrides(scCard, ['T2_us=100.5']).card, 0.5), /exceeds 2 \* T1_us/);
 });
 
-// ---- tools/sweep.mjs helpers (CC-A21): Stage holdout, V18 ----
+// ---- tools/sweep.mjs helpers: Stage holdout, V18 ----
 
 const { parseHeldoutName, holdoutTrainingFiles, holdoutTraining, v18Verdict } = await import('../tools/sweep.mjs');
 
@@ -633,7 +633,7 @@ test('v18Verdict: the V12(b) two-clause rule; clause 1 alone is not a pass', () 
   assert.equal(v18Verdict([row(3, 10, 0.5, 1, 0.1)]).verdict, 'fail'); // no d = 5 row
 });
 
-// ---- CC-A22: final Stage 4 helpers ----
+// ---- final Stage 4 helpers ----
 const { STAGE4_INPUTS, pickStage4Input, cardMatchesParams, unpairedClusterDiff, perRoundBounds, c6Conclusion, PLAIN } = await import('../tools/sweep.mjs');
 const { perRound: perRoundM, perMicrosecond: perMicrosecondM } = await import('../src/core/metrics.js');
 
@@ -721,7 +721,7 @@ test('c6Conclusion: not applicable unless T2 < T1; the tie rule excludes UNRESOL
   assert.equal(withVariant.detail.variant.cases['d3 hard'].pLDiff.paired, false);
 });
 
-// Catches: fails if a draft plain-language sentence grows past the 20-word limit of CC-A22, or if
+// Catches: fails if a draft plain-language sentence grows past the 20-word limit, or if
 // a conclusion verdict, the framing or F1 has no draft at all.
 test('PLAIN: a draft of at most 20 words for every conclusion verdict, F1 and the framing', () => {
   const words = (s) => s.trim().split(/\s+/).length;
