@@ -32,6 +32,14 @@ test('no HTML comment and no carriage return survive in the stored markdown', ()
   assert.ok(!writeupData.markdown.includes('\r'));
 });
 
+// Catches: fails if the GitHub contents list (in-page #anchor links, which the level would show
+// as plain text above its own section headings) reaches the stored copy.
+test('the contents list of docs/project_page.md stays out of the stored markdown', () => {
+  assert.ok(mdBytes.toString('utf8').includes('**Contents**'), 'the source has a contents list, so the test is not vacuous');
+  assert.ok(!writeupData.markdown.includes('**Contents**'));
+  assert.ok(!/\]\(#/.test(writeupData.markdown));
+});
+
 // Catches: fails if the stored copy holds a URL the release check's URL row would reject (the
 // JSON is embedded in main.js, which that row scans), or if the write-up's allowlist drifts from
 // the row's.
@@ -82,8 +90,8 @@ test('a table becomes a <table> with one row per line', () => {
   assert.equal(count(html, /<th /g), 2);
   assert.equal(count(html, /<td>/g), 6);
   assert.ok(html.includes('<td><strong>2</strong></td>') && html.includes('<td><code>4</code></td>'));
-  // The project page has three tables.
-  assert.equal(count(renderWriteup(writeupData.markdown), /<table/g), 3);
+  // The project page has five tables (F1's held-out table and the ablation table added for the submission).
+  assert.equal(count(renderWriteup(writeupData.markdown), /<table/g), 5);
 });
 
 // Catches: fails if a link the URL row would reject becomes an anchor (the page would link off

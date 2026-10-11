@@ -21,7 +21,7 @@ export const WHY_SUMMARY = 'Why?';
 export const NEXT_LABEL = 'See what mattered';
 export const TWIST_INTRO = 'Once the readout time is right, fine-tuning it barely mattered. What did: how well the decoder knows the noise.';
 export const DECODER_LABELS = { naive: 'First decoder', learned: 'Decoder that learned the noise' };
-export const TWIST_TITLE = 'Trapped ion: hard against soft decoding (d = 3, 20 µs)';
+export const TWIST_TITLE = 'Trapped ion, bit-flip memory: hard against soft decoding (d = 3, 20 µs)';
 export const MODE_LABELS = { hard: 'Hard', soft: 'Soft' };
 export const STEPS_LABEL = 'See it step by step';
 export const RESTART_LABEL = 'Start over';
@@ -183,6 +183,15 @@ export function twistCaption(decoder, data) {
   if (decoder === 'naive') return `Using each reading’s confidence made things worse: ${nums}`;
   if (decoder === 'learned') return `Using each reading’s confidence no longer hurts: ${nums}`;
   return null;
+}
+
+// The twist's large number: how many times fewer stored bits soft decoding loses once the decoder
+// has learned the noise (held-out banks, d = 3, 20 µs, as the chart). null when a value is missing.
+export function twistHeadline(data) {
+  const naive = data?.naive?.soft?.pL;
+  const learned = data?.learned?.soft?.pL;
+  if (!finite(naive) || !finite(learned) || !(learned > 0) || !(naive > learned)) return null;
+  return `${formatNumber(naive / learned)}× fewer lost bits once the decoder learns the noise`;
 }
 
 // The counts are settings (readout times x distances), not readout times.

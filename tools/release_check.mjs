@@ -49,6 +49,8 @@ const NEEDS = {
   // pipeline map reads no data.
   writeup: ['writeupData'],
   pipelineNav: [],
+  // The colour theme reads no data.
+  theme: [],
 };
 // Results files the bridges may point at (data/results, Person A's data; CC-B21 item 7). Each
 // bridge export under data/results/ must be one of these, exist, and carry schema s2s-results/1.

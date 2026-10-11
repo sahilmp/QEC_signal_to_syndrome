@@ -4,25 +4,110 @@
 
 **Listening longer to a qubit makes its readout cleaner, but the rest of the code keeps ageing while you listen. Signal to Syndrome lets you find, in your browser, the readout time that actually minimises the logical error of an error-corrected memory, and shows that it is not always the time that gives the cleanest readout.**
 
+<!-- toc: shown on GitHub; tools/make_writeup.mjs drops it, as the level shows each section as its own heading -->
+**Contents**
+
+- [In 30 seconds](#in-30-seconds)
+- [Summary](#summary)
+- [Findings](#findings)
+  - [F1 (headline): a missing error, once modelled, cuts the logical error 4×](#f1-headline-the-data-revealed-a-missing-error-modelling-it-cuts-the-logical-error-4-on-held-out-circuits)
+  - [F2: single-qubit readout tuning is enough](#f2-both-platforms-superconducting-case-single-qubit-readout-tuning-is-enough)
+  - [F3: optical pumping, not idling, sets the ion's readout time](#f3-trapped-ion-optical-pumping-not-idling-sets-the-readout-time)
+- [What this means for trapped ions](#what-this-means-for-trapped-ions)
+- [Why a repetition code, and why a simulator?](#why-a-repetition-code-and-why-a-simulator)
+- [Who did what](#who-did-what)
+- [What it is](#what-it-is)
+- [How to run it](#how-to-run-it)
+- [The levels](#the-levels)
+- [What runs where](#what-runs-where)
+- [The physics in plain language](#the-physics-in-plain-language)
+- [Results](#results)
+- [Validation](#validation)
+- [Accessibility](#accessibility)
+- [Limitations](#limitations)
+- [How to extend the project](#how-to-extend-the-project)
+- [References](#references)
+- [AI assistance and planning disclosure](#ai-assistance-and-planning-disclosure)
+- [Licence](#licence)
+<!-- /toc -->
+
+## In 30 seconds
+
+- **Headline: the data alone revealed an error our first decoder missed, and modelling it cuts the logical error 4×.** Detector correlations showed that a fault between a data qubit's two gates is as common as a wrong check reading. The simple decoding graph (data-qubit flips and wrong check readings only) has no edge for it; circuit-level models include it, given the circuit's noise model, while the correlations found it from the detector data alone, as hardware would require. On held-out simulator circuits, adding it takes the trapped-ion d = 5 memory from 0.096% to 0.024%, and going from d = 3 to d = 5 suppresses errors 15× instead of 5×. <!-- source: data/results/stage4_comparison.json (decoderComparison, trapped-ion Z hard, inSample false, source holdout.json -> setting2: d = 3 at 23.02 µs naive 0.00484 [cluster 0.00339, 0.00635], learned 0.00365 [0.00242, 0.00501]; d = 5 at 89.09 µs naive 0.000964 [0.000693, 0.00129], learned 0.000243 [0.000122, 0.000375]; ratios 0.00484/0.000964 = 5.0 and 0.00365/0.000243 = 15.0, naive/learned at d = 5 = 4.0) -->
+- **Takeaway: tune readout on one qubit.** On both platforms, the code's best readout time can't be told apart from a single qubit's. <!-- source: data/results/stage4_comparison.json (conclusions.C1, verdict "refuted") -->
+- **For trapped ions: idling never sets the readout time.** At the optimum, idling costs 1.2e-6 per round, against 6.1e-4 for readout and 8.7e-3 for gates. <!-- source: data/results/stage4_comparison.json (platforms.trapped-ion.budgetAtOptimum: idle 1.17e-6, readout 6.13e-4, gate 8.68e-3) -->
+- **Try it:** [the main project on Qollab](https://qollab.xyz/u/SQuant/main-project) runs in the browser, with nothing to install.
+
 ## Summary
 
 Signal to Syndrome compares two readout physics models at fixed gate noise. A trapped ion and a superconducting qubit read out the same IonQ-simulated repetition-code memories, decoded the same way, so every difference comes from the readout, the idling during readout and the cycle time. <!-- source: data/results/stage4_comparison.json (framing); CLAUDE.md (What the project is) --> Learning the simulator's noise turns soft decoding from a loss into a gain on the ion. On both platforms, the best readout time for the code cannot be told apart from a single qubit's, because the minima are flat. <!-- source: data/results/stage4_comparison.json (findings[F1].plain; conclusions.C1.plain, verdict "refuted") -->
 
 ## Findings
 
-### F1. Learning IonQ's noise rescues soft decoding
+### F1 (headline). The data revealed a missing error; modelling it cuts the logical error 4× on held-out circuits
 
-Soft decoding uses how confident each readout was. With our first, naive decoder (one calibrated error rate for every edge) it made the ion worse: soft was above hard beyond the intervals at 13 of 39 points, for example 0.0074 [0.0065, 0.0084] against 0.0035 [0.0029, 0.0042] at 20 µs. <!-- source: data/results/stage2_ion_v2b.json (validation.C2 softAboveBeyondIntervals, naive: 13 of 39; series naive d = 3 at τ = 20 µs: soft pL 0.007375 [0.006495, 0.008373], hard 0.003469 [0.002881, 0.004175]); docs/notes_results.md (Verdicts v2, F1) --> That decoder misses a whole class of errors: a fault between a data qubit's two gates lights a diagonal pair of detectors, and the simulator produces it as often as a wrong check reading (0.0099 against 0.0100 per edge). <!-- source: data/results/dem_forte1.json (banks, d3 r3: diag 0.0099, time 0.0100); CLAUDE.md (Decoding graph) --> The learned decoder adds diagonal edges and learns one rate per edge class from detector correlations. Soft is then never above hard (0 of 39 points, both memories). <!-- source: data/results/stage2_ion_v2b.json, stage2_ion_x_v2b.json (validation.C2, learned: 0 of 39 each; paired: 0 of 39 each) --> **This holds out of sample:** on 12 banks from new simulator seeds, decoded with rates learned only from the original banks, soft is worse than hard at 13 of 26 points with the naive decoder and 0 of 26 with the learned one (at 20 µs, soft minus hard: +0.0053 [+0.0037, +0.0071] naive, +0.0001 [−0.0003, +0.0005] learned). <!-- source: data/results/holdout.json (params.banksUsed: 12 of 12; setting2.softWorseCount naive 13, learned 0, pointsPerDecoder 26); data/results/stage4_comparison.json (findings[F1].numbers.outOfSample.example_d3_tau20.pairedSoftMinusHard: naive 0.00528 [0.00373, 0.00711], learned 0.00009 [−0.00028, 0.00050]) --> F1 was found after seeing the data and is shown for the ion only. <!-- source: data/results/stage4_comparison.json (findings[F1].statement); docs/notes_results.md (F1 out of sample) --> *Figure: the "Learn the noise" view.*
+| Held-out ion circuits, at the best readout time | First decoder | Learned decoder | Gain |
+|---|---|---|---|
+| d = 3, hard decoding | 0.48% | 0.37% | 1.3× (not resolved) |
+| d = 3, soft decoding | 1.02% | 0.38% | 2.7× |
+| d = 5, hard decoding | 0.096% | 0.024% | **4.0×** |
+| d = 5, soft decoding | 0.16% | 0.024% | 6.7× |
+| Error suppression from d = 3 to d = 5 (hard) | 5.0× | **15×** | |
+| Settings where soft decoding is worse than hard | 13 of 26 | **0 of 26** | |
 
-### F2. Superconducting: idling pulls the code's optimum earlier, inside a flat valley
+<!-- source: data/results/stage4_comparison.json (decoderComparison, trapped-ion Z, inSample false, source holdout.json -> setting2: hard d = 3 at 23.02 µs naive 0.00484 [cluster 0.00339, 0.00635], learned 0.00365 [0.00242, 0.00501], ratio 1.33; soft d = 3 at 20.81 µs naive 0.0102 [0.00796, 0.0123], learned 0.00380 [0.00255, 0.00511], ratio 2.68; hard d = 5 at 89.09 µs naive 0.000964 [0.000693, 0.00129], learned 0.000243 [0.000122, 0.000375], ratio 3.97; soft d = 5 at 103.2 µs naive 0.00162 [0.00130, 0.00198], learned 0.000242 [0.000129, 0.000387], ratio 6.68; suppression 0.00484/0.000964 = 5.0 and 0.00365/0.000243 = 15.0); data/results/stage4_comparison.json (findings[F1].numbers.outOfSample: softWorseCount naive 13, learned 0, pointsPerDecoder 26) -->
+
+The gain grows with distance; at d = 3 with hard decoding, the two decoders' intervals overlap, so that gain is not resolved. The headline uses hard decoding, where only the noise model changes; the soft gains also include repairing the first decoder's soft decoding, which was worse than hard.
+
+The learned decoder also makes the distance pay off: with the first decoder, two extra data qubits suppress the logical error 5×; with the learned one, 15×. Here is how we found it.
+
+
+Soft decoding uses how confident each readout was. With our first, naive decoder (one calibrated error rate for every edge) it made the ion worse: soft was above hard beyond the intervals at 13 of 39 points, for example 0.0074 [0.0065, 0.0084] against 0.0035 [0.0029, 0.0042] at 20 µs. <!-- source: data/results/stage2_ion_v2b.json (validation.C2 softAboveBeyondIntervals, naive: 13 of 39; series naive d = 3 at τ = 20 µs: soft pL 0.007375 [0.006495, 0.008373], hard 0.003469 [0.002881, 0.004175]); docs/notes_results.md (Verdicts v2, F1) --> That decoder misses a whole class of errors: a fault between a data qubit's two gates lights a diagonal pair of detectors, and the simulator produces it as often as a wrong check reading (0.0099 against 0.0100 per edge). <!-- source: data/results/dem_forte1.json (banks, d3 r3: diag 0.0099, time 0.0100); CLAUDE.md (Decoding graph) --> The learned decoder adds diagonal edges and learns one rate per edge class from detector correlations. Soft is then never above hard (0 of 39 points, both memories). <!-- source: data/results/stage2_ion_v2b.json, stage2_ion_x_v2b.json (validation.C2, learned: 0 of 39 each; paired: 0 of 39 each) --> **This holds out of sample:** on 12 banks from new simulator seeds, decoded with rates learned only from the original banks, soft is worse than hard at 13 of 26 points with the naive decoder and 0 of 26 with the learned one (at 20 µs, soft minus hard: +0.0053 [+0.0037, +0.0071] naive, +0.0001 [−0.0003, +0.0005] learned). <!-- source: data/results/holdout.json (params.banksUsed: 12 of 12; setting2.softWorseCount naive 13, learned 0, pointsPerDecoder 26); data/results/stage4_comparison.json (findings[F1].numbers.outOfSample.example_d3_tau20.pairedSoftMinusHard: naive 0.00528 [0.00373, 0.00711], learned 0.00009 [−0.00028, 0.00050]) --> F1 was found after seeing the data and is shown for the ion only. <!-- source: data/results/stage4_comparison.json (findings[F1].statement); docs/notes_results.md (F1 out of sample) --> ![Learn the noise, step 3: detector-pair correlations, the learned graph with its diagonal edges, and the held-out test](https://github.com/sahilmp/QEC_signal_to_syndrome/blob/main/docs/screenshots/learnnoise.png?raw=true)
+
+**Which part does the work? An ablation.** The learned decoder makes two changes: it adds the diagonal edges, and it learns one rate per edge class. On the same held-out banks, with the same seeds for every model, we switched them on one at a time (ion readout at 20 µs for d = 3 and 100 µs for d = 5, the grid points nearest the optima):
+
+| Held-out logical error | First decoder | + diagonal edges only (one uniform rate) | + learned rates only (no diagonal edges) | Learned decoder (both) |
+|---|---|---|---|---|
+| d = 3, hard | 0.48% | 0.40% | 0.48% | 0.37% |
+| d = 3, soft | 1.02% | 0.40% | 0.48% | 0.38% |
+| d = 5, hard | 0.097% | **0.022%** | 0.089% | 0.026% |
+| d = 5, soft | 0.16% | **0.019%** | 0.096% | 0.022% |
+
+<!-- source: data/results/ablation.json (rows; Wilson 95%, R = 4: d3 hard naive 0.00478 [0.00408, 0.00560], diagOnly 0.00403 (minus naive −0.00075 [−0.00137, −0.00025]), ratesOnly 0.00478 (minus naive 0.0000 [−0.00034, 0.00037]), learned 0.00366; d3 soft naive 0.01016, diagOnly 0.00397, ratesOnly 0.00478, learned 0.00375; d5 hard naive 0.000973 [0.000834, 0.00114], diagOnly 0.000222 [0.000162, 0.000304], ratesOnly 0.000891 (minus naive −0.000094 [−0.000203, 0.000042]), learned 0.000258 [0.000192, 0.000347]; d5 soft naive 0.00160, diagOnly 0.000194, ratesOnly 0.000961, learned 0.000222); tools/ablation.mjs -->
+
+The diagonal edges carry the hard-decoding gain: alone, at one uniform rate, they take d = 5 from 0.097% to 0.022%, while learned rates alone leave it unresolved (0.089%). The learned rates matter for soft decoding. The single calibrated rate (0.012 to 0.013) absorbs the missing diagonal errors and sits about 40% above the learned space and time rates (0.007 to 0.010), so it outweighs each readout's confidence; either change rescues soft decoding, and together they are best at d = 3. So the detector correlations did two jobs: they exposed the missing error, and they measured its rate. A circuit-level error model built from the circuit would also contain the diagonal edges, but only if its noise model is known; on hardware it is not, and detector correlations need nothing but the measured shots. <!-- source: data/results/ablation.json (fit: pGate d3 0.0124, d5 0.0131; trained space 0.0082 / 0.0073, time 0.0100 / 0.0096) -->
+
+**The learned model checks out as a model.** Rates re-learned from the held-out banks match those learned from the training banks (d = 5: space 0.0073 against 0.0071, time 0.0096 against 0.0094, diagonal 0.0091 against 0.0094). Learned from each of 16 banks on its own (d = 3, 5 and 7, original and held out), they stay within 0.0067–0.0088 (space), 0.0088–0.0106 (time) and 0.0081–0.0107 (diagonal). And detector pairs on the other diagonal, which no single error joins, show an effective rate of 6 × 10⁻⁵ on the held-out d = 5 banks, 150× below the diagonal edges: the model has the edges the circuit implies, and no others. <!-- source: data/results/ablation.json (fit: d5 trained space 0.00732542, time 0.00964432, diag 0.00914783; heldout space 0.00707225, time 0.00941461, diag 0.00938281, heldoutAntiDiag 0.0000612402; stability: 16 banks, space 0.00672–0.00879, time 0.00879–0.0106, diag 0.00815–0.0107) -->
+
+### F2. Both platforms, superconducting case: single-qubit readout tuning is enough
+
+**Takeaway:** the code's best readout time can't be told apart from a single qubit's, so calibrating readout on one qubit is enough. The superconducting qubit is the case where idling could have moved it.
+
 
 The simulated superconducting readout error is lowest at τ*_phys = 0.910 µs. <!-- source: data/results/stage3_sc_dense.json (optima.tauPhysEmpirical = 0.909707) --> Meanwhile the data qubits wait and decay with probability ½(1 − e^(−τ/T1)) per round, 0.0070 at 0.7 µs. <!-- source: CLAUDE.md (Idle errors); data/results/stage3_sc_dense.json (budget.idle at 0.7 µs = 0.00695) --> **One-line estimate:** the code's optimum sits where the falling readout error and the rising idle error have equal and opposite slopes, the minimum of their sum: 0.75 µs on the simulated readout curve. <!-- source: computed for CC-A16 from data/results/stage3_sc_dense.json: minimum over x.values of assignment.empirical + budget.idle is 0.01275 at τ = 0.75 µs (readout 0.00531 + idle 0.00744) --> **The simulation agrees:** the logical optimum is 0.710 µs [0.662, 0.990], and lies below τ*_phys in 8 of 9 resolved cases. <!-- source: data/results/stage3_sc_dense.json (optima.tauLog, learned d = 3 hard: 0.709963 [0.66208, 0.990054]); docs/notes_results.md (Verdicts v2, C1 superconducting: 8 of 9 resolved rows) --> **But the shift is not resolved:** the logical error is flat across the valley (0.0065 to 0.0073 from 0.65 to 1.0 µs), only 1 of 8 intervals at d = 3 and 5 lies wholly below τ*_phys, and pL(0.9 µs) − pL(0.75 µs) = +0.0004 [−0.0004, +0.0013] is not above zero. <!-- source: docs/notes_results.md (Verdicts v2, C1 superconducting: flat valley 0.0065–0.0073; only X d = 3 soft below 0.910); data/results/stage4_comparison.json (conclusionDetail.C1.superconducting.cases["Z d3 hard"].shiftDelta: 0.0004375 [−0.000360, 0.00134]) --> The readout model's own estimate, which ignores ring-up, would give 0.45 µs, outside every interval. <!-- source: computed for CC-A16 from data/results/stage3_sc_dense.json: minimum of assignment.belief + budget.idle at τ = 0.45 µs; lowest lower bound of optima.tauLog (learned, d = 3 and 5) is 0.518 µs --> *Figure: Level 3, superconducting qubit.*
 
-### F3. Trapped ion: optical pumping, not idling, sets the readout optimum
+### F3. Trapped ion: optical pumping, not idling, sets the readout time
+
+**Takeaway:** the ion case of F2, for a different reason. Idling is too small to matter, and the readout optimum comes from the ion's own optical pumping.
+
 
 The ion's readout error falls as photons accumulate, then rises because the detection light pumps the ion between states. <!-- source: docs/notes_results.md (Stage 2, F1-ion: "driven by dark→bright pumping") --> Its simulated minimum is τ*_phys = 23.0 µs (5.7e-4 at 20 µs); without pumping the model's error falls all the way to the end of the grid at 500 µs.¹ <!-- source: data/results/stage2_ion_v2b.json (optima.tauPhysEmpirical = 23.0163; assignment.empirical at 20 µs = 5.70e-4); docs/notes_results.md (Stage 2, F1-ion: no pumping, lowest at the grid end) --> Idling plays no part. At the optimum the idle error is 1.2e-6 per round, against 6.1e-4 for readout and 8.7e-3 for gates, and the logical optimum's interval, 23.0 µs [20.0, 47.5], contains τ*_phys. <!-- source: data/results/stage4_comparison.json (platforms.trapped-ion.budgetAtOptimum: idle 1.17e-6, readout 6.13e-4, gate 8.68e-3; tauLog.hard d = 3: 23.02 [19.98, 47.48]) --> Measurement crosstalk, a neighbour's detection light flipping a waiting qubit, is sourced at 1.67e-5 /µs, a lower bound. At that rate every interval contains τ*_phys; an optimum wholly below it appears only at 1e-3 /µs, about 60 times higher, where crosstalk rivals gate noise. <!-- source: params/ion.json (crosstalk_rate_per_us, crosstalk_scan_per_us); DECISIONS.md (E6); docs/notes_results.md (Verdicts v2, C1 ion (b) and (c)); data/results/stage2_ion_v2b.json, stage2_ion_x_v2b.json (crosstalkScan) --> *Figure: Level 3, trapped ion.*
 
 ¹ The IonQ simulator (forte-1) shows no measurable readout error of its own: at most 3.7 × 10⁻⁴ per measurement (95% bound; V19), and the two flips seen are consistent with gate error. <!-- source: DECISIONS.md (E13, footnote wording) -->
+
+## What this means for trapped ions
+
+- **Readout time and memory lifetime are separate knobs on an ion.** At the ion's best readout time (23.0 µs), waiting qubits lose 1.2e-6 per round to decay, against 6.1e-4 for readout and 8.7e-3 for gates: idling is about 500× smaller than readout and 7000× smaller than gates. The readout can be tuned for the cleanest reading without trading against the memory. <!-- source: data/results/stage4_comparison.json (platforms.trapped-ion.budgetAtOptimum: tau_us 23.02, idle 1.17342e-6, readout 6.13355e-4, gate 8.67893e-3; ratios 523 and 7396) -->
+- **Gates, not readout timing, set the logical error.** At the optimum, the gate error per round is about 14× the readout error, so better gates are what would lower the code's error. <!-- source: data/results/stage4_comparison.json (platforms.trapped-ion.budgetAtOptimum: gate / readout = 14.1) -->
+- **A crosstalk budget.** Measurement crosstalk, a neighbour's detection light flipping a waiting ion, adds 2.0e-4 per round at the published rate (1.67e-5 /µs), and never moves the optimum. An optimum wholly below the single-qubit one appears only at 1e-3 /µs, about 60× higher. So mid-circuit ion readout keeps its best timing as long as crosstalk stays below about 1e-3 /µs. <!-- source: data/results/stage4_comparison.json (platforms.trapped-ion.budgetAtOptimum.crosstalk 1.95921e-4); params/ion.json (crosstalk_rate_per_us); docs/notes_results.md (Verdicts v2, C1 ion (b) and (c)); data/results/stage2_ion_v2b.json (crosstalkScan) -->
+- **Per microsecond of storage, the ion's logical error is far lower** (2.8e-7 against 2.1e-3 for the superconducting arm, d = 3); per second, the superconducting arm runs about 3800× more rounds. This is not a platform ranking: both arms carry the same simulated IonQ gate noise (see "Limitations"). <!-- source: data/results/stage4_comparison.json (platforms.*.perMicrosecond.hard d = 3: 2.836e-7 and 2.115e-3; conclusions.C3 note, cycle ratio 3787) -->
+
+## Why a repetition code, and why a simulator?
+
+- **It isolates readout.** The question is how readout physics sets the logical error. A repetition code has nothing else in the way: its decoder is exact, so every change in the logical error comes from readout, idling or the noise model.
+- **A controlled comparison needs shared gate noise.** Both platforms decode the same IonQ-simulator measurement banks, so the two arms differ only in readout physics, idling and cycle time. Real hardware can't hold the gate noise fixed between two platforms. <!-- source: docs/notes_results.md (Verdicts, A28); DECISIONS.md (A28 item 8) -->
+- **It still covers the whole loop:** Qiskit circuits on IonQ's forte-1 noise model in native gates, bit-flip and phase-flip memories, d = 3, 5 and 7, an exact matching decoder checked against PyMatching, and a live run that submits a fresh job.
+- **The next step is hardware, and the learned decoder is built for it.** It learns its noise model from detector data alone, so one d = 3 bank on Forte hardware would let us compare the learned edge rates with the simulator's. A surface code needs a 2-D detector layout and new edge classes; the matching decoder already works on any graph, and the correlation method that learns the rates carries over.
 
 ## Who did what
 
@@ -63,7 +148,7 @@ The page opens with a three-step question: guess how long to listen to a qubit, 
 - **Learn the noise.** Find an error the first decoder cannot see, then let the data teach it. Three steps: inject a fault on a data qubit between its two CNOTs, which lights a diagonal pair of detectors; ask the naive decoder, which has no single error that explains that pair; then switch to the learned graph, which estimates a rate for every kind of detector pair (including the diagonal ones) from the stored shots, and compare the two decoders' logical error, starting with the held-out test. Concept: the decoder is only as good as its error model (F1). <!-- source: src/ui/learnnoise.js -->
 5. **Two readout models, same gates.** Both arms decode the same IonQ-simulated circuits; only the readout model, the idle physics and the cycle time differ. A trade-off chart puts error per round against rounds per second, per-µs charts show each platform on its own readout-time axis, hard or soft, with the Stage 4 values at τ*_log, followed by the hypotheses with their verdicts, the comparison and sensitivity tables, and every parameter card with its sources and units. Optima resting on fewer than 10 logical errors are marked "not resolved". <!-- source: src/ui/level5.js (level5v2) --> ![Level 5](https://github.com/sahilmp/QEC_signal_to_syndrome/blob/main/docs/screenshots/level5-preview.png?raw=true)
 
-The app shows the bit-flip memory (Z basis). The phase-flip results in this write-up (C6, O4) are listed in Level 5's hypothesis table; their curves are not in the app. <!-- source: src/ui/features.js (phaseFlip: false); src/ui/level5.js (conclusions table) -->
+A switch under the title chooses the bit-flip memory (Z basis, the default) or the phase-flip memory (X basis); it sets the hero and Levels 3–5, and "Learn the noise" has its own memory selector. Levels 1 and 2, the shots in Level 4, the hero's twist and the sensitivity table stay in the bit-flip memory and say so. The held-out test ran on bit-flip circuits only, so the phase-flip learned results are labelled in sample. <!-- source: src/ui/features.js (phaseFlip: true); src/ui/main.js (BIT_FLIP_ONLY); src/ui/level3.js (learnedLabel); src/ui/hero3_text.js (TWIST_TITLE); data/results/holdout.json (trainedOn, heldout: rep_* banks only) -->
 
 ## What runs where
 
@@ -167,7 +252,7 @@ The hypotheses were registered before the reruns, each with its refutation condi
 - **Add a readout model:** implement the readout contract, `measure(trueBit, rng) -> { hard, llr }`, `idleFlipProbability()` and `averageAssignmentError()`, in `src/core/readout/`, and add a parameter card with a source for every value in `params/`. <!-- source: CLAUDE.md (Conventions, Module API) -->
 - **Generate new banks:** run `qollab/bank_generator.py` on Qollab, one configuration per run, with the native recipe and a distinct `sampler_seed` per bank; check that the detector rate is above 0. <!-- source: DECISIONS.md (D1, D2, bank generator rules) -->
 - **Open problems we found:**
-  - Per-edge-class gate rates estimated from detector-pair correlations (in `graph.js` and `calibrate.js`), to test whether the ion soft-decoding loss disappears. <!-- source: docs/notes_results.md (Stage 2, Diagnosis) -->
+  - One learned rate per edge instead of per edge class (`src/core/dem.js`), and held-out banks for the phase-flip memory and d = 7, whose learned results are in sample. <!-- source: docs/project_page.md (Limitations: learned rates in sample except where held-out banks exist; one rate per edge class); data/results/holdout.json (heldout: rep_d3 and rep_d5 banks only) -->
   - Ring-up in the superconducting belief model (`src/core/readout/sc.js`), which would change every Stage 3 number. <!-- source: docs/notes_results.md (Ring-up mismatch) -->
   - A different tie-break in `matching.js`. <!-- source: DECISIONS.md (Person B, V2) -->
   - A photomultiplier-tube ion setup with lower collection efficiency, and the dark→bright pumping rate, which mainly sets the ion τ*_phys, as sensitivity cases. <!-- source: DECISIONS.md (A15) -->

@@ -1,33 +1,68 @@
 # Signal to Syndrome
 
-## Authors
+**How long should you listen to a qubit? Longer gives a cleaner reading, but the rest of the error-correcting code keeps ageing while you wait. Signal to Syndrome is a browser lab, built on IonQ's simulator, that finds the readout time that actually minimises a code's logical error. Along the way it shows that the decoder's model of the noise matters more than the readout time.**
 
-- Soumyajit Pal: physics and data
-- Sahil Prabhudesai: decoder, interface and platform
+**[Try it on Qollab](https://qollab.xyz/u/SQuant/main-project)**: nothing to install, and every result is embedded in the page.
 
-## About
+![Level 3: trapped-ion readout time against logical error](docs/screenshots/level3-ion.png)
 
-Signal to Syndrome is an open-source lab, published and runnable on Qollab, that shows how qubit-readout physics sets the logical error rate of a repetition-code memory. The circuits are written in Qiskit and run on IonQ's simulator with the forte-1 noise model, submitted in native gates so that IonQ's optimiser does not remove them. Readout is modelled classically in JavaScript (flat, trapped-ion and superconducting models), and the syndromes are decoded by our own exact minimum-weight matching decoder.
+**Contents**
 
-The page opens with a three-step question (how long should you listen to a qubit?) and a strip of the main findings, then has six tabs: be the decoder (d = 3, one round), time as a dimension (three rounds on the space-time grid), the readout-time trade-off on a trapped ion and a superconducting qubit, hard against soft decoding, "Learn the noise" (the decoder learns IonQ's error model from the data), and two readout models at the same gate noise. The full write-up, with results and limitations, is in [docs/project_page.md](docs/project_page.md); screenshots are in [docs/screenshots/](docs/screenshots/).
+- [In 30 seconds](#in-30-seconds)
+- [What we found](#what-we-found)
+- [Why a repetition code, and why a simulator?](#why-a-repetition-code-and-why-a-simulator)
+- [Run it](#run-it)
+- [Repository layout](#repository-layout)
+- [Authors](#authors)
+- [AI assistance and planning disclosure](#ai-assistance-and-planning-disclosure)
+- [Licence](#licence)
 
-## Main findings
+## In 30 seconds
 
-- **F1. Learning IonQ's noise rescues soft decoding.** With one calibrated error rate per edge, soft decoding made the trapped ion worse (soft above hard at 13 of 39 points). The simulator also produces faults between a data qubit's two gates, which light a diagonal pair of detectors as often as a wrong check reading does. The learned decoder (`src/core/dem.js`) adds those diagonal edges and learns one rate per edge class from detector correlations; soft is then never above hard (0 of 39), and this holds on 12 held-out banks from new simulator seeds (0 of 26).
-- **F2. Superconducting:** idling during readout pulls the code's best readout time below the single-qubit optimum (0.710 µs against 0.910 µs), but the minimum is flat and the shift is not resolved.
-- **F3. Trapped ion:** optical pumping, not idling, sets the readout optimum (23.0 µs); the logical optimum's interval contains the single-qubit one.
+- **Headline: the data alone revealed an error our first decoder missed, and modelling it cuts the logical error 4×.** Correlations between detectors showed that a fault between a data qubit's two gates is as common as a wrong check reading. The simple decoding graph, which models only data-qubit flips and wrong check readings, has no edge for it. Circuit-level models include it, but they need the circuit's noise model; our method finds it from the detector data alone, which is what real hardware provides. On held-out IonQ-simulator circuits (new seeds, never used for training), adding it takes the trapped-ion d = 5 memory from 0.096% to 0.024% logical error, and going from d = 3 to d = 5 then suppresses errors **15×** instead of 5×, so extra qubits pay off.
+- **Both kinds of error.** A switch at the top of the page shows the bit-flip memory (0 ↔ 1 errors) or the phase-flip memory (sign errors). The headline numbers come from the bit-flip memory, where the held-out test ran.
+- **Practical takeaway: tune readout on one qubit.** On both a trapped ion and a superconducting qubit, the readout time that is best for the code can't be told apart from the best time for a single qubit. Single-qubit calibration is enough.
+- **For trapped ions: idling never sets the readout time.** At the ion's best readout time, waiting qubits lose 1.2 × 10⁻⁶ per round to decay, about 500× less than readout error and 7000× less than gate error. Optical pumping sets the clock, and gates set the limit.
 
-Numbers, intervals and sources are in [docs/project_page.md](docs/project_page.md).
+## What we found
 
-## Run it on Qollab
+**F1 (headline). The data revealed a missing error, and modelling it makes the code work on fresh circuits.** Our first decoder used one error rate per edge, and with it, using each readout's confidence ("soft decoding") made the ion *worse*. Measuring how often pairs of detectors fire together ([`src/core/dem.js`](src/core/dem.js)) showed why: an error between a data qubit's two gates lights a diagonal pair of detectors, the simulator produces it as often as a wrong check reading, and the simple decoding graph (data-qubit flips and wrong check readings only) has no edge for it. Circuit-level models include such edges, given the circuit's noise model; the correlations found it without one. The learned decoder adds those edges and learns one rate per edge class from the same correlations. We found this after seeing the data, so we tested it on 12 new simulator banks:
 
-- **Main project (the lab):** https://qollab.xyz/u/SQuant/main-project. Open it in a Chromium-based browser (Chrome, Edge or Opera) and run it; the page needs no setup and no network access, because all data are embedded.
-- **Bank generator (the IonQ-simulator circuits that produced the data):** https://qollab.xyz/u/SQuant/signal-to-syndrome-bank-genera. One configuration per run, chosen by a variable at the top of the script; the bank is printed between `BEGIN_BANK` and `END_BANK`.
-- **Live run (optional):** in the main project, pick IonQ Forte 1 in Qollab's Select QPU dialog, open Level 4 and press the live-run button. Each press submits one new d = 3, r = 3 job (200 shots) to the IonQ simulator with the forte-1 noise model, in native gates, through the Python helper `live.py`, which is uploaded next to the three page files.
+| Held-out ion circuits, best readout time | First decoder | Learned decoder | Gain |
+|---|---|---|---|
+| d = 3, hard decoding | 0.48% | 0.37% | 1.3× (not resolved) |
+| d = 3, soft decoding | 1.02% | 0.38% | 2.7× |
+| d = 5, hard decoding | 0.096% | 0.024% | **4.0×** |
+| d = 5, soft decoding | 0.16% | 0.024% | 6.7× |
+| Error suppression from d = 3 to d = 5 (hard) | 5.0× | **15×** | |
+| Settings where soft decoding hurts | 13 of 26 | **0 of 26** | |
 
-## Rebuild locally
+![Learn the noise: detector pairs that fire together, the learned graph with its diagonal edges (pink), and the held-out test](docs/screenshots/learnnoise.png)
 
-Requires Node.js 20 or later.
+The gain grows with distance; at d = 3 with hard decoding, the two decoders' intervals overlap, so that gain is not resolved. The headline uses hard decoding, where only the noise model changes; the soft gains also include repairing the first decoder's soft decoding, which was worse than hard.
+
+**Which part does the work?** An ablation on the same held-out circuits ([`tools/ablation.mjs`](tools/ablation.mjs)) separates the two changes. Adding the diagonal edges alone, at one uniform rate, gives the whole hard-decoding gain at d = 5 (0.097% → 0.022%); learned rates alone barely move it (0.089%). Learned rates matter for soft decoding: the single calibrated rate (0.013) absorbs the missing diagonal errors and sits about 40% above the true gate rates (0.007–0.010), so it drowns out the readout's confidence. The learned model also holds up as a model: rates re-learned from the held-out banks match the trained ones, they are stable across 16 banks and d = 3, 5 and 7, and detector pairs with no edge between them show 150× less correlation than the diagonal pairs.
+
+**F2. Both platforms: single-qubit readout tuning is enough.** On the superconducting qubit, idling pulls the code's best readout time a little earlier (0.71 µs against 0.91 µs), but the valley is flat (0.66–0.99 µs) and the shift is within the noise. On the ion, both optima are 23.0 µs.
+
+**F3. Trapped ion: optical pumping, not idling, sets the readout time.** Photons keep making the reading cleaner until the detection light pumps the ion between states. Idling during the readout never moves the optimum. Measurement crosstalk would only start to move it above about 10⁻³ per µs, about 60× the published rate, which gives a concrete crosstalk budget for ion hardware.
+
+Intervals, sources and the pre-registered hypotheses are in the [full write-up](docs/project_page.md).
+
+## Why a repetition code, and why a simulator?
+
+- **It isolates readout.** The question is how readout physics sets the logical error. A repetition code has nothing else in the way: its decoder is exact, so every change in the logical error comes from readout, idling or the noise model.
+- **A controlled comparison needs shared gate noise.** Both platforms decode *the same* IonQ-simulator measurement banks, so the trapped ion and the superconducting qubit differ only in readout physics, idling and cycle time. Real hardware can't hold the gate noise fixed between two platforms.
+- **It still covers the whole loop.** Real Qiskit circuits run on IonQ's forte-1 noise model in native gates, with bit-flip and phase-flip memories, d = 3, 5 and 7, three rounds, an exact matching decoder checked against PyMatching, and a live-run button that submits a fresh job.
+- **The learned decoder is built for hardware.** It learns its noise model from the detector data alone, so the next step is one bank on Forte hardware, comparing the learned edge rates with the simulator's. A surface code needs a 2-D detector layout and new edge classes; the matching decoder already works on any graph, and the correlation method that learns the rates carries over.
+
+## Run it
+
+- **Main lab:** https://qollab.xyz/u/SQuant/main-project. Use a Chromium-based browser (Chrome, Edge or Opera). All data are embedded, so it makes no network requests.
+- **Bank generator** (the IonQ-simulator circuits that produced the data): https://qollab.xyz/u/SQuant/signal-to-syndrome-bank-genera
+- **Live run (optional):** select IonQ Forte 1 in Qollab's Select QPU dialog, open Level 4 and press the live-run button. Each press submits one d = 3, r = 3 job (200 shots) through [`qollab/live.py`](qollab/live.py).
+
+Locally, with Node.js 20 or later:
 
 ```bash
 npm install
@@ -36,50 +71,22 @@ npm run build
 npm run check
 ```
 
-`npm run build` writes `dist/qollab/` (`index.html`, `main.css`, `main.js`), the three files uploaded to the main Qollab project together with `qollab/live.py` (uploaded at the top level as `live.py`). It also writes `dist/local/preview.html`, a single file that opens in a browser without Qollab (the live run is unavailable there). `npm run check` runs the release check (no network calls, size limit, attribution, licence, valid banks).
-
-To rerun the analysis: `node tools/sweep.mjs --stage 1` (and `--stage 2`, `--stage 3`, `--stage 4`) regenerates `data/results/*.json`; `node tools/sweep.mjs --diag` prints the V9 fingerprint. Local Python validation (V2, V3) uses a virtual environment with `numpy qiskit pymatching pytest`: `validation/pymatching_check.py` (after `node tools/export_vectors.mjs --n 20000 --seed 1`) and `pytest validation/test_circuits.py`.
+`npm run build` writes `dist/qollab/` (the three files uploaded to Qollab, alongside `qollab/live.py`) and `dist/local/preview.html`, a single file that opens without Qollab. `node tools/sweep.mjs --stage 1` (through `--stage 4`) regenerates `data/results/*.json`; `node tools/ablation.mjs` regenerates the ablation (`data/results/ablation.json`).
 
 ## Repository layout
 
-- `src/core/`: core logic as ES modules, no runtime dependencies: seeded random numbers, bank parsing, detectors, decoding graph, matching decoder, statistics, sweeps, and the readout models in `src/core/readout/`
-- `src/ui/`: user interface (levels 1–5, charts, live-run panel), with the bridges to the core and data and the feature switches; stubs in `src/ui/stubs/`
-- `tools/`: Node scripts for the build, sweeps, release check, test vectors and fixtures
-- `tests/`: Node test files (`*.test.js`), run with `npm test`
+- `src/core/`: decoder, detectors, learned error model, readout models and statistics (ES modules, no runtime dependencies)
+- `src/ui/`: the page (hero, findings, levels 1–5, charts, live run)
 - `qollab/`: Python that runs on Qollab (bank generator, live-run helper)
-- `validation/`: local Python validation (PyMatching comparison, circuit tests)
-- `data/`: measurement banks from the IonQ simulator, results, test vectors and fixtures
-- `params/`: parameter cards (trapped ion, superconducting, cycle times), with a source for every value
-- `docs/`: project page, results notes, screenshots, and Qollab's JavaScript example for calling the IonQ backend
+- `data/`: IonQ-simulator measurement banks (including the 12 held-out banks) and results
+- `params/`: parameter cards, with a source for every value
+- `tools/`, `tests/`, `validation/`: build, sweeps, release check, Node tests and Python validation
+- `docs/`: [full write-up](docs/project_page.md), [methods and sources](docs/METHODS.md), screenshots
 
-## Methods implemented and sources
+## Authors
 
-All of the following are our own implementations in JavaScript (`src/core/`), with no runtime libraries.
-
-- **Repetition-code memory and detectors:** d data qubits, d − 1 parity checks measured for r rounds, detectors as changes of a check between rounds, plus a final layer from the data readout (`detectors.js`, `graph.js`). D. Gottesman, PhD thesis (1997), arXiv:quant-ph/9705052; E. Dennis, A. Kitaev, A. Landahl and J. Preskill, J. Math. Phys. 43, 4452 (2002).
-- **Minimum-weight matching decoder:** shortest paths with Dijkstra's algorithm on the space-time decoding graph, then an exact minimum-weight matching of the lit detectors (and the boundary) by dynamic programming over subsets, up to 20 defects; above that a greedy matching, flagged as not exact (`matching.js`). Edge weights w = ln[(1 − p)/p]. Checked against PyMatching (V2): O. Higgott, ACM Trans. Quantum Comput. 3, 16 (2022); O. Higgott and C. Gidney, arXiv:2303.15933. Background: J. Edmonds, Can. J. Math. 17, 449 (1965).
-- **Soft decoding:** readout log-likelihood ratios turned into per-edge error probabilities, p = 1/(1 + e^|llr|), combined with the gate-noise rate. C. A. Pattison, M. E. Beverland, M. P. da Silva and N. Delfosse, arXiv:2107.13589.
-- **Gate-noise calibration:** the per-edge gate error estimated from the bulk detector firing rate, P(fire) = [1 − (1 − 2p)^n]/2 (`calibrate.js`).
-- **Learned detector error model:** one rate per edge class (space, boundary, time and the diagonal edges from faults between a data qubit's two gates), solved from pairwise detector correlations, p = ½ − ½√(1 − 4(x_ij − x_i x_j)/(1 − 2x_i − 2x_j + 4x_ij)) (`dem.js`).
-- **Trapped-ion fluorescence readout:** Poisson photon counts from a bright or dark ion with background, with at most one optical-pumping switch during the window; the likelihood integrates over the switch time (`readout/ion.js`). Parameters: C. Crain et al., Commun. Phys. 2, 97 (2019); S. Noek et al., Opt. Lett. 38, 4735 (2013); S. Olmschenk et al., arXiv:0708.0657; A. H. Myerson et al., Phys. Rev. Lett. 100, 200502 (2008).
-- **Superconducting dispersive readout:** resonator ring-up to state-dependent coherent states, integrated and projected heterodyne signal with efficiency η, decay of |1⟩ during the window (T1); the belief model has no ring-up (`readout/sc.js`). Assignment error ½ erfc(SNR/2√2) without decay (V8). J. Gambetta et al., Phys. Rev. A 76, 012325 (2007); A. Blais, A. L. Grimsmo, S. M. Girvin and A. Wallraff, Rev. Mod. Phys. 93, 025005 (2021); parameters: T. Walter et al., Phys. Rev. Applied 7, 054020 (2017).
-- **Idle errors (Pauli-frame rule):** data qubits waiting during readout flip with probability ½(1 − e^(−τ/T1)) (Pauli-twirled amplitude damping), or ½(1 − e^(−τ/T2)) in the phase-flip memory, plus ½(1 − e^(−Γτ)) for trapped-ion measurement crosstalk; the X error is applied to the later check results and the final data readout (`idle.js`), checked against an explicit X gate on IonQ's ideal simulator (V4).
-- **Per-round and per-microsecond rates:** ε_L = ½[1 − (1 − 2p_L)^(1/r)], divided by the cycle time (`metrics.js`). Cycle times: Robertson et al., arXiv:2603.03801; Google Quantum AI, Nature 638, 920 (2025), arXiv:2408.13687; M. McEwen et al., Nat. Commun. 12, 1761 (2021), arXiv:2102.06131.
-- **Wilson score interval** for every error rate: E. B. Wilson, J. Am. Stat. Assoc. 22, 209 (1927) (`stats.js`).
-- **Percentile bootstrap** for the location of optimal readout times, with a least-squares quadratic fit around the grid minimum: B. Efron, Ann. Statist. 7, 1 (1979) (`stats.js`, `optimum.js`).
-- **Random numbers:** mulberry32 uniform generator, Box–Muller normal draws, Poisson draws by Knuth's multiplication method below mean 30 and by PTRS above: W. Hörmann, "The transformed rejection method for generating Poisson random variables," Insurance: Mathematics and Economics 12, 39 (1993) (`rng.js`).
-- **Numerical tools:** Gauss–Legendre quadrature (`quadrature.js`), erfc by its series and continued fraction, and ln Γ by the Lanczos approximation (`special.js`).
-
-## Libraries and tools
-
-- **esbuild:** build-only bundler (`npm run build`); nothing from it ships at runtime
-- **Node.js** built-in test runner (`node --test`) for the JavaScript tests
-- **Qiskit:** circuit construction and transpilation, in the bank generator and the live-run helper on Qollab
-- **The IonQ provider (qiskit-ionq), through Qollab:** IonQ's simulator with the forte-1 noise model (and the ideal model for V4), native gates
-- **Qollab:** hosting and running both projects; the page uses the `qollab.live` / `live` Python bridge for the live run, following Qollab's documented JavaScript example (`docs/qollab_js_api_example.txt`)
-- **PyMatching, NumPy and pytest:** local validation only (V2, V3); not shipped
-
-The shipped page loads no external resource and makes no network request; all data are embedded at build time.
+- Soumyajit Pal: physics and data
+- Sahil Prabhudesai: decoder, interface and platform
 
 ## AI assistance and planning disclosure
 

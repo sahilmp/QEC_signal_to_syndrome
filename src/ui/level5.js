@@ -30,7 +30,7 @@ import {
 import { FEATURES } from './features.js';
 import {
   cardValue, physicalOptimum, PLATFORMS as LEVEL3_PLATFORMS, MIN_ERRORS_RESOLVED, errorsAtMinimum, isResolved, formatCount,
-  naiveResults, headlineResults, decoderLabel, LEARNED_LABEL, BASES, basisOn, currentBasis, onBasisChange, memoryTag, formatTau,
+  naiveResults, headlineResults, decoderLabel, learnedLabel, BASES, basisOn, currentBasis, onBasisChange, memoryTag, formatTau,
 } from './level3.js';
 import { POST_HOC_NOTE, isPostHoc, f1Line } from './findings.js';
 
@@ -713,7 +713,7 @@ export function tradeoffOptions(mode, src = SRC_V2) {
   // The curves are Stage 4's headline decoder: the learned one carries its out-of-sample label.
   const learned = src.stage4.decoder === 'learned';
   return {
-    title: `Speed against accuracy, ${mode} decoding${memoryTag(src.basis ?? 'Z')}${learned ? `, ${LEARNED_LABEL}` : ''}${src.stage4.fixture ? ' — placeholder data' : ''}`,
+    title: `Speed against accuracy, ${mode} decoding${memoryTag(src.basis ?? 'Z')}${learned ? `, ${learnedLabel(src.basis ?? 'Z')}` : ''}${src.stage4.fixture ? ' — placeholder data' : ''}`,
     xLabel: 'Rounds per second', yLabel: 'Logical error per round',
     series, points, intervals: intervalCaption(kinds), logX: true, logY: true, yFloor: 1e-8,
     extra: { key: 'tau', label: 'Readout time τ (µs)' },
@@ -795,19 +795,19 @@ export const rowMark = (r) => (r.badge ? `${r.badge.icon} ${r.badge.text}` : r.l
 
 // Badge colours only add emphasis; the icon and the word carry the meaning.
 const BADGE_STYLE = {
-  held: 'background:#e3f1e6;color:#1b5e20;border-color:#1b5e20',
-  refuted: 'background:#fbe4e2;color:#8e1c12;border-color:#8e1c12',
-  undetermined: 'background:#eef0f3;color:#3c4450;border-color:#3c4450',
-  'not-applicable': 'background:#ffffff;color:#3c4450;border-color:#3c4450;border-style:dashed',
-  unknown: 'background:#eef0f3;color:#3c4450;border-color:#3c4450',
-  missing: 'background:#eef0f3;color:#3c4450;border-color:#3c4450',
+  held: 'background:var(--ok-bg);color:var(--ok-fg);border-color:var(--ok-fg)',
+  refuted: 'background:var(--bad-bg);color:var(--bad-fg);border-color:var(--bad-fg)',
+  undetermined: 'background:var(--chip-bg);color:var(--chip-fg);border-color:var(--chip-fg)',
+  'not-applicable': 'background:var(--bg);color:var(--chip-fg);border-color:var(--chip-fg);border-style:dashed',
+  unknown: 'background:var(--chip-bg);color:var(--chip-fg);border-color:var(--chip-fg)',
+  missing: 'background:var(--chip-bg);color:var(--chip-fg);border-color:var(--chip-fg)',
 };
 // The grey labels: plain text in a neutral colour, no border, so they never read as a verdict.
-const LABEL_STYLE = 'display:inline-block;margin-right:8px;padding:1px 8px;border-radius:10px;background:#eef0f3;color:#3c4450;font-style:italic';
+const LABEL_STYLE = 'display:inline-block;margin-right:8px;padding:1px 8px;border-radius:10px;background:var(--chip-bg);color:var(--chip-fg);font-style:italic';
 function scoreboard(src) {
   const list = el('ul', { class: 'l5-scoreboard', style: 'list-style:none;padding:0;margin:0' });
   for (const r of scoreboardRows(src)) {
-    const li = el('li', { class: 'l5-score-row', style: 'padding:8px 0;border-bottom:1px solid #c4c8cf' });
+    const li = el('li', { class: 'l5-score-row', style: 'padding:8px 0;border-bottom:1px solid var(--rule)' });
     const line = el('p', { style: 'margin:0' });
     let mark;
     if (r.badge) {
@@ -887,7 +887,7 @@ export function findingLines(n) {
 }
 // One finding as the page has always shown it: the statement, then its number lines.
 function findingItem(f) {
-  const li = el('li', { class: 'l5-finding', style: 'padding:8px 0;border-bottom:1px solid #c4c8cf' });
+  const li = el('li', { class: 'l5-finding', style: 'padding:8px 0;border-bottom:1px solid var(--rule)' });
   li.appendChild(el('p', { style: 'margin:0' }, '')).append(el('strong', {}, `${f.id} `), f.statement);
   for (const t of f.lines) li.appendChild(el('p', { class: 'hint', style: 'margin:4px 0 0' }, t));
   return li;
@@ -907,14 +907,14 @@ export function compactFindingRows(src = SRC_V2) {
     return { id: row.id, plain, postHoc: isPostHoc(f), short: short ? `${short}.` : null, row };
   });
 }
-const POST_HOC_STYLE = 'display:inline-block;margin-right:4px;padding:1px 8px;border-radius:10px;background:#eef0f3;color:#3c4450;font-style:italic';
+const POST_HOC_STYLE = 'display:inline-block;margin-right:4px;padding:1px 8px;border-radius:10px;background:var(--chip-bg);color:var(--chip-fg);font-style:italic';
 function findingsList(src) {
   const rows = findingRows(src);
   if (!rows.length) return null;
   if (FEATURES.compactText === true) {
     const list = el('ul', { class: 'l5-findings-compact', style: 'list-style:none;padding:0;margin:0' });
     for (const c of compactFindingRows(src)) {
-      const li = el('li', { class: 'l5-finding-compact', style: 'padding:8px 0;border-bottom:1px solid #c4c8cf' });
+      const li = el('li', { class: 'l5-finding-compact', style: 'padding:8px 0;border-bottom:1px solid var(--rule)' });
       const line = el('p', { style: 'margin:0' });
       line.append(el('strong', {}, `${c.id} `));
       if (c.postHoc) line.append(el('span', { class: 'l5-label l5-label-posthoc', style: POST_HOC_STYLE }, POST_HOC_NOTE), ' ');
@@ -1109,7 +1109,7 @@ function provisionalBanner(...stage4s) {
   if (!isProvisional(...stage4s)) return null;
   const p = el('p', {
     class: 'l5-provisional', role: 'note',
-    style: 'margin:8px 0;padding:6px 10px;border:2px solid #8a5a00;border-radius:6px;background:#fff4d6;color:#4a3000;font-weight:600',
+    style: 'margin:8px 0;padding:6px 10px;border:2px solid var(--warn-border);border-radius:6px;background:var(--warn-bg);color:var(--warn-fg);font-weight:600',
   });
   p.append(el('span', { 'aria-hidden': 'true' }, '⚠ '), PROVISIONAL_TEXT);
   return p;
@@ -1148,7 +1148,12 @@ function mountLevel5v2(container) {
   container.appendChild(controls);
 
   const tabs = tabSet([{ id: 'tradeoff', label: 'Trade-off' }, { id: 'per-us', label: 'Per µs' }], 'Chart view');
-  container.appendChild(tabs.node);
+  // On a wide screen (style.css .l5-wide) the chart views and the error budget sit side by side;
+  // on a narrow one they stack, in this order.
+  const wide = el('div', { class: 'l5-wide' });
+  const budgetCol = el('div', { class: 'l5-wide-col' });
+  wide.append(tabs.node, budgetCol);
+  container.appendChild(wide);
   const trade = safeChart(createChart, () => tradeoffOptions(mode, src), 'trade-off chart');
   tabs.panels[0].append(trade.root, hint(
     'Each curve runs through the readout times τ of one arm and distance: longer readouts move it left (fewer rounds per second). '
@@ -1173,8 +1178,8 @@ function mountLevel5v2(container) {
   };
   controls.appendChild(radioGroup('mode', 'Decoding', MODES, mode, (v) => { mode = v; render(); }));
 
-  container.appendChild(el('h3', {}, 'Where the error comes from'));
-  container.appendChild(safeChart(createStackedBars, () => budgetOptions(src), 'error-budget chart').root);
+  budgetCol.appendChild(el('h3', {}, 'Where the error comes from'));
+  budgetCol.appendChild(safeChart(createStackedBars, () => budgetOptions(src), 'error-budget chart').root);
 
   container.appendChild(el('h3', {}, 'Scoreboard'));
   for (const n of [provisionalBanner(zSrc.stage4), xNote('scoreboard')]) if (n) container.appendChild(n);

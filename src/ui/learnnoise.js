@@ -399,7 +399,7 @@ function drawTimeline({ round, fault, onPick }) {
         fill: chosen ? 'var(--lit)' : 'var(--bg)', stroke: chosen ? 'var(--text)' : 'var(--accent)', 'stroke-width': 2,
         ...(chosen ? {} : { 'stroke-dasharray': '3 2' }),
       }, g);
-      const t = svgEl('text', { x: sx, y: sy + TL.plus / 3, 'text-anchor': 'middle', 'font-size': TL.plus, fill: chosen ? '#ffffff' : 'var(--accent)' }, g);
+      const t = svgEl('text', { x: sx, y: sy + TL.plus / 3, 'text-anchor': 'middle', 'font-size': TL.plus, fill: chosen ? 'var(--accent-text)' : 'var(--accent)' }, g);
       t.textContent = chosen ? '✕' : '+';
       g.addEventListener('click', () => onPick({ qubit: i, round, slot }));
       g.addEventListener('keydown', (ev) => {

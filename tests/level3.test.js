@@ -344,3 +344,14 @@ test('bridges: v2b ion files and dense superconducting files; the learned label'
   assert.equal(decoderLabel(headlineResults({ x: { values: [1] }, series: [{ d: 3, mode: 'hard', decoder: 'naive' }] })), 'naive decoder');
   assert.ok(!/V18|CC-|N7b|SP5/.test(LEARNED_LABEL));
 });
+
+// Catches: fails if the phase-flip memory's learned results claim the held-out check, which ran on
+// bit-flip banks only (data/results/holdout.json trainedOn and heldout are all rep_* banks).
+test('decoderLabel: the out-of-sample label only for the bit-flip memory', async () => {
+  const { learnedLabel, LEARNED_LABEL_X } = await import('../src/ui/level3.js');
+  const learned = [{ d: 3, mode: 'hard', decoder: 'learned' }];
+  assert.equal(decoderLabel({ basis: 'Z', series: learned }), LEARNED_LABEL);
+  assert.equal(decoderLabel({ basis: 'X', series: learned }), LEARNED_LABEL_X);
+  assert.equal(learnedLabel(undefined), LEARNED_LABEL);
+  assert.doesNotMatch(LEARNED_LABEL_X, /out of sample|bit[- ]flip/i);
+});

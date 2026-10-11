@@ -1,0 +1,522 @@
+{
+  "schema": "s2s-results/1",
+  "stage": "ablation",
+  "params": {
+    "distances": [
+      3,
+      5
+    ],
+    "r": 3,
+    "tau_us": {
+      "3": 20,
+      "5": 100
+    },
+    "modes": [
+      "hard",
+      "soft"
+    ],
+    "readoutDrawsPerShot": 4,
+    "clusterB": 500,
+    "models": [
+      "naive",
+      "diagOnly",
+      "ratesOnly",
+      "learned"
+    ],
+    "stabilityBanks": [
+      "rep_d3_r3_L0",
+      "rep_d3_r3_L1",
+      "rep_d5_r3_L0",
+      "rep_d5_r3_L1",
+      "rep_d7_r3_L0",
+      "rep_d7_r3_L1"
+    ],
+    "card": "params/ion.json",
+    "heldout": [
+      "rep_d3_r3_L0_h1.json",
+      "rep_d3_r3_L1_h1.json",
+      "rep_d5_r3_L0_h1.json",
+      "rep_d5_r3_L0_h2.json",
+      "rep_d5_r3_L0_h3.json",
+      "rep_d5_r3_L0_h4.json",
+      "rep_d5_r3_L0_h5.json",
+      "rep_d5_r3_L1_h1.json",
+      "rep_d5_r3_L1_h2.json",
+      "rep_d5_r3_L1_h3.json",
+      "rep_d5_r3_L1_h4.json",
+      "rep_d5_r3_L1_h5.json"
+    ],
+    "training": "original L0 + L1 banks of each d only; no held-out bank feeds a rate"
+  },
+  "rows": [
+    {
+      "d": 3,
+      "r": 3,
+      "mode": "hard",
+      "tau_us": 20,
+      "model": "naive",
+      "k": 153,
+      "n": 32000,
+      "pL": 0.00478125,
+      "lo": 0.0040826,
+      "hi": 0.00559879,
+      "minusNaive": null
+    },
+    {
+      "d": 3,
+      "r": 3,
+      "mode": "hard",
+      "tau_us": 20,
+      "model": "diagOnly",
+      "k": 129,
+      "n": 32000,
+      "pL": 0.00403125,
+      "lo": 0.00339401,
+      "hi": 0.00478755,
+      "minusNaive": {
+        "diff": -0.00075,
+        "lo": -0.001375,
+        "hi": -0.00025
+      }
+    },
+    {
+      "d": 3,
+      "r": 3,
+      "mode": "hard",
+      "tau_us": 20,
+      "model": "ratesOnly",
+      "k": 153,
+      "n": 32000,
+      "pL": 0.00478125,
+      "lo": 0.0040826,
+      "hi": 0.00559879,
+      "minusNaive": {
+        "diff": 0,
+        "lo": -0.00034375,
+        "hi": 0.000375
+      }
+    },
+    {
+      "d": 3,
+      "r": 3,
+      "mode": "hard",
+      "tau_us": 20,
+      "model": "learned",
+      "k": 117,
+      "n": 32000,
+      "pL": 0.00365625,
+      "lo": 0.00305188,
+      "hi": 0.00437978,
+      "minusNaive": {
+        "diff": -0.001125,
+        "lo": -0.00190625,
+        "hi": -0.00046875
+      }
+    },
+    {
+      "d": 3,
+      "r": 3,
+      "mode": "soft",
+      "tau_us": 20,
+      "model": "naive",
+      "k": 325,
+      "n": 32000,
+      "pL": 0.0101563,
+      "lo": 0.00911496,
+      "hi": 0.0113151,
+      "minusNaive": null
+    },
+    {
+      "d": 3,
+      "r": 3,
+      "mode": "soft",
+      "tau_us": 20,
+      "model": "diagOnly",
+      "k": 127,
+      "n": 32000,
+      "pL": 0.00396875,
+      "lo": 0.00333688,
+      "hi": 0.0047197,
+      "minusNaive": {
+        "diff": -0.0061875,
+        "lo": -0.00784375,
+        "hi": -0.00448359
+      }
+    },
+    {
+      "d": 3,
+      "r": 3,
+      "mode": "soft",
+      "tau_us": 20,
+      "model": "ratesOnly",
+      "k": 153,
+      "n": 32000,
+      "pL": 0.00478125,
+      "lo": 0.0040826,
+      "hi": 0.00559879,
+      "minusNaive": {
+        "diff": -0.005375,
+        "lo": -0.00733359,
+        "hi": -0.00368594
+      }
+    },
+    {
+      "d": 3,
+      "r": 3,
+      "mode": "soft",
+      "tau_us": 20,
+      "model": "learned",
+      "k": 120,
+      "n": 32000,
+      "pL": 0.00375,
+      "lo": 0.00313726,
+      "hi": 0.00448187,
+      "minusNaive": {
+        "diff": -0.00640625,
+        "lo": -0.00836016,
+        "hi": -0.00446719
+      }
+    },
+    {
+      "d": 5,
+      "r": 3,
+      "mode": "hard",
+      "tau_us": 100,
+      "model": "naive",
+      "k": 156,
+      "n": 160000,
+      "pL": 0.000975,
+      "lo": 0.000833587,
+      "hi": 0.00114038,
+      "minusNaive": null
+    },
+    {
+      "d": 5,
+      "r": 3,
+      "mode": "hard",
+      "tau_us": 100,
+      "model": "diagOnly",
+      "k": 35,
+      "n": 160000,
+      "pL": 0.00021875,
+      "lo": 0.000157299,
+      "hi": 0.000304199,
+      "minusNaive": {
+        "diff": -0.00075625,
+        "lo": -0.001025,
+        "hi": -0.000490469
+      }
+    },
+    {
+      "d": 5,
+      "r": 3,
+      "mode": "hard",
+      "tau_us": 100,
+      "model": "ratesOnly",
+      "k": 142,
+      "n": 160000,
+      "pL": 0.0008875,
+      "lo": 0.000753083,
+      "hi": 0.00104588,
+      "minusNaive": {
+        "diff": -0.0000875,
+        "lo": -0.0002,
+        "hi": 0.0000375
+      }
+    },
+    {
+      "d": 5,
+      "r": 3,
+      "mode": "hard",
+      "tau_us": 100,
+      "model": "learned",
+      "k": 42,
+      "n": 160000,
+      "pL": 0.0002625,
+      "lo": 0.000194219,
+      "hi": 0.000354778,
+      "minusNaive": {
+        "diff": -0.0007125,
+        "lo": -0.00098125,
+        "hi": -0.000424375
+      }
+    },
+    {
+      "d": 5,
+      "r": 3,
+      "mode": "soft",
+      "tau_us": 100,
+      "model": "naive",
+      "k": 256,
+      "n": 160000,
+      "pL": 0.0016,
+      "lo": 0.00141576,
+      "hi": 0.00180817,
+      "minusNaive": null
+    },
+    {
+      "d": 5,
+      "r": 3,
+      "mode": "soft",
+      "tau_us": 100,
+      "model": "diagOnly",
+      "k": 30,
+      "n": 160000,
+      "pL": 0.0001875,
+      "lo": 0.000131347,
+      "hi": 0.000267654,
+      "minusNaive": {
+        "diff": -0.0014125,
+        "lo": -0.00177531,
+        "hi": -0.00107469
+      }
+    },
+    {
+      "d": 5,
+      "r": 3,
+      "mode": "soft",
+      "tau_us": 100,
+      "model": "ratesOnly",
+      "k": 154,
+      "n": 160000,
+      "pL": 0.0009625,
+      "lo": 0.000822066,
+      "hi": 0.0011269,
+      "minusNaive": {
+        "diff": -0.0006375,
+        "lo": -0.00090625,
+        "hi": -0.000368438
+      }
+    },
+    {
+      "d": 5,
+      "r": 3,
+      "mode": "soft",
+      "tau_us": 100,
+      "model": "learned",
+      "k": 35,
+      "n": 160000,
+      "pL": 0.00021875,
+      "lo": 0.000157299,
+      "hi": 0.000304199,
+      "minusNaive": {
+        "diff": -0.00138125,
+        "lo": -0.0017375,
+        "hi": -0.00106875
+      }
+    }
+  ],
+  "fit": [
+    {
+      "d": 3,
+      "r": 3,
+      "trainedOn": [
+        "rep_d3_r3_L0.json",
+        "rep_d3_r3_L1.json"
+      ],
+      "pGate": 0.0124158,
+      "trained": {
+        "space": 0.00816547,
+        "spaceBoundary": 0.00656471,
+        "time": 0.0100458,
+        "diag": 0.00993978
+      },
+      "heldout": {
+        "space": 0.00849769,
+        "spaceBoundary": 0.00768,
+        "time": 0.00921543,
+        "diag": 0.0109503
+      },
+      "heldoutAntiDiag": 0.000285115
+    },
+    {
+      "d": 5,
+      "r": 3,
+      "trainedOn": [
+        "rep_d5_r3_L0.json",
+        "rep_d5_r3_L1.json"
+      ],
+      "pGate": 0.0131081,
+      "trained": {
+        "space": 0.00732542,
+        "spaceBoundary": 0.00827424,
+        "time": 0.00964432,
+        "diag": 0.00914783
+      },
+      "heldout": {
+        "space": 0.00707225,
+        "spaceBoundary": 0.00777537,
+        "time": 0.00941461,
+        "diag": 0.00938281
+      },
+      "heldoutAntiDiag": 0.0000612402
+    }
+  ],
+  "stability": [
+    {
+      "bank": "rep_d3_r3_L0",
+      "d": 3,
+      "space": 0.00879179,
+      "spaceBoundary": 0.00672563,
+      "time": 0.00947071,
+      "diag": 0.00918356,
+      "antiDiag": 0.000230569,
+      "pGate": 0.0124748
+    },
+    {
+      "bank": "rep_d3_r3_L1",
+      "d": 3,
+      "space": 0.0075319,
+      "spaceBoundary": 0.00653393,
+      "time": 0.0106213,
+      "diag": 0.0106951,
+      "antiDiag": 0.00101027,
+      "pGate": 0.0123568
+    },
+    {
+      "bank": "rep_d5_r3_L0",
+      "d": 5,
+      "space": 0.00693773,
+      "spaceBoundary": 0.00933306,
+      "time": 0.0091003,
+      "diag": 0.00977434,
+      "antiDiag": 0.0000119118,
+      "pGate": 0.0131673
+    },
+    {
+      "bank": "rep_d5_r3_L1",
+      "d": 5,
+      "space": 0.00771334,
+      "spaceBoundary": 0.0072492,
+      "time": 0.0101839,
+      "diag": 0.00851795,
+      "antiDiag": 0.000471998,
+      "pGate": 0.0130489
+    },
+    {
+      "bank": "rep_d7_r3_L0",
+      "d": 7,
+      "space": 0.00691115,
+      "spaceBoundary": 0.00714596,
+      "time": 0.0090328,
+      "diag": 0.00957401,
+      "antiDiag": 0.000278815,
+      "pGate": 0.0130263
+    },
+    {
+      "bank": "rep_d7_r3_L1",
+      "d": 7,
+      "space": 0.00777155,
+      "spaceBoundary": 0.00727557,
+      "time": 0.00916355,
+      "diag": 0.00983533,
+      "antiDiag": 0.0001927,
+      "pGate": 0.0139025
+    },
+    {
+      "bank": "rep_d5_r3_L0_h1",
+      "d": 5,
+      "space": 0.00672078,
+      "spaceBoundary": 0.00891347,
+      "time": 0.00953521,
+      "diag": 0.00922336,
+      "antiDiag": 0.000541728,
+      "pGate": 0.0130996
+    },
+    {
+      "bank": "rep_d5_r3_L0_h2",
+      "d": 5,
+      "space": 0.00672964,
+      "spaceBoundary": 0.00918792,
+      "time": 0.00962122,
+      "diag": 0.00879771,
+      "antiDiag": 0.000197181,
+      "pGate": 0.0131165
+    },
+    {
+      "bank": "rep_d5_r3_L0_h3",
+      "d": 5,
+      "space": 0.00705412,
+      "spaceBoundary": 0.00707669,
+      "time": 0.0097636,
+      "diag": 0.0103114,
+      "antiDiag": 0.00019595,
+      "pGate": 0.0139564
+    },
+    {
+      "bank": "rep_d5_r3_L0_h4",
+      "d": 5,
+      "space": 0.00685427,
+      "spaceBoundary": 0.00772431,
+      "time": 0.00913738,
+      "diag": 0.0100469,
+      "antiDiag": 0.000285506,
+      "pGate": 0.0127953
+    },
+    {
+      "bank": "rep_d5_r3_L0_h5",
+      "d": 5,
+      "space": 0.0067255,
+      "spaceBoundary": 0.00753459,
+      "time": 0.00958585,
+      "diag": 0.00906276,
+      "antiDiag": 0.000305149,
+      "pGate": 0.0128714
+    },
+    {
+      "bank": "rep_d5_r3_L1_h1",
+      "d": 5,
+      "space": 0.00752651,
+      "spaceBoundary": 0.00849864,
+      "time": 0.00957377,
+      "diag": 0.00814523,
+      "antiDiag": 0.000242441,
+      "pGate": 0.01277
+    },
+    {
+      "bank": "rep_d5_r3_L1_h2",
+      "d": 5,
+      "space": 0.00750854,
+      "spaceBoundary": 0.00816905,
+      "time": 0.00887637,
+      "diag": 0.00940126,
+      "antiDiag": 0.0000496676,
+      "pGate": 0.0130066
+    },
+    {
+      "bank": "rep_d5_r3_L1_h3",
+      "d": 5,
+      "space": 0.00700643,
+      "spaceBoundary": 0.00780882,
+      "time": 0.00965636,
+      "diag": 0.0102009,
+      "antiDiag": 0.000231342,
+      "pGate": 0.0132689
+    },
+    {
+      "bank": "rep_d5_r3_L1_h4",
+      "d": 5,
+      "space": 0.00705141,
+      "spaceBoundary": 0.00687943,
+      "time": 0.00879406,
+      "diag": 0.0089232,
+      "antiDiag": 0.000491656,
+      "pGate": 0.0126518
+    },
+    {
+      "bank": "rep_d5_r3_L1_h5",
+      "d": 5,
+      "space": 0.00751393,
+      "spaceBoundary": 0.00672932,
+      "time": 0.00961263,
+      "diag": 0.00970408,
+      "antiDiag": 0.000177379,
+      "pGate": 0.0134214
+    }
+  ],
+  "provenance": {
+    "tool": "tools/ablation.mjs",
+    "seedRule": "readout: 7300000 + 10000*d + 1000*bankIndex + draw (every model); paired cluster bootstrap: 7400000 + 100*d + 10*modeIndex + modelIndex",
+    "node": "v24.19.0"
+  }
+}

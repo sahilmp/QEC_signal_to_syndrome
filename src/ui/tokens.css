@@ -1,32 +1,80 @@
 /* Signal to Syndrome design tokens (team checklist U7.1). One colour and one marker per
    quantity, used by every chart: d = 3 / 5 / 7, hard / soft decoding (solid against dashed
    lines), trapped ion / superconducting (circle against square markers, charts.js TOKENS),
-   bit-flip / phase-flip memory, and the error-budget segments. Defining the tokens changes
-   nothing on the page; style.css applies them under #s2s-app.ux-v2 (FEATURES.uxV2) and in
-   the hero panel (FEATURES.hero). Line and marker colours reach at least 3:1 on white and
-   on --panel (#f4f6f9). */
+   bit-flip / phase-flip memory, and the error-budget segments.
+
+   Two themes, from the design mock: dark (the default, also before the script runs) and light
+   (#s2s-app[data-theme="light"], theme.js). Surfaces are the mock's navy and blue-grey; data
+   colours are Okabe-Ito (distinguishable with colour-vision deficiency). Contrast, checked in
+   both themes: text at least 4.5:1 on --bg, --panel and --raised; control outlines, line and
+   marker colours at least 3:1. The mock's own border shade (1.6:1) is kept for decorative rules
+   (--rule) only. In the light theme the Okabe-Ito orange, sky blue, reddish purple and yellow
+   are darkened to reach 3:1 on white; each keeps its hue. */
 
 #s2s-app {
-  /* Code distance (Okabe-Ito blue, vermillion, bluish green: the v1 series order). */
+  color-scheme: dark;
+  /* Surfaces and text (mock: background, card, surface-raised, foreground, muted-foreground). */
+  --bg: oklch(17% 0.025 253);
+  --panel: oklch(20.5% 0.025 253);
+  --raised: oklch(22.5% 0.025 253);
+  --text: oklch(94% 0.012 225);       /* 16:1 on --bg */
+  --muted: oklch(70% 0.02 230);       /* 7.2:1 on --bg */
+  --accent: oklch(68% 0.15 226);      /* mock primary; 7.0:1 on --bg */
+  --accent-text: oklch(16% 0.02 253); /* on --accent: 7.2:1 */
+  --border: oklch(58% 0.025 245);     /* control outlines: 4.5:1 on --bg */
+  --rule: oklch(34% 0.025 250);       /* mock border: dividers and table rules only */
+  --focus: oklch(72% 0.12 225);       /* mock ring: 7.9:1 */
+  --danger: oklch(64% 0.2 26);        /* mock destructive: 5.2:1 */
+  --gridline: oklch(36% 0.02 250 / 0.7);
+  --axis-ink: oklch(73% 0.018 230);
+  --hero-glow: oklch(38% 0.09 225 / 0.14);
+  --lit: #e69f00;                     /* lit check / detector fill */
+  --lit-text: oklch(17% 0.025 253);   /* on --lit: 8.5:1 */
+  --match: #cc79a7;
+  /* Text on a filled data colour (budget bars): the background colour, 5.6:1 or more. */
+  --on-data: oklch(17% 0.025 253);
+  /* Heatmap: from the panel to sky blue. */
+  --heat-lo: oklch(20.5% 0.025 253);
+  --heat-hi: #56b4e9;
+  /* Status chips and notes (Level 5). */
+  --ok-bg: color-mix(in oklab, #009e73 18%, var(--panel));
+  --ok-fg: #3ccf98;
+  --bad-bg: color-mix(in oklab, #d55e00 18%, var(--panel));
+  --bad-fg: #ff8a80;
+  --chip-bg: var(--raised);
+  --chip-fg: var(--muted);
+  --warn-bg: color-mix(in oklab, #e69f00 14%, var(--panel));
+  --warn-fg: #f5c86b;
+  --warn-border: #e69f00;
+  --disabled-bg: oklch(26% 0.025 253);
+  --disabled-fg: oklch(70% 0.02 230);
+
+  /* Code distance (Okabe-Ito blue, orange, bluish green). */
   --d3: #0072B2;
-  --d5: #D55E00;
+  --d5: #E69F00;
   --d7: #009E73;
   /* Decoding mode: hard solid, soft dashed (charts.js TOKENS.dash). */
-  --hard: #1a1a1a;
-  --soft: #6a3d9a;
+  --hard: #D55E00;
+  --soft: #56B4E9;
   /* Platform: trapped ion circles, superconducting squares (charts.js TOKENS.shape). */
-  --ion: #7a5195;
-  --sc: #2b7bb9;
+  --ion: #D55E00;
+  --sc: #56B4E9;
   /* Memory basis. */
-  --zbasis: #1f6f8b;
-  --xbasis: #a6463b;
+  --zbasis: #CC79A7;
+  --xbasis: #F0E442;
   /* Error-budget segments; readout is also the colour of every readout-error curve. */
-  --b-readout: #a86f00;
-  --b-idle: #3b6ea8;
-  --b-xt: #ad1457;
-  --b-gate: #5f6b7a;
-  /* Shaded interval between two optima (hero panel). */
-  --band-fill: #fbe7c2;
+  --b-readout: #56B4E9;
+  --b-idle: #E69F00;
+  --b-xt: #CC79A7;
+  --b-gate: #009E73;
+  /* Generic series (charts.js SERIES_STYLES), in Okabe-Ito order. */
+  --s1: #0072B2;
+  --s2: #D55E00;
+  --s3: #009E73;
+  --s4: #CC79A7;
+  --s5: #56B4E9;
+  /* Shaded interval between two optima (hero panel), opaque so labels can use it as a halo. */
+  --band-fill: color-mix(in oklab, #e69f00 18%, var(--bg));
 
   /* Spacing scale. */
   --sp-1: 4px;
@@ -43,6 +91,58 @@
   /* Rendered chart height (charts.js draws its viewBox to match at the usual widths). */
   --chart-h: 320px;
 }
+
+#s2s-app[data-theme="light"] {
+  color-scheme: light;
+  --bg: oklch(97.5% 0.012 225);
+  --panel: oklch(99.5% 0.005 225);
+  --raised: oklch(96% 0.01 225);
+  --text: oklch(20% 0.035 250);       /* 16.9:1 */
+  --muted: oklch(43% 0.03 245);       /* 7.5:1 */
+  --accent: oklch(48% 0.13 226);      /* 5.6:1 */
+  --accent-text: #ffffff;             /* on --accent: 6.0:1 */
+  --border: oklch(55% 0.03 245);      /* 4.5:1 */
+  --rule: oklch(83% 0.025 235);
+  --focus: oklch(48% 0.13 226);
+  --danger: oklch(52% 0.2 26);        /* 5.7:1 */
+  --gridline: oklch(82% 0.022 235 / 0.85);
+  --axis-ink: oklch(38% 0.03 245);
+  --hero-glow: oklch(78% 0.08 220 / 0.22);
+  --lit: #b35900;
+  --lit-text: #ffffff;                /* 4.8:1 */
+  --match: #c2185b;
+  --on-data: #ffffff;                 /* on the light budget colours: 5.4:1 or more */
+  --heat-lo: oklch(96% 0.01 225);
+  --heat-hi: #08306b;
+  --ok-bg: #e3f1e6;
+  --ok-fg: #1b5e20;
+  --bad-bg: #fbe4e2;
+  --bad-fg: #8e1c12;
+  --chip-bg: #eef0f3;
+  --chip-fg: #3c4450;
+  --warn-bg: #fff4d6;
+  --warn-fg: #4a3000;
+  --warn-border: #8a5a00;
+  --disabled-bg: oklch(93% 0.018 225);
+  --disabled-fg: oklch(43% 0.03 245);
+
+  --d5: #A86F00;
+  --soft: #2B7BB9;
+  --sc: #2B7BB9;
+  --zbasis: #B8649A;
+  --xbasis: #857A00;
+  --b-readout: #1F6FA8;
+  --b-idle: #8A5A00;
+  --b-xt: #9C4A80;
+  --b-gate: #00704F;
+  --s4: #B8649A;
+  --s5: #2B7BB9;
+  --band-fill: #fbe7c2;
+}
+
+/* The page around the app takes the same background. */
+html:has(#s2s-app), body:has(#s2s-app) { background: oklch(17% 0.025 253); }
+html:has(#s2s-app[data-theme="light"]), body:has(#s2s-app[data-theme="light"]) { background: oklch(97.5% 0.012 225); }
 
 @media (max-width: 600px) {
   #s2s-app { --chart-h: 260px; }

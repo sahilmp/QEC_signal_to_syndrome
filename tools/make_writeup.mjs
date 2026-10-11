@@ -1,7 +1,8 @@
 // Writes data/writeup/project_page.json, the copy of docs/project_page.md shown by the
 // "Read the full write-up" level (FEATURES.writeup, src/ui/writeup.js). Usage:
 //   node tools/make_writeup.mjs
-// The markdown is stored without HTML comments (the source notes), with \n line endings.
+// The markdown is stored without HTML comments (the source notes) and without the contents list
+// (between "<!-- toc" and "<!-- /toc -->", for GitHub only), with \n line endings.
 // Links whose target the release check's URL row would reject keep their text and lose the
 // target, because the JSON is embedded in dist/qollab/main.js and that row scans the bundle;
 // any other rejected URL stops the script. The sha256 is of the .md file's bytes as stored,
@@ -35,6 +36,8 @@ const sha256 = createHash('sha256').update(bytes).digest('hex');
 let markdown = bytes.toString('utf8')
   .replace(/^﻿/, '')
   .replace(/\r\n?/g, '\n')
+  // The contents list is for GitHub; the level shows every "##" section as its own heading.
+  .replace(/<!-- toc[\s\S]*?<!-- \/toc -->\n?/g, '')
   .replace(/<!--[\s\S]*?-->/g, '');
 // [text](rejected URL) -> text; images keep their link form (the page shows only their alt text).
 markdown = markdown.replace(/(!?)\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)/gi, (all, bang, text, url) => (

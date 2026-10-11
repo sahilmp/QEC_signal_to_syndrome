@@ -22,7 +22,7 @@ export function svgNamespace() {
 export function svgEl(tag, attrs = {}, parent = null) {
   const el = document.createElementNS(svgNamespace(), tag);
   for (const [k, v] of Object.entries(attrs)) {
-    if ((k === 'fill' || k === 'stroke') && String(v).startsWith('var(')) el.style.setProperty(k, String(v));
+    if ((k === 'fill' || k === 'stroke') && /^(var|color-mix)\(/.test(String(v))) el.style.setProperty(k, String(v));
     else el.setAttribute(k, String(v));
   }
   if (parent) parent.appendChild(el);
@@ -30,14 +30,14 @@ export function svgEl(tag, attrs = {}, parent = null) {
 }
 
 // Okabe-Ito colours (designed to stay distinguishable with colour-vision deficiency);
-// each series also gets its own marker shape, so colour is never the only cue. The last
-// two are darkened (from #CC79A7 and #56B4E9) to reach 3:1 on white and on --panel.
+// each series also gets its own marker shape, so colour is never the only cue. The values are
+// --s1 to --s5 in tokens.css, per theme (the light theme darkens the last two to reach 3:1).
 export const SERIES_STYLES = [
-  { color: '#0072B2', shape: 'circle' },
-  { color: '#D55E00', shape: 'square' },
-  { color: '#009E73', shape: 'triangle' },
-  { color: '#B8649A', shape: 'diamond' },
-  { color: '#2B8CC4', shape: 'cross' },
+  { color: 'var(--s1)', shape: 'circle' },
+  { color: 'var(--s2)', shape: 'square' },
+  { color: 'var(--s3)', shape: 'triangle' },
+  { color: 'var(--s4)', shape: 'diamond' },
+  { color: 'var(--s5)', shape: 'cross' },
 ];
 
 // Design tokens (tokens.css, U7.1): the same quantity has the same colour and marker on every
@@ -139,13 +139,13 @@ export function drawVlineLabels(svg, items, top, right, narrow) {
     t.textContent = label;
   });
 }
-export const HIGHLIGHT = { color: '#1a1a1a', shape: 'diamond' };
+export const HIGHLIGHT = { color: 'var(--text)', shape: 'diamond' };
 
 let chartCounter = 0;
 
 export function drawMarker(parent, shape, cx, cy, size, color, filled = true) {
   const s = size;
-  const common = { fill: filled ? color : '#ffffff', stroke: color, 'stroke-width': 1.5 };
+  const common = { fill: filled ? color : 'var(--bg)', stroke: color, 'stroke-width': 1.5 };
   switch (shape) {
     case 'square':
       return svgEl('rect', { x: cx - s, y: cy - s, width: 2 * s, height: 2 * s, ...common }, parent);
@@ -559,14 +559,12 @@ export function takeawayCard(text) {
   return { node: slot, show };
 }
 
-// Sequential colour of a heatmap cell, t in [0, 1]: from --panel (0) to a dark blue (1), so a
-// larger value is always darker (one hue; readable without colour vision).
-const HEAT_LO = [0xf4, 0xf6, 0xf9];
-const HEAT_HI = [0x08, 0x30, 0x6b];
+// Sequential colour of a heatmap cell, t in [0, 1]: from --heat-lo (0) to --heat-hi (1), mixed in
+// Oklab, so a larger value always stands further from the background (one hue; readable without
+// colour vision). The dark theme runs from the panel to sky blue, the light one to dark blue.
 export function heatColor(t) {
   const u = Math.min(1, Math.max(0, Number.isFinite(t) ? t : 0));
-  const c = HEAT_LO.map((lo, i) => Math.round(lo + (HEAT_HI[i] - lo) * u));
-  return `rgb(${c[0]},${c[1]},${c[2]})`;
+  return `color-mix(in oklab, var(--heat-hi) ${Math.round(u * 1000) / 10}%, var(--heat-lo))`;
 }
 
 // Heatmap of a square matrix, with a colour key and a table as its text alternative.
@@ -630,8 +628,8 @@ export function createHeatmap(opts) {
         const masked = mask(i, j);
         const rect = svgEl('rect', {
           x: x0 + j * cell, y: y0 + i * cell, width: cell, height: cell,
-          fill: masked ? '#ffffff' : heatColor(vMax > 0 ? matrix[i][j] / vMax : 0),
-          stroke: '#ffffff', 'stroke-width': 0.5,
+          fill: masked ? 'var(--bg)' : heatColor(vMax > 0 ? matrix[i][j] / vMax : 0),
+          stroke: 'var(--bg)', 'stroke-width': 0.5,
         }, svg);
         if (labels.length) {
           svgEl('title', {}, rect).textContent = masked
@@ -644,8 +642,8 @@ export function createHeatmap(opts) {
     for (const g of groups) {
       const a = g.start * cell;
       if (g.start > 0) {
-        svgEl('line', { x1: x0 + a, x2: x0 + a, y1: y0, y2: y0 + size, stroke: '#c4c8cf', 'stroke-width': 1 }, svg);
-        svgEl('line', { x1: x0, x2: x0 + size, y1: y0 + a, y2: y0 + a, stroke: '#c4c8cf', 'stroke-width': 1 }, svg);
+        svgEl('line', { x1: x0 + a, x2: x0 + a, y1: y0, y2: y0 + size, stroke: 'var(--rule)', 'stroke-width': 1 }, svg);
+        svgEl('line', { x1: x0, x2: x0 + size, y1: y0 + a, y2: y0 + a, stroke: 'var(--rule)', 'stroke-width': 1 }, svg);
       }
       const mid = a + (g.size * cell) / 2;
       const ty = svgEl('text', { x: x0 - 6, y: y0 + mid + font / 3, 'text-anchor': 'end', class: 'tick' }, svg);
@@ -805,10 +803,10 @@ export function createStackedBars(opts) {
         const x0 = sx(acc);
         const x1 = sx(acc + g.value);
         acc += g.value;
-        const rect = svgEl('rect', { x: x0, y, width: Math.max(1, x1 - x0), height: barH, fill: g.color, stroke: '#ffffff', 'stroke-width': 1.5 }, svg);
+        const rect = svgEl('rect', { x: x0, y, width: Math.max(1, x1 - x0), height: barH, fill: g.color, stroke: 'var(--bg)', 'stroke-width': 1.5 }, svg);
         svgEl('title', {}, rect).textContent = `${c.label}, ${g.name}: ${formatNumber(g.value)}`;
         if (x1 - x0 >= 0.62 * font * g.name.length + 8) {
-          svgEl('text', { x: (x0 + x1) / 2, y: y + barH / 2 + font / 3, 'text-anchor': 'middle', fill: '#ffffff', class: 'tick' }, svg).textContent = g.name;
+          svgEl('text', { x: (x0 + x1) / 2, y: y + barH / 2 + font / 3, 'text-anchor': 'middle', fill: 'var(--on-data)', class: 'tick' }, svg).textContent = g.name;
         }
       }
     });
@@ -883,7 +881,7 @@ export function createTornado(opts) {
         const x1 = sx(Math.max(0, b.value));
         const filled = b.filled !== false;
         const rect = svgEl('rect', {
-          x: x0, y: b.y, width: Math.max(1, x1 - x0), height: barH, fill: filled ? b.color : '#ffffff', stroke: b.color, 'stroke-width': 1.5,
+          x: x0, y: b.y, width: Math.max(1, x1 - x0), height: barH, fill: filled ? b.color : 'var(--bg)', stroke: b.color, 'stroke-width': 1.5,
         }, svg);
         svgEl('title', {}, rect).textContent = `${g.label}, ${b.label}: ${formatNumber(b.value)}`;
       }

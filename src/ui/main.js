@@ -21,6 +21,7 @@ import { mountFindings } from './findings.js';
 import { createTour, TOUR_STOPS, TOUR_LABEL } from './tour.js';
 import { mountWriteup, WRITEUP_LABEL } from './writeup.js';
 import { mountPipeline } from './pipeline.js';
+import { mountThemeToggle } from './theme.js';
 import { setPlatform, setBasis, currentBasis, onBasisChange, BASES } from './level3.js';
 
 const LEVELS = [
@@ -101,6 +102,11 @@ function start() {
   for (const v of root.querySelectorAll('[data-s2s="version"]')) v.textContent = version;
   // Text cut and design tokens (U7.1, U7.3): style.css applies the tokens under this class.
   if (FEATURES.uxV2 === true) root.classList.add('ux-v2');
+  // Colour theme (theme.js): the toggle sits beside the title; dark until the reader picks light.
+  if (FEATURES.theme === true) {
+    const title = root.querySelector('h1');
+    if (title) mountThemeToggle(root, title);
+  }
 
   const enabled = LEVELS.filter(isEnabled);
   const selector = root.querySelector('[data-s2s="levels"]');

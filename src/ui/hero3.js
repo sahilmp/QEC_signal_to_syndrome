@@ -11,7 +11,7 @@ import {
 import {
   STEP_LABELS, GUESS_PROMPT, GUESS_SLIDER_LABEL, LOCK_LABEL, WHY_SUMMARY, NEXT_LABEL, TWIST_INTRO,
   DECODER_LABELS, TWIST_TITLE, MODE_LABELS, STEPS_LABEL, RESTART_LABEL, CHART_LABELS,
-  guessVerdict, overlapSentence, whySentence, twistData, twistCaption, twistFootnote,
+  guessVerdict, overlapSentence, whySentence, twistData, twistCaption, twistFootnote, twistHeadline,
 } from './bridge_hero3.js';
 import {
   createChart, svgEl, htmlLegend, scrollBox, isNarrow, onNarrowChange, formatNumber, TOKENS, intervalCaption,
@@ -131,7 +131,7 @@ function createTwistChart() {
       }
       // Hard a filled circle, soft an open one: the marker tells the modes apart without colour.
       if (Number.isFinite(pt?.pL)) {
-        svgEl('circle', { cx: x, cy: sy(pt.pL), r: 7, fill: mode === 'hard' ? color : '#ffffff', stroke: color, 'stroke-width': 2 }, g);
+        svgEl('circle', { cx: x, cy: sy(pt.pL), r: 7, fill: mode === 'hard' ? color : 'var(--bg)', stroke: color, 'stroke-width': 2 }, g);
       }
     });
     holder.replaceChildren(svg);
@@ -205,7 +205,7 @@ function radioPair(name, options, checked, onChange, { legend = null, labelledBy
 // text: optional replacements for the twist functions of the contract (twistData, twistCaption,
 // twistFootnote), so the tests can reach cases the bridged module's data does not have.
 export function mountHero3(container, { goDeeper = null, openLearnNoise = null, text = {} } = {}) {
-  const tx = { twistData, twistCaption, twistFootnote, ...text };
+  const tx = { twistData, twistCaption, twistFootnote, twistHeadline, ...text };
   let basis = currentBasis();
   let platformId = 'superconducting';
   let step = 0;
@@ -303,6 +303,11 @@ export function mountHero3(container, { goDeeper = null, openLearnNoise = null, 
   const s3 = steps[2].section;
   s3.appendChild(el('p', { id: 'hero3-twist-intro', class: 'hero-live' }, TWIST_INTRO));
   const data = tx.twistData();
+  // The headline number, large, before the controls; absent when the data do not give it.
+  const headline = data ? tx.twistHeadline(data) : null;
+  if (headline) {
+    s3.appendChild(el('p', { class: 'hero3-twist-stat' })).appendChild(el('strong', { style: 'font-size:var(--fs-xl)' }, headline));
+  }
   let twist = null;
   let resetDecoder = null;
   let captionP = null;

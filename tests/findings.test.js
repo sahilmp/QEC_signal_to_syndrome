@@ -28,9 +28,15 @@ test('findingCards on the real data: F1, F2, F3, each number from the results fi
   assert.deepEqual(cards.map((c) => c.target), ['learnnoise-3', 'level3:superconducting', 'level3:trapped-ion']);
   const oos = stage4.findings.find((f) => f.id === 'F1').numbers.outOfSample;
   const n = oos.pointsPerDecoder;
-  assert.deepEqual(numbersIn(cards[0].line), [oos.softWorseCount.naive, n, oos.softWorseCount.learned, n]);
+  const row = stage4.decoderComparison.find((r) => r.arm === 'trapped-ion' && r.basis === 'Z' && r.d === 5
+    && r.mode === 'hard' && r.inSample === false);
+  assert.deepEqual(numbersIn(cards[0].title), [Math.round(row.naive.pL / row.learned.pL)]);
+  assert.deepEqual(numbersIn(cards[0].line), [5, p3(row.naive.pL * 100), p3(row.learned.pL * 100)]);
+  assert.deepEqual(numbersIn(cards[0].detail), [oos.softWorseCount.naive, n, oos.softWorseCount.learned, n]);
   const opt = stage3.optima.tauLog.find((t) => t.d === 3 && t.mode === 'hard' && t.decoder === 'learned');
-  assert.deepEqual(numbersIn(cards[1].line), [p3(opt.xMin), p3(opt.lo), p3(opt.hi)]);
+  const scPhys = stage4.platforms.superconducting.tauPhys.empirical.xMin;
+  const ionPhys = stage4.platforms['trapped-ion'].tauPhys.empirical.xMin;
+  assert.deepEqual(numbersIn(cards[1].line), [p3(opt.lo), p3(opt.hi), p3(scPhys), p3(ionPhys)]);
   const b = stage4.platforms['trapped-ion'].budgetAtOptimum;
   // Replaces p2 (toPrecision(2): 520) with p3 (formatNumber: 523) because the E17 audit allows
   // only formatNumber rounding when a sentence states no precision.
@@ -47,8 +53,10 @@ test('findingCards: short titles and lines, F1 wording and note', () => {
     assert.ok(c.line && words(c.line) <= 16, `${c.id} line: ${c.line}`);
   }
   const f1 = findingCards(SOURCES)[0];
-  assert.match(f1.line, /settings/);
-  assert.doesNotMatch(f1.line, /readout times/);
+  assert.ok(words(f1.detail) <= 16, f1.detail);
+  assert.match(f1.detail, /settings/);
+  assert.doesNotMatch(f1.detail, /readout times/);
+  assert.equal(f1.headline, true);
   assert.equal(isPostHoc(stage4.findings[0]), true);
   assert.equal(f1.note, POST_HOC_NOTE);
 });
@@ -59,7 +67,7 @@ test('findingCards: short titles and lines, F1 wording and note', () => {
 test('findingCards: F1 names the ion and the held-out circuits; F3 ratio as the hero prints it', () => {
   const [f1, , f3] = findingCards(SOURCES);
   assert.match(f1.title, /^Trapped ion:/);
-  assert.match(f1.line, /held-out circuits/);
+  assert.match(f1.line, /held-out circuits/i);
   const ratio = /Idling is (\S+)× smaller/.exec(f3.line)?.[1];
   assert.ok(ratio, f3.line);
   const b = budgetFor('trapped-ion', 'Z');
@@ -73,8 +81,14 @@ test('findingCards: F1 names the ion and the held-out circuits; F3 ratio as the 
 test('findingCards: missing values give a title-only card', () => {
   const noF1 = { stage3, stage4: { ...stage4, findings: [] } };
   const [f1, f2, f3] = findingCards(noF1);
-  assert.equal(f1.line, null);
+  assert.equal(f1.detail, null);
   assert.equal(f1.note, null);
+  assert.ok(f1.line);
+  const neither = findingCards({ stage3, stage4: { ...stage4, findings: [], decoderComparison: [] } })[0];
+  assert.equal(neither.line, null);
+  assert.equal(neither.detail, null);
+  assert.equal(neither.note, null);
+  assert.equal(neither.title, 'Trapped ion: modelling hidden faults cuts errors');
   assert.ok(f2.line && f3.line);
   const budget = (idle) => ({
     stage3,
@@ -187,20 +201,27 @@ test('mountFindings: heading, then title, line and note inside each button', () 
     const cards = findingCards(SOURCES);
     cardButtons(root).forEach((b, i) => {
       const c = cards[i];
-      assert.equal(b.textContent, `${c.title}${c.line}${c.note ?? ''}`);
+      assert.equal(b.textContent, `${c.title}${c.line}${c.detail ?? ''}${c.note ?? ''}`);
     });
-    const bare = mountStrip({ open() {}, sources: { stage3, stage4: { ...stage4, findings: [] } } });
-    assert.equal(cardButtons(bare)[0].textContent, cards[0].title);
+    const bare = mountStrip({ open() {}, sources: { stage3, stage4: { ...stage4, findings: [], decoderComparison: [] } } });
+    assert.equal(cardButtons(bare)[0].textContent, 'Trapped ion: modelling hidden faults cuts errors');
   });
 });
 
 // Catches: fails if the cards do not stack into one column under the narrow query of charts.js
-// (max-width: 600px), or stay in one column on a wide screen.
-test('mountFindings: three columns when wide, one when narrow', () => {
+// (max-width: 600px), or stay in one column on a wide screen, or the headline card stops spanning
+// the full row.
+test('mountFindings: two columns when wide (headline card across both), one when narrow', () => {
   const cols = (narrow) => withDom(() => {
     const root = mountStrip({ open() {}, sources: SOURCES });
     return [...walk(root)].find((n) => n.className === 'findings-cards').style.gridTemplateColumns;
   }, { narrow });
-  assert.match(cols(false), /^repeat\(3,/);
+  withDom(() => {
+    const root = mountStrip({ open() {}, sources: SOURCES });
+    const items = [...walk(root)].filter((n) => n.localName === 'li');
+    assert.match(items[0].attributes.style, /grid-column:1 \/ -1/);
+    assert.doesNotMatch(items[1].attributes.style, /grid-column/);
+  });
+  assert.match(cols(false), /^repeat\(2,/);
   assert.equal(cols(true), '1fr');
 });

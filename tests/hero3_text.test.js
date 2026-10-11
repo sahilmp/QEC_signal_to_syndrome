@@ -42,7 +42,7 @@ const CONTRACT = {
   NEXT_LABEL: 'string', TWIST_INTRO: 'string', DECODER_LABELS: 'object', TWIST_TITLE: 'string', MODE_LABELS: 'object',
   STEPS_LABEL: 'string', RESTART_LABEL: 'string', CHART_LABELS: 'object',
   guessVerdict: 'function', overlapSentence: 'function', budgetFor: 'function', whySentence: 'function',
-  twistData: 'function', twistCaption: 'function', twistFootnote: 'function',
+  twistData: 'function', twistCaption: 'function', twistFootnote: 'function', twistHeadline: 'function',
   WHY_SMALL_RATIO: 'number', WHY_RIVAL_RATIO: 'number',
 };
 
@@ -312,4 +312,15 @@ test('read-aloud fixes: intro, equal-optima overlap, caption order, 40 words', (
   }
   for (const basis of ['Z', 'X']) for (const id of PLATFORM_IDS) texts.push(whySentence({ platformId: id, basis, ...heroCase(id, basis) }));
   for (const t of texts) assert.ok(typeof t === 'string' && words(t) <= 40, `${t}`);
+});
+
+// Catches: fails if the twist's large number stops being naive soft over learned soft from the
+// same held-out point as the chart, or if missing data or no gain still print a number.
+test('twistHeadline: the ratio of the two soft points, null without data or gain', () => {
+  const data = T.twistData();
+  const h = T.twistHeadline(data);
+  const want = Number((data.naive.soft.pL / data.learned.soft.pL).toPrecision(3));
+  assert.equal(Number(/^(\S+)×/.exec(h)?.[1]), want, h);
+  assert.equal(T.twistHeadline(null), null);
+  assert.equal(T.twistHeadline({ naive: { soft: { pL: 0.001 } }, learned: { soft: { pL: 0.002 } } }), null);
 });

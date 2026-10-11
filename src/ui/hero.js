@@ -18,7 +18,7 @@ import { stage2v2, stage3v2, stage2x, stage3x } from './bridge_data.js';
 import { findMinimum } from './bridge_core.js';
 import { createChart, TOKENS, intervalOf, intervalCaption } from './charts.js';
 import {
-  formatTau, currentBasis, onBasisChange, memoryTag, LEARNED_LABEL,
+  formatTau, currentBasis, onBasisChange, memoryTag, learnedLabel,
 } from './level3.js';
 
 export const HERO_PLATFORMS = [
@@ -249,7 +249,7 @@ export function mountHero(container, { goDeeper = null } = {}) {
 
     const shape = TOKENS.shape[p.id];
     // The learned decoder's results carry the out-of-sample label (U3 row 31).
-    const decoderName = curves.decoder === 'learned' ? LEARNED_LABEL : 'naive decoder';
+    const decoderName = curves.decoder === 'learned' ? learnedLabel(basis) : 'naive decoder';
     const { interval, ...logical } = curves.logical;
     const vlines = [];
     if (optima.tauLog && !optima.tauLog.atEdge) vlines.push({ x: optima.tauLog.xMin, label: 'τ*_log' });

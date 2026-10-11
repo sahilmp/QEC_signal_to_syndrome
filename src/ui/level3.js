@@ -57,8 +57,12 @@ export function headlineResults(results) {
 // the hero and Levels 2-5). Out of sample: the held-out check V18 passed (DECISIONS, Person A,
 // "SP5 cut lifted (V18 passed)"; data/results/holdout.json, setting1).
 export const LEARNED_LABEL = 'learned decoder (checked out of sample on held-out circuits)';
+// The phase-flip memory has no held-out banks (holdout.json trains and tests on bit-flip banks
+// only), so its learned results carry no out-of-sample claim.
+export const LEARNED_LABEL_X = 'learned decoder (in sample: no held-out circuits for this memory)';
+export const learnedLabel = (basis) => (basis === 'X' ? LEARNED_LABEL_X : LEARNED_LABEL);
 // The decoder label of a results file as headlineResults reduced it.
-export const decoderLabel = (results) => ((results?.series || []).some((s) => s.decoder === 'learned') ? LEARNED_LABEL : 'naive decoder');
+export const decoderLabel = (results) => ((results?.series || []).some((s) => s.decoder === 'learned') ? learnedLabel(results?.basis) : 'naive decoder');
 
 // The readout platforms of levels 3 and 4, each behind its FEATURES flag. The curves are the
 // learned decoder's (headlineResults) from the files Stage 4 uses: stage2v2 (v2b) for the ion,
@@ -586,25 +590,33 @@ export function mountLevel3(container) {
   label.append(labelText, out);
   const input = el('input', { id: 'l3-tau', type: 'range', min: '0', step: '1' });
   row.append(label, input);
-  container.appendChild(row);
+  // Two columns on a wide screen (style.css .l3-cols): the readout physics (slider, readings,
+  // batch) on the left, the code (distance, logical-error chart, budget) on the right. One
+  // column, in this order, on a narrow screen.
+  const cols = el('div', { class: 'l3-cols' });
+  const physCol = el('div', { class: 'l3-col l3-col-physics' });
+  const codeCol = el('div', { class: 'l3-col l3-col-code' });
+  cols.append(physCol, codeCol);
+  container.appendChild(cols);
+  physCol.appendChild(row);
 
   const assign = el('p', { class: 'status', 'aria-live': 'polite' });
-  container.appendChild(assign);
+  physCol.appendChild(assign);
   const visualBox = el('div');
-  container.appendChild(visualBox);
+  physCol.appendChild(visualBox);
 
   // Superconducting only: the stage-3 assignment-error U-curve.
   const assignChart = createChart({ title: '', xLabel: 'Integration time τ (µs)', yLabel: 'Assignment error', series: [], logX: true, logY: true, yFloor: 1e-6 });
-  container.appendChild(assignChart.root);
+  physCol.appendChild(assignChart.root);
 
   const batchRow = el('div', { class: 'control-row' });
   // With the text cut on, the button says what it does and the help sentence goes.
   const batchBtn = el('button', { type: 'button' }, ux ? `Decode ${BATCH_SHOTS} shots at this τ` : 'Batch');
   batchRow.appendChild(batchBtn);
   if (!ux) batchRow.appendChild(el('span', { class: 'hint' }, `Decode ${BATCH_SHOTS} shots of the d = 3, r = 3 bank at this τ (hard mode).`));
-  container.appendChild(batchRow);
+  physCol.appendChild(batchRow);
   const batchOut = el('p', { class: 'status', 'aria-live': 'polite' });
-  container.appendChild(batchOut);
+  physCol.appendChild(batchOut);
 
   // Distance selector (uxV2): which d's tau_log marker the chart shows, and the challenge's d.
   let selD = 3;
@@ -626,11 +638,11 @@ export function mountLevel3(container) {
       wrap.append(input, el('label', { for: id }, `d = ${d}`));
       fs.appendChild(wrap);
     }
-    container.appendChild(fs);
+    codeCol.appendChild(fs);
   }
 
   const chart = createChart({ title: '', xLabel: '', yLabel: 'Logical error probability', series: [], logX: true, logY: true, yFloor: 1e-7 });
-  container.appendChild(chart.root);
+  codeCol.appendChild(chart.root);
 
   // Error budget at the current tau (uxV2), under the curves, with its values table.
   const budgetBox = el('div', { class: 'budget' });
@@ -638,7 +650,7 @@ export function mountLevel3(container) {
   let budgetChart = null;
   if (ux) {
     budgetBox.appendChild(budgetNote);
-    container.appendChild(budgetBox);
+    codeCol.appendChild(budgetBox);
   }
 
   // Challenge (uxV2): lock in a tau, scored against the lowest point of the chosen d's curve.
