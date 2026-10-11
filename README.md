@@ -2,7 +2,7 @@
 
 **How long should you listen to a qubit? Longer gives a cleaner reading, but the rest of the error-correcting code keeps ageing while you wait. Signal to Syndrome is a browser lab, built on IonQ's simulator, that finds the readout time that actually minimises a code's logical error. Along the way it shows that the decoder's model of the noise matters more than the readout time.**
 
-**[Try it on Qollab](https://qollab.xyz/u/SQuant/main-project)**: nothing to install, and every result is embedded in the page.
+**[Try it on Qollab](https://qollab.xyz/u/SQuant/qec-signal-to-syndrome)**: nothing to install, and every result is embedded in the page.
 
 ![Level 3: trapped-ion readout time against logical error](docs/screenshots/level3-ion.png)
 
@@ -58,8 +58,8 @@ Intervals, sources and the pre-registered hypotheses are in the [full write-up](
 
 ## Run it
 
-- **Main lab:** https://qollab.xyz/u/SQuant/main-project. Use a Chromium-based browser (Chrome, Edge or Opera). All data are embedded, so it makes no network requests.
-- **Bank generator** (the IonQ-simulator circuits that produced the data): https://qollab.xyz/u/SQuant/signal-to-syndrome-bank-genera
+- **Main lab:** https://qollab.xyz/u/SQuant/qec-signal-to-syndrome. Use a Chromium-based browser (Chrome, Edge or Opera). All data are embedded, so it makes no network requests.
+- **Bank generator** (the IonQ-simulator circuits that produced the data): https://qollab.xyz/u/SQuant/bank-generator
 - **Live run (optional):** select IonQ Forte 1 in Qollab's Select QPU dialog, open Level 4 and press the live-run button. Each press submits one d = 3, r = 3 job (200 shots) through [`qollab/live.py`](qollab/live.py).
 
 Locally, with Node.js 20 or later:

@@ -168,7 +168,7 @@ git push
 - `qollab/live.py`, uploaded as `live.py`
 
 **f) Redo V9 on Qollab:**
-1. Open https://qollab.xyz/u/SQuant/main-project in Chrome or Edge.
+1. Open https://qollab.xyz/u/SQuant/qec-signal-to-syndrome in Chrome or Edge.
 2. Run it, scroll to **Diagnostics** at the bottom, and read the fingerprint.
 3. Expect **`53933f98`** (V9 and V9L), the same value `node tools/sweep.mjs --diag` prints.
 4. Once it matches, the project page's V9 row ("on Qollab not yet redone") can be updated.

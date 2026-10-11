@@ -19,7 +19,7 @@ import { correctedLogical, isLogicalError } from '../core/logical.js';
 export const LIVE_D = 3;
 export const LIVE_R = 3;
 export const LIVE_SHOTS = 200;
-export const BANK_GENERATOR_URL = 'https://qollab.xyz/u/SQuant/signal-to-syndrome-bank-genera';
+export const BANK_GENERATOR_URL = 'https://qollab.xyz/u/SQuant/bank-generator';
 
 // Seeds are integers in 1..2^31; a new one per press, never the previous one.
 export function nextSeed(previous, now) {
