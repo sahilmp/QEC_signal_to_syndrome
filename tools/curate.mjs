@@ -7,7 +7,8 @@
 // drawn in shot order (the same seeds for both banks); hard and soft decoding each start from
 // createRng(seed_s), so both see identical readings (the Level 4 rule).
 // Deviation from U7.11 (B50, agreed with Person B): U7.11 names rep_d3_r3_L0 only, where hard
-// never fails while soft succeeds (the ion's dark readings are reliable; soft decoding's uniform
+// almost never fails while soft succeeds (0 such shots in the pre-window bank, 2 in the in-window
+// rerun; the ion's dark readings are reliable; soft decoding's uniform
 // prior undervalues them). Both banks are scanned: "softSaves" come from rep_d3_r3_L1 and
 // "softFails" from rep_d3_r3_L0, up to 10 each. The per-bank counts of both kinds are stored.
 // Each record carries its bank label, hex key and seed, and each bank its layout, so Level 4

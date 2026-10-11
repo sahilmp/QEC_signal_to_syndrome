@@ -5,7 +5,7 @@
   "decoder": "learned",
   "provisional": false,
   "framing": "Two readout physics models at fixed gate noise: the same IonQ forte-1 banks and learned decoder; different readout models, idle physics and cycle times.",
-  "framingPlain": "Two readout models on the same IonQ-simulated circuits and gate noise: a controlled comparison, not a hardware benchmark.",
+  "framingPlain": "Same IonQ-simulated circuits and gate noise, two ways of reading qubits out: a controlled comparison, not a hardware benchmark.",
   "platforms": {
     "trapped-ion": {
       "tradeoff": {
@@ -2315,9 +2315,9 @@
   },
   "provenance": {
     "tool": "tools/sweep.mjs --stage 4 --decoder both --basis X",
-    "commit": "022a042e137630fb839fd26d659ca02c4833f68c",
-    "date": "2026-10-10T20:55:16.961Z",
-    "node": "v24.19.0",
+    "commit": "16b9a97a4164f96bf93aff0bfbf275027be39b77",
+    "date": "2026-10-11T17:06:19.009Z",
+    "node": "v24.18.1",
     "params": [
       "params/cycle.json",
       "params/ion.json",
@@ -2326,21 +2326,21 @@
     "inputs": {
       "trapped-ion": {
         "file": "data\\results\\stage2_ion_x_v2b.json",
-        "commit": "23982f7e69eb36af16b6e877b3a49b00c3b9de38",
-        "date": "2026-10-10T18:24:04.308Z",
+        "commit": "16b9a97a4164f96bf93aff0bfbf275027be39b77",
+        "date": "2026-10-11T16:30:14.805Z",
         "grid": "standard",
         "overrides": {},
         "cardMatchesParams": true
       },
       "superconducting": {
         "file": "data\\results\\stage3_sc_x_dense.json",
-        "commit": "42d68a34ee2ccc169bc500dd81e9cc880c99d1c3",
-        "date": "2026-10-10T20:13:36.581Z",
+        "commit": "16b9a97a4164f96bf93aff0bfbf275027be39b77",
+        "date": "2026-10-11T17:05:18.952Z",
         "grid": "dense",
         "overrides": {},
         "cardMatchesParams": true
       }
     },
-    "runtime_s": 0.108
+    "runtime_s": 0.082
   }
 }

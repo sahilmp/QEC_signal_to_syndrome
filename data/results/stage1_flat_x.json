@@ -1292,46 +1292,46 @@
         {
           "d": 3,
           "r": 1,
-          "ratio": 1.04114,
-          "lo": 0.893595,
-          "hi": 1.21304,
-          "rateZ": 0.01975,
+          "ratio": 1.16667,
+          "lo": 0.996616,
+          "hi": 1.36573,
+          "rateZ": 0.017625,
           "rateX": 0.0205625
         },
         {
           "d": 3,
           "r": 3,
-          "ratio": 1.02678,
-          "lo": 0.958656,
-          "hi": 1.09974,
-          "rateZ": 0.0478437,
+          "ratio": 1.02745,
+          "lo": 0.959271,
+          "hi": 1.10048,
+          "rateZ": 0.0478125,
           "rateX": 0.049125
         },
         {
           "d": 5,
           "r": 3,
-          "ratio": 0.99969,
-          "lo": 0.953258,
-          "hi": 1.04838,
-          "rateZ": 0.0504062,
+          "ratio": 0.984432,
+          "lo": 0.938888,
+          "hi": 1.03219,
+          "rateZ": 0.0511875,
           "rateX": 0.0503906
         },
         {
           "d": 5,
           "r": 5,
-          "ratio": 1.02869,
-          "lo": 0.994719,
-          "hi": 1.06383,
-          "rateZ": 0.0498281,
+          "ratio": 1.04825,
+          "lo": 1.01346,
+          "hi": 1.08424,
+          "rateZ": 0.0488984,
           "rateX": 0.0512578
         },
         {
           "d": 7,
           "r": 3,
-          "ratio": 1.02135,
-          "lo": 0.983172,
-          "hi": 1.06101,
-          "rateZ": 0.0517188,
+          "ratio": 1.01339,
+          "lo": 0.975587,
+          "hi": 1.05266,
+          "rateZ": 0.052125,
           "rateX": 0.0528229
         }
       ]
@@ -1339,9 +1339,9 @@
   },
   "provenance": {
     "tool": "tools/sweep.mjs --stage 1 --decoder both --basis X",
-    "commit": "79dc0301516df65457901237ff802407754bf83c",
-    "date": "2026-10-10T13:33:35.987Z",
-    "node": "v24.19.0",
+    "commit": "16b9a97a4164f96bf93aff0bfbf275027be39b77",
+    "date": "2026-10-11T16:14:56.342Z",
+    "node": "v24.18.1",
     "banks": [
       "repx_d3_r3_L0.json",
       "repx_d3_r3_L1.json",
@@ -1422,6 +1422,6 @@
     },
     "seedRule": "seed = 1000000 + 1000*d + 100*logical + epsilonIndex (both decoders share it; V11 epsilon 1e-9 uses epsilonIndex 8)",
     "nonExact": 0,
-    "runtime_s": 22.856
+    "runtime_s": 22.408
   }
 }

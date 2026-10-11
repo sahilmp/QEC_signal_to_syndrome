@@ -6017,7 +6017,7 @@
       }
     ],
     "nonExact": 0,
-    "runtime_s": 96.93
+    "runtime_s": 321.302
   },
   "paired": [
     {
@@ -10020,9 +10020,9 @@
   },
   "provenance": {
     "tool": "tools/sweep.mjs --stage 2 --decoder both --basis X --out data/results/stage2_ion_x_v2b.json",
-    "commit": "23982f7e69eb36af16b6e877b3a49b00c3b9de38",
-    "date": "2026-10-10T18:24:04.308Z",
-    "node": "v24.19.0",
+    "commit": "16b9a97a4164f96bf93aff0bfbf275027be39b77",
+    "date": "2026-10-11T16:30:14.805Z",
+    "node": "v24.18.1",
     "params": "params/ion.json",
     "banks": [
       "repx_d3_r3_L0.json",
@@ -10536,6 +10536,6 @@
     "grid": "standard",
     "overrides": {},
     "nonExact": 0,
-    "runtime_s": 193.941
+    "runtime_s": 705.035
   }
 }
