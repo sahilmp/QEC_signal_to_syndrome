@@ -11,7 +11,7 @@
     "2000": 100
   },
   "d": 5,
-  "date": "2026-10-08T11:33:56Z",
+  "date": "2026-10-11T15:48:12Z",
   "detector_rate": 0.125,
   "inject": [
     [
@@ -19,7 +19,7 @@
       2
     ]
   ],
-  "job_id": "01a11b4a-67a5-7ca2-ae9b-9a2332c5aea3",
+  "job_id": "01a12ba6-48a7-76a6-80cf-b0c9e04d17bd",
   "key_encoding": "hex",
   "layout": {
     "ancilla": [
@@ -62,7 +62,7 @@
   },
   "noise_model": "ideal",
   "r": 3,
-  "sampler_seed": 1520817678,
+  "sampler_seed": 1459612269,
   "schema": "s2s-bank/1",
   "shots": 100
 }

@@ -3,27 +3,27 @@
   "bit_order": "qiskit-little-endian",
   "checksum": {
     "n_keys": 11,
-    "sha256": "cbc150a2b2d1af041d79b4a08e2bbd8a2bba984b763f7135f1b5e8c62eb7747f",
+    "sha256": "3bb01043c424cd5ae29854184f3565ab6e9b98fbbb6e9c448446551a14f05c07",
     "total_shots": 4000
   },
   "code": "repetition",
   "counts": {
-    "0": 3811,
-    "1": 29,
+    "0": 3825,
+    "1": 27,
     "2": 26,
-    "4": 19,
-    "5": 15,
-    "8": 22,
-    "10": 11,
-    "12": 15,
-    "a": 31,
-    "b": 20,
-    "c": 1
+    "4": 21,
+    "5": 6,
+    "8": 13,
+    "10": 19,
+    "12": 17,
+    "a": 34,
+    "b": 11,
+    "d": 1
   },
   "d": 3,
-  "date": "2026-10-07T09:59:45Z",
-  "detector_rate": 0.0198125,
-  "job_id": "01a115cd-d1f8-761b-b114-900f36530834",
+  "date": "2026-10-11T14:46:48Z",
+  "detector_rate": 0.018,
+  "job_id": "01a12b6e-131b-7598-bf92-93891d7d84cb",
   "key_encoding": "hex",
   "layout": {
     "ancilla": [
@@ -49,7 +49,7 @@
   },
   "noise_model": "forte-1",
   "r": 1,
-  "sampler_seed": 1012386106,
+  "sampler_seed": 1085456959,
   "schema": "s2s-bank/1",
   "shots": 4000
 }
