@@ -222,6 +222,7 @@ for (const [name, { bridge, path }] of sources) {
 // 7. Live-run import line: only with liveRun on, and then exactly as the
 // first line of main.js. LIVE_MODULE must match tools/build.mjs ('live': top-level live.py).
 const LIVE_MODULE = 'live';
+const LIVE_HOLD = 'await globalThis.s2sLiveHold;';
 const LIVE_IMPORT = `import * as s2sLive from '${LIVE_MODULE}'; globalThis.s2sLive = s2sLive;`;
 const mainJs = read(jsFile);
 if (mainJs === null) {
@@ -229,6 +230,8 @@ if (mainJs === null) {
 } else if (FEATURES.liveRun === true) {
   const firstLine = mainJs.split(/\r?\n/, 1)[0];
   row('liveRun on: first line of main.js is the live-run import', firstLine === LIVE_IMPORT, firstLine === LIVE_IMPORT ? '' : `first line starts "${firstLine.slice(0, 80)}"`);
+  const lastLine = mainJs.trimEnd().split(/\r?\n/).pop();
+  row('liveRun on: last line of main.js holds the run open for the live job', lastLine === LIVE_HOLD, lastLine === LIVE_HOLD ? '' : `last line ends "${lastLine.slice(-80)}"`);
 } else {
   // Look for the import itself: the bare word 'live' occurs throughout the bundle.
   row(`liveRun off: main.js does not import '${LIVE_MODULE}'`, !mainJs.includes(`from '${LIVE_MODULE}'`) && !mainJs.includes('s2sLive from'));

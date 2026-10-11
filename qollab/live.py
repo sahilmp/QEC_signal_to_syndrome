@@ -41,8 +41,15 @@ def run_live(backend, shots=200, seed=7):
     if backend.options.get("noise_model") != "forte-1":
         raise RuntimeError("The backend is not IonQ Forte 1. Pick IonQ Forte 1 in the "
                            "Select QPU dialog, then run again.")
+    qc = live_circuit()
     nb = backend.with_name(backend.name, gateset="native", noise_model="forte-1")
+    # with_name looks up the qubit count over HTTP, which a JS project cannot do, and then
+    # falls back to 4 qubits (qiskit_ionq.helpers.get_n_qubits). IonQ is all-to-all, so widen
+    # it to the circuit and rebuild the target, which qiskit-ionq 1.0.x builds only once.
+    if nb.num_qubits < qc.num_qubits:
+        nb._num_qubits = qc.num_qubits
+        nb._target = nb._make_target()
     # The seed only takes effect through set_options, never as a run() argument.
     nb.set_options(noise_model="forte-1", sampler_seed=int(seed))
-    job = nb.run(transpile(live_circuit(), backend=nb), shots=int(shots))
+    job = nb.run(transpile(qc, backend=nb), shots=int(shots))
     return {str(k): int(v) for k, v in job.result().get_counts().items()}

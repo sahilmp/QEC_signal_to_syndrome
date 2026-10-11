@@ -38,8 +38,11 @@ let js = result.outputFiles[0].text;
 // Python helper. Module name 'live': Qollab's upload takes files only, no folders, so
 // live.py sits at the top level of the main project.
 const LIVE_MODULE = 'live';
+const LIVE_HOLD = 'await globalThis.s2sLiveHold;';
 if (FEATURES.liveRun === true) {
-  js = `import * as s2sLive from '${LIVE_MODULE}'; globalThis.s2sLive = s2sLive;\n${js}`;
+  // The last line keeps the Qollab run open until the live job has finished, because
+  // Qollab proxies IonQ requests only while the run is open (src/ui/liverun.js).
+  js = `import * as s2sLive from '${LIVE_MODULE}'; globalThis.s2sLive = s2sLive;\n${js}${LIVE_HOLD}\n`;
 }
 writeFileSync(join(qollabDir, 'main.js'), js);
 

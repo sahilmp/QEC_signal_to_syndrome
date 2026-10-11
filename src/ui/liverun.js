@@ -154,6 +154,23 @@ export function liveRunAvailable() {
   return FEATURES.liveRun === true && typeof globalThis.s2sLive !== 'undefined' && globalThis.s2sLive !== null;
 }
 
+// Qollab routes IonQ requests through its proxy only while main.js is still running; once
+// the runner prints "Done." they go straight to IonQ and the browser blocks them ("Failed to
+// fetch"). So main.js ends with `await globalThis.s2sLiveHold` (tools/build.mjs), and the hold
+// is released when the one live job of this run has finished.
+let releaseHold = null;
+let jobUsed = false;
+function ionqBackend() {
+  try {
+    return typeof backend !== 'undefined' && String(backend.name).startsWith('ionq');
+  } catch {
+    return false;
+  }
+}
+if (liveRunAvailable() && ionqBackend()) {
+  globalThis.s2sLiveHold = new Promise((resolve) => { releaseHold = resolve; });
+}
+
 function el(tag, attrs = {}, text = null) {
   const e = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs)) {
@@ -211,6 +228,11 @@ export function mountLiveRun(container, { onBank, storedBank = null, pGate = 0.0
   // keeps the keyboard focus; a press during the run does nothing (one job per run).
   btn.addEventListener('click', async () => {
     if (running) return;
+    if (jobUsed) {
+      status.className = 'status';
+      status.textContent = 'Qollab allows one job per run. Press Run in Qollab, then this button, for another fresh experiment.';
+      return;
+    }
     running = true;
     const seed = nextSeed(lastSeed, Date.now());
     lastSeed = seed;
@@ -248,11 +270,20 @@ export function mountLiveRun(container, { onBank, storedBank = null, pGate = 0.0
     } catch (err) {
       setState('error');
       status.className = 'status error';
-      status.textContent = `The live run failed: ${err && err.name ? `${err.name}: ` : ''}${String(err && err.message ? err.message : err).slice(0, 300)}. The stored bank is still in use.`;
+      // A Python traceback ends with the actual error, so show its last line; the full
+      // traceback goes to the browser console.
+      console.error(err);
+      const msg = String(err && err.message ? err.message : err).trim().split('\n').pop().slice(0, 300);
+      status.textContent = `The live run failed: ${err && err.name ? `${err.name}: ` : ''}${msg}. The stored bank is still in use.`;
     } finally {
       clearInterval(timer);
       btn.removeAttribute('aria-disabled');
       running = false;
+      if (releaseHold) {
+        jobUsed = true;
+        releaseHold();
+        releaseHold = null;
+      }
     }
   });
 }
