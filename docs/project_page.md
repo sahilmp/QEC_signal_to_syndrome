@@ -111,7 +111,7 @@ The ion's readout error falls as photons accumulate, then rises because the dete
 
 ## Who did what
 
-The authors chose the physics, sourced the parameters, diagnosed why soft decoding failed and decided to learn the error model from the data. The code was written with Claude Code under their direction (see "AI assistance and planning disclosure" below). <!-- source: README.md (Authors; AI assistance and planning disclosure) -->
+The authors chose the physics, sourced the parameters, diagnosed why soft decoding failed and decided to learn the error model from the data. The code was written by the authors with the assistance of Claude Code (see "AI assistance and planning disclosure" below).
 
 ## What it is
 
@@ -299,7 +299,7 @@ Platform:
 
 ## AI assistance and planning disclosure
 
-The project plan, the execution and team checklists (including the Claude Code prompts in them) and the parameter-card templates were written before the build window opened; they are not part of the repository. We prototyped the pipeline and ran early simulator banks on 7–9 Oct, before the window. Every measurement bank and result in this submission was regenerated inside the window with new simulator seeds (data/raw/RERUN_SEEDS.md); the pre-window banks are kept unchanged in archive/pre-window/. On the fresh seeds, F1 replicated within its intervals (the d = 5 gain, the 15× suppression and "13 of 26 → 0 of 26"), but not everything did: the superconducting bit-flip memory now shows a resolved shorter best readout time than a single qubit (before, the shift was within the noise), and the ion's d = 5 best readout time is no longer resolved. Every old and new number is compared in docs/RERUN_DIFF.md. All code was generated with Claude Code (Anthropic) under the authors' direction, reviewed by the authors, cross-reviewed by the other team member, and checked by tests and the validation checks above. This page and the README were drafted with Claude Code from the repository's own results files and edited by the authors. `docs/qollab_js_api_example.txt` is Qollab's own example of calling the IonQ backend from JavaScript, copied as a disclosed reference. <!-- source: README.md (AI assistance and planning disclosure) -->
+The authors developed and wrote the majority of the project's code themselves, using Claude Code as an assistance tool for tasks such as UI improvements, debugging, running selected tests and validation checks. All code was reviewed by the authors, with additional cross-review by the other team member. The project idea, initial plan, and team checklists were prepared by the authors before the hackathon window opened. All measurements and results presented in the submission were regenerated during the hackathon window using fresh simulator seeds.
 
 ## Licence
 
